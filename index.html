@@ -12,33 +12,64 @@
     <meta name="apple-mobile-web-app-title" content="Pickleball Point Counter">
     <meta name="mobile-web-app-capable" content="yes">
 
-    <!-- App Icons -->
-    <link rel="icon" type="image/jpeg" sizes="512x512" href="https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg">
-    <link rel="apple-touch-icon" sizes="512x512" href="https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg">
+    <!-- App Icons (Fallback before dynamic generation) -->
+    <link id="favicon" rel="icon" type="image/jpeg" sizes="512x512" href="https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg">
+    <link id="apple-icon" rel="apple-touch-icon" sizes="512x512" href="https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg">
+    <link id="manifest-link" rel="manifest" href="">
 
-    <!-- Dynamic PWA Manifest Generator -->
+    <!-- Dynamic PWA Manifest & Icon Generator -->
     <script>
         (function() {
-            // Inject Web App Manifest (Required for Android Installation)
-            const manifest = {
-                name: "Pickleball Point Counter",
-                short_name: "Pickleball",
-                start_url: ".",
-                display: "standalone",
-                background_color: "#fafaf9",
-                theme_color: "#10b981",
-                icons: [{ 
-                    src: "https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg", 
-                    sizes: "512x512", 
-                    type: "image/jpeg", 
-                    purpose: "any maskable" 
-                }]
-            };
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
             
-            const manifestLink = document.createElement('link');
-            manifestLink.rel = 'manifest';
-            manifestLink.href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
-            document.head.appendChild(manifestLink);
+            const img = new Image();
+            img.crossOrigin = "Anonymous"; // Allows canvas to export the image
+            img.onload = function() {
+                // 1. Draw solid white background
+                ctx.fillStyle = '#ffffff'; 
+                ctx.fillRect(0, 0, 512, 512);
+                
+                // 2. Shrink image by 10% (Scale to 90% size)
+                const scale = 0.9;
+                const size = 512 * scale;
+                const offset = (512 - size) / 2;
+                
+                // 3. Draw the image in the center
+                ctx.drawImage(img, offset, offset, size, size);
+                
+                try {
+                    const iconUrl = canvas.toDataURL('image/png');
+                    
+                    // Update links to use the new padded icon
+                    document.getElementById('favicon').href = iconUrl;
+                    document.getElementById('favicon').type = 'image/png';
+                    document.getElementById('apple-icon').href = iconUrl;
+                    
+                    // Inject Web App Manifest
+                    const manifest = {
+                        name: "Pickleball Point Counter",
+                        short_name: "Pickleball",
+                        start_url: ".",
+                        display: "standalone",
+                        background_color: "#fafaf9",
+                        theme_color: "#10b981",
+                        icons: [{ 
+                            src: iconUrl, 
+                            sizes: "512x512", 
+                            type: "image/png", 
+                            purpose: "any maskable" 
+                        }]
+                    };
+                    
+                    document.getElementById('manifest-link').href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
+                } catch (e) {
+                    console.warn("Could not generate padded icon due to CORS. Using original image as fallback.");
+                }
+            };
+            img.src = 'https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg';
         })();
     </script>
 
