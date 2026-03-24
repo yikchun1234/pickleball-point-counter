@@ -58,6 +58,6 @@ GitHub: @yikchun1234
 
 Reclub: Amos
 
-Club: Pick-to-Sync
+Reclub Club: Pick-to-Sync
 
 This project is licensed under the MIT License - see the https://www.google.com/search?q=LICENSE file for details.
