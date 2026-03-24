@@ -9,44 +9,17 @@
     <meta name="theme-color" content="#fafaf9">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Pickleball">
+    <meta name="apple-mobile-web-app-title" content="Pickleball Point Counter">
     <meta name="mobile-web-app-capable" content="yes">
 
-    <!-- Dynamic PWA Icon & Manifest Generator -->
+    <!-- App Icons -->
+    <link rel="icon" type="image/jpeg" sizes="512x512" href="https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg">
+    <link rel="apple-touch-icon" sizes="512x512" href="https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg">
+
+    <!-- Dynamic PWA Manifest Generator -->
     <script>
         (function() {
-            // Generate a high-res PNG icon directly in the browser
-            const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 512;
-            const ctx = canvas.getContext('2d');
-            
-            // Draw emerald background
-            ctx.fillStyle = '#10b981'; 
-            ctx.fillRect(0, 0, 512, 512);
-            
-            // Draw Pickleball emoji
-            ctx.font = '280px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('🎾', 256, 280);
-            
-            const iconUrl = canvas.toDataURL('image/png');
-            
-            // 1. Inject Apple Touch Icon (Required for iOS Shortcut)
-            const appleIcon = document.createElement('link');
-            appleIcon.rel = 'apple-touch-icon';
-            appleIcon.href = iconUrl;
-            document.head.appendChild(appleIcon);
-            
-            // 2. Inject Standard Favicon
-            const stdIcon = document.createElement('link');
-            stdIcon.rel = 'icon';
-            stdIcon.type = 'image/png';
-            stdIcon.href = iconUrl;
-            document.head.appendChild(stdIcon);
-            
-            // 3. Inject Web App Manifest (Required for Android Installation)
+            // Inject Web App Manifest (Required for Android Installation)
             const manifest = {
                 name: "Pickleball Point Counter",
                 short_name: "Pickleball",
@@ -54,7 +27,12 @@
                 display: "standalone",
                 background_color: "#fafaf9",
                 theme_color: "#10b981",
-                icons: [{ src: iconUrl, sizes: "512x512", type: "image/png", purpose: "any maskable" }]
+                icons: [{ 
+                    src: "https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg", 
+                    sizes: "512x512", 
+                    type: "image/jpeg", 
+                    purpose: "any maskable" 
+                }]
             };
             
             const manifestLink = document.createElement('link');
