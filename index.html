@@ -149,6 +149,8 @@
         const HistoryIcon = (props) => <IconWrapper iconObj={lucide.icons.History} {...props} />;
         const Trash2 = (props) => <IconWrapper iconObj={lucide.icons.Trash2} {...props} />;
         const X = (props) => <IconWrapper iconObj={lucide.icons.X} {...props} />;
+        const InfoIcon = (props) => <IconWrapper iconObj={lucide.icons.Info} {...props} />;
+        const HardDrive = (props) => <IconWrapper iconObj={lucide.icons.HardDrive} {...props} />;
 
 
         // --- i18n Dictionary ---
@@ -169,7 +171,11 @@
             confirmClear: "Are you sure you want to clear all match history?", yesClear: "Yes, Clear All", showResults: "Show Results",
             installStepsIOS: 'Tap the Share icon at the bottom, then select "Add to Home Screen".',
             installStepsAndroid: 'Tap the browser menu (three dots) and select "Install App" or "Add to Home Screen".',
-            gotIt: 'Got it!'
+            gotIt: 'Got it!',
+            infoTitle: 'About & Disclaimer',
+            infoData: 'All your match history and settings are saved locally on your device. We do not store any data in the cloud. Uninstalling the app or clearing your browser data will permanently delete your match history.',
+            infoUsage: 'This project is open-source. You are free to use and modify it, but please provide proper citation and credit to the original creator (Amos) if you use it for your own projects.',
+            infoFooter: 'Designed with ❤️ for the Pickleball community.'
           },
           zh: {
             appTitle: "匹克球", appSub: "计分器", tapToStart: "点击开始",
@@ -187,7 +193,11 @@
             confirmClear: "确定要清空所有比赛历史记录吗？", yesClear: "确定清空", showResults: "查看结果",
             installStepsIOS: '点击底部的“分享”图标，然后选择“添加到主屏幕”。',
             installStepsAndroid: '点击浏览器菜单（三个点），然后选择“安装应用”或“添加到主屏幕”。',
-            gotIt: '知道了！'
+            gotIt: '知道了！',
+            infoTitle: '关于与免责声明',
+            infoData: '您的所有比赛记录和设置均保存在本地设备上。我们不会在云端存储任何数据。卸载应用或清除浏览器数据将永久删除您的比赛记录。',
+            infoUsage: '本项目开源。您可以自由使用和修改，但如果您将其用于个人项目，请务必注明出处并鸣谢原作者 (Amos)。',
+            infoFooter: '为匹克球社区用心设计 ❤️'
           },
           es: {
             appTitle: "Pickleball", appSub: "Contador de Puntos", tapToStart: "Toca para empezar",
@@ -202,7 +212,14 @@
             cancel: "Cancelar", startMatch: "Iniciar Partido", t1Label: "E1", t2Label: "E2", installAsApp: "Instalar como aplicación nativa",
             designBy: "Diseñado por Amos © 2026", matchTitlePlaceholder: "Título del Partido (Opcional)", matchHistory: "Historial de Partidos",
             clearHistory: "Borrar Historial", reviewMatch: "Revisar Partido", noHistory: "No hay partidos guardados.", untitledMatch: "Partido Amistoso",
-            confirmClear: "¿Seguro que quieres borrar el historial?", yesClear: "Sí, borrar todo", showResults: "Mostrar Resultados"
+            confirmClear: "¿Seguro que quieres borrar el historial?", yesClear: "Sí, borrar todo", showResults: "Mostrar Resultados",
+            installStepsIOS: 'Toca el ícono de Compartir en la parte inferior y selecciona "Agregar a la pantalla de inicio".',
+            installStepsAndroid: 'Toca el menú del navegador (tres puntos) y selecciona "Instalar aplicación" o "Agregar a la pantalla de inicio".',
+            gotIt: '¡Entendido!',
+            infoTitle: 'Acerca de y Aviso Legal',
+            infoData: 'Todo el historial de partidos y configuraciones se guardan localmente en tu dispositivo. No almacenamos datos en la nube. Desinstalar o borrar los datos del navegador eliminará permanentemente tu historial.',
+            infoUsage: 'Este proyecto es de código abierto. Puedes usarlo y modificarlo libremente, pero por favor proporciona la cita y el crédito adecuado al creador original (Amos) si lo usas en tus proyectos.',
+            infoFooter: 'Diseñado con ❤️ para la comunidad de Pickleball.'
           },
           fr: {
             appTitle: "Pickleball", appSub: "Compteur de Points", tapToStart: "Touchez pour commencer",
@@ -217,7 +234,14 @@
             cancel: "Annuler", startMatch: "Commencer", t1Label: "É1", t2Label: "É2", installAsApp: "Installer l'application native",
             designBy: "Conçu par Amos © 2026", matchTitlePlaceholder: "Titre du match (Optionnel)", matchHistory: "Historique des Matchs",
             clearHistory: "Effacer l'historique", reviewMatch: "Revoir le match", noHistory: "Aucun match enregistré.", untitledMatch: "Match Amical",
-            confirmClear: "Voulez-vous vraiment effacer l'historique ?", yesClear: "Oui, tout effacer", showResults: "Afficher les résultats"
+            confirmClear: "Voulez-vous vraiment effacer l'historique ?", yesClear: "Oui, tout effacer", showResults: "Afficher les résultats",
+            installStepsIOS: 'Appuyez sur l\'icône Partager en bas, puis sélectionnez "Sur l\'écran d\'accueil".',
+            installStepsAndroid: 'Appuyez sur le menu du navigateur (trois points) et sélectionnez "Installer l\'application" ou "Ajouter à l\'écran d\'accueil".',
+            gotIt: 'Compris !',
+            infoTitle: 'À propos & Avertissement',
+            infoData: 'Tout votre historique de matchs et vos paramètres sont enregistrés localement sur votre appareil. Nous ne stockons aucune donnée dans le cloud. La désinstallation ou l\'effacement des données du navigateur supprimera votre historique de manière permanente.',
+            infoUsage: 'Ce projet est open-source. Vous êtes libre de l\'utiliser et de le modifier, mais veuillez citer et créditer correctement le créateur original (Amos) si vous l\'utilisez pour vos propres projets.',
+            infoFooter: 'Conçu avec ❤️ pour la communauté de Pickleball.'
           },
           ja: {
             appTitle: "ピックルボール", appSub: "スコアカウンター", tapToStart: "タップして開始",
@@ -232,7 +256,14 @@
             cancel: "キャンセル", startMatch: "試合開始", t1Label: "T1", t2Label: "T2", installAsApp: "ネイティブアプリとしてインストール",
             designBy: "Designed by Amos © 2026", matchTitlePlaceholder: "試合のタイトル (任意)", matchHistory: "試合履歴",
             clearHistory: "履歴を消去", reviewMatch: "タイムラインを確認", noHistory: "保存された試合はありません。", untitledMatch: "フレンドリーマッチ",
-            confirmClear: "すべての試合履歴を消去してもよろしいですか？", yesClear: "はい、消去します", showResults: "結果を表示"
+            confirmClear: "すべての試合履歴を消去してもよろしいですか？", yesClear: "はい、消去します", showResults: "結果を表示",
+            installStepsIOS: '下部の共有アイコンをタップし、「ホーム画面に追加」を選択します。',
+            installStepsAndroid: 'ブラウザのメニュー（3つの点）をタップし、「アプリをインストール」または「ホーム画面に追加」を選択します。',
+            gotIt: '了解しました！',
+            infoTitle: '概要と免責事項',
+            infoData: 'すべての試合履歴と設定はデバイスにローカル保存されます。クラウドには一切データを保存しません。アプリのアンインストールやブラウザのデータを消去すると、履歴は完全に削除されます。',
+            infoUsage: 'このプロジェクトはオープンソースです。自由に使用・変更できますが、ご自身のプロジェクトで使用する場合は、原作者（Amos）への適切な引用とクレジット表記をお願いします。',
+            infoFooter: 'ピックルボールコミュニティのために❤️を込めてデザインされました。'
           },
           ko: {
             appTitle: "피클볼", appSub: "점수 카운터", tapToStart: "탭하여 시작",
@@ -247,7 +278,14 @@
             cancel: "취소", startMatch: "경기 시작", t1Label: "팀1", t2Label: "팀2", installAsApp: "기본 앱으로 설치",
             designBy: "Amos 디자인 © 2026", matchTitlePlaceholder: "경기 제목 (선택 사항)", matchHistory: "경기 기록",
             clearHistory: "기록 삭제", reviewMatch: "타임라인 확인", noHistory: "저장된 경기가 없습니다.", untitledMatch: "친선 경기",
-            confirmClear: "모든 경기 기록을 삭제하시겠습니까?", yesClear: "네, 모두 삭제합니다", showResults: "결과 보기"
+            confirmClear: "모든 경기 기록을 삭제하시겠습니까?", yesClear: "네, 모두 삭제합니다", showResults: "결과 보기",
+            installStepsIOS: '하단의 공유 아이콘을 탭한 다음 "홈 화면에 추가"를 선택하세요.',
+            installStepsAndroid: '브라우저 메뉴(점 3개)를 탭하고 "앱 설치" 또는 "홈 화면에 추가"를 선택하세요.',
+            gotIt: '알겠습니다!',
+            infoTitle: '정보 및 면책 조항',
+            infoData: '모든 경기 기록과 설정은 기기에 로컬로 저장됩니다. 클라우드에 어떠한 데이터도 저장하지 않습니다. 앱을 제거하거나 브라우저 데이터를 지우면 경기 기록이 영구적으로 삭제됩니다.',
+            infoUsage: '이 프로젝트는 오픈 소스입니다. 자유롭게 사용하고 수정할 수 있지만, 개인 프로젝트에 사용할 경우 원작자(Amos)에 대한 적절한 출처와 크레딧을 명시해 주세요.',
+            infoFooter: '피클볼 커뮤니티를 위해 ❤️를 담아 디자인되었습니다.'
           },
           de: {
             appTitle: "Pickleball", appSub: "Punktezähler", tapToStart: "Tippen zum Starten",
@@ -262,7 +300,14 @@
             cancel: "Abbrechen", startMatch: "Spiel starten", t1Label: "T1", t2Label: "T2", installAsApp: "Als native App installieren",
             designBy: "Entworfen von Amos © 2026", matchTitlePlaceholder: "Spieltitel (Optional)", matchHistory: "Spielverlauf",
             clearHistory: "Verlauf löschen", reviewMatch: "Verlauf ansehen", noHistory: "Keine Spiele gespeichert.", untitledMatch: "Freundschaftsspiel",
-            confirmClear: "Möchtest du den gesamten Spielverlauf wirklich löschen?", yesClear: "Ja, alles löschen", showResults: "Ergebnisse anzeigen"
+            confirmClear: "Möchtest du den gesamten Spielverlauf wirklich löschen?", yesClear: "Ja, alles löschen", showResults: "Ergebnisse anzeigen",
+            installStepsIOS: 'Tippe unten auf das Teilen-Symbol und wähle "Zum Home-Bildschirm".',
+            installStepsAndroid: 'Tippe auf das Browser-Menü (drei Punkte) und wähle "App installieren" oder "Zum Home-Bildschirm".',
+            gotIt: 'Verstanden!',
+            infoTitle: 'Über & Haftungsausschluss',
+            infoData: 'Ihr gesamter Spielverlauf und Ihre Einstellungen werden lokal auf Ihrem Gerät gespeichert. Wir speichern keine Daten in der Cloud. Durch die Deinstallation oder das Löschen von Browserdaten wird Ihr Verlauf dauerhaft gelöscht.',
+            infoUsage: 'Dieses Projekt ist Open Source. Sie können es frei verwenden und ändern, aber bitte geben Sie bei der Nutzung für eigene Projekte das entsprechende Zitat und den Credit für den ursprünglichen Ersteller (Amos) an.',
+            infoFooter: 'Entworfen mit ❤️ für die Pickleball-Community.'
           },
           pt: {
             appTitle: "Pickleball", appSub: "Contador de Pontos", tapToStart: "Toque para começar",
@@ -277,7 +322,14 @@
             cancel: "Cancelar", startMatch: "Iniciar Partida", t1Label: "E1", t2Label: "E2", installAsApp: "Instalar como aplicativo nativo",
             designBy: "Desenvolvido por Amos © 2026", matchTitlePlaceholder: "Título da Partida (Opcional)", matchHistory: "Histórico de Partidas",
             clearHistory: "Limpar Histórico", reviewMatch: "Revisar Partida", noHistory: "Nenhuma partida salva.", untitledMatch: "Partida Amistosa",
-            confirmClear: "Tem certeza de que deseja limpar todo o histórico?", yesClear: "Sim, Limpar Tudo", showResults: "Mostrar Resultados"
+            confirmClear: "Tem certeza de que deseja limpar todo o histórico?", yesClear: "Sim, Limpar Tudo", showResults: "Mostrar Resultados",
+            installStepsIOS: 'Toque no ícone Compartilhar na parte inferior e selecione "Adicionar à Tela de Início".',
+            installStepsAndroid: 'Toque no menu do navegador (três pontos) e selecione "Instalar aplicativo" ou "Adicionar à tela inicial".',
+            gotIt: 'Entendi!',
+            infoTitle: 'Sobre e Aviso Legal',
+            infoData: 'Todo o seu histórico de partidas e configurações são salvos localmente. Não armazenamos dados na nuvem. Desinstalar ou limpar os dados do navegador excluirá permanentemente seu histórico.',
+            infoUsage: 'Este projeto é de código aberto. Você é livre para usá-lo e modificá-lo, mas, por favor, forneça a citação e o crédito adequados ao criador original (Amos) se usá-lo em seus próprios projetos.',
+            infoFooter: 'Projetado com ❤️ para a comunidade de Pickleball.'
           }
         };
 
@@ -301,6 +353,7 @@
           const [showClearConfirm, setShowClearConfirm] = useState(false);
           const [showLangMenu, setShowLangMenu] = useState(false);
           const [showInstallInstructions, setShowInstallInstructions] = useState(false);
+          const [showInfo, setShowInfo] = useState(false);
           
           // Settings
           const [lang, setLang] = useState('en');
@@ -709,6 +762,9 @@
               {appState !== 'splash' && (
                 <div className="absolute top-0 w-full p-4 flex justify-end items-center z-50 pointer-events-none">
                   <div className="flex items-center gap-2 pointer-events-auto">
+                    <button onClick={() => setShowInfo(true)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 transition-transform`}>
+                      <InfoIcon size={18} className={textSub} />
+                    </button>
                     {appState === 'menu' && (
                       <button onClick={() => setShowHistory(true)} className={`flex items-center gap-1.5 px-3 py-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 transition-transform text-xs font-bold ${textSub}`}>
                         <HistoryIcon size={16} /> <span className="hidden sm:inline">History</span>
@@ -719,6 +775,35 @@
                     </button>
                     <button onClick={() => setIsDark(!isDark)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 transition-transform`}>
                       {isDark ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-stone-500" />}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Info & Disclaimer Modal */}
+              {showInfo && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={() => setShowInfo(false)}></div>
+                  <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl transition-all duration-200`}>
+                    <div className="flex items-center gap-3 mb-6">
+                      <InfoIcon size={24} className={accentGreen} />
+                      <h2 className={`text-xl font-bold ${textMain}`}>{t.infoTitle}</h2>
+                    </div>
+                    
+                    <div className={`text-sm mb-6 ${textSub} text-left space-y-5`}>
+                      <div className="flex items-start gap-3">
+                        <HardDrive size={18} className={`mt-0.5 flex-shrink-0 ${accentRed}`} />
+                        <p className="leading-relaxed">{t.infoData}</p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Github size={18} className={`mt-0.5 flex-shrink-0 ${textMain}`} />
+                        <p className="leading-relaxed">{t.infoUsage}</p>
+                      </div>
+                      <p className={`text-center pt-2 italic text-xs ${textSub}`}>{t.infoFooter}</p>
+                    </div>
+                    
+                    <button onClick={() => setShowInfo(false)} className={`w-full py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors shadow-md`}>
+                      {t.gotIt}
                     </button>
                   </div>
                 </div>
