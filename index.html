@@ -1272,8 +1272,13 @@
                               <div>
                                 <div className={`text-xs font-bold uppercase tracking-widest ${accentGreen} mb-1`}>{match.date}</div>
                                 <h2 className={`text-2xl font-bold ${textMain}`}>{match.title}</h2>
-                                <div className={`text-xs font-semibold ${textSub} mt-1`}>
-                                  {match.mode === 'single' ? t.singles : t.doubles} • {match.rules === 'standard' ? t.stdTitle : t.fourteenTitle}
+                                <div className={`text-xs font-semibold ${textSub} mt-1 flex flex-wrap items-center gap-2`}>
+                                  <span>{match.mode === 'single' ? t.singles : t.doubles} • {match.rules === 'standard' ? t.stdTitle : t.fourteenTitle}</span>
+                                  {match.winReason === 'retreat' && (
+                                    <span className="px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 text-[9px] uppercase font-bold tracking-widest border border-rose-200 dark:border-rose-800">
+                                      {match.winner === 1 ? t.t2Retreat : t.t1Retreat}
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                               <div className="flex items-center justify-center w-full md:w-auto gap-8 mt-5 md:mt-0 bg-stone-900/5 dark:bg-stone-50/5 px-6 py-4 rounded-2xl border border-stone-200 dark:border-stone-800">
