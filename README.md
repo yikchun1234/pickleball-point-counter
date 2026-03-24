@@ -2,6 +2,7 @@
 
 A minimalist, Muji-inspired Pickleball Point Counter built with React & Tailwind. Tracks Standard and 14-Point rally scoring. Features a visual rally timeline, undo button, local match history, and supports 8 languages. PWA-ready and runs entirely as a single HTML file. Perfect for tracking matches on the go!
 
+
 ✨ Features
 
 Zen, Muji-Inspired UI: Clean, distraction-free interface with smooth animations and interactive dot-matrix backgrounds. Supports Light & Dark modes.
@@ -20,6 +21,7 @@ PWA Ready: Install it directly to your iOS or Android home screen to use it offl
 
 Zero-Build Setup: The entire application runs natively in a single index.html file using CDNs. No Node.js, Webpack, or Vite required!
 
+
 🚀 How to Use (For Players)
 
 Playing a Match
@@ -34,6 +36,7 @@ During the game, simply tap the Team 1 or Team 2 buttons to award a point/side-o
 
 Made a mistake? Hit the Undo button in the top right to reverse the last point.
 
+
 Viewing History
 
 On the main menu, click the History button in the top right corner.
@@ -45,6 +48,7 @@ Installing on your Phone
 Android / Chrome: Scroll to the bottom of the menu and click "Install App".
 
 iOS / Safari: Tap the "Share" icon at the bottom of your screen and select "Add to Home Screen".
+
 
 👨‍💻 Credits & License
 
