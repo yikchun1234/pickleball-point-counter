@@ -190,7 +190,7 @@
             winByRetreat: 'Wins by Retreat!',
             loading: 'Loading...'
           },
-          zh: {
+          zh_CN: {
             appTitle: "匹克球", appSub: "计分器", tapToStart: "点击开始",
             newMatch: "匹克球计分器", selectFormat: "选择比赛模式与规则",
             singles: "单打", doubles: "双打",
@@ -224,6 +224,41 @@
             yesQuit: '确定退出',
             winByRetreat: '对方退赛，获得胜利！',
             loading: '加载中...'
+          },
+          zh_TW: {
+            appTitle: "匹克球", appSub: "計分器", tapToStart: "點擊開始",
+            newMatch: "匹克球計分器", selectFormat: "選擇比賽模式與規則",
+            singles: "單打", doubles: "雙打",
+            stdTitle: "標準規則 (11分)", stdDescSingle: "0-0規則 • 11分制 • 贏2分", stdDescDouble: "0-0-2規則 • 11分制 • 贏2分",
+            fourteenTitle: "14分制 (每球得分)", fourteenDesc: "15分制 • 接發球方也可直接得分獲勝",
+            team1: "隊伍 1", team2: "隊伍 2", server: "發球", wonRally: "得分", serving: "發球方", winner: "獲得勝利！",
+            playAgain: "再來一局", undo: "撤銷", reset: "重置", timeline: "對局記錄", awaiting: "比賽尚未開始...",
+            suddenDeath: "決勝局", nextPointWins: "一球定勝負", install: "安裝應用",
+            serveToWinOption: "14平必須發球得分", serveToWinDesc: "在14-14平時，必須是發球方贏下回合才能獲得第15分", suddenDeathServeDesc: "發球方得分制勝",
+            cancel: "取消", startMatch: "開始比賽", t1Label: "T1", t2Label: "T2", installAsApp: "安裝為原生應用",
+            designBy: "設計者 Amos © 2026", matchTitlePlaceholder: "比賽名稱 (選填)", matchHistory: "歷史記錄",
+            clearHistory: "清空記錄", reviewMatch: "查看對局過程", noHistory: "暫無歷史記錄", untitledMatch: "友誼賽",
+            confirmClear: "確定要清空所有比賽歷史記錄嗎？", yesClear: "確定清空", showResults: "查看結果",
+            installStepsIOS: '點擊底部的「分享」圖標，然後選擇「添加到主屏幕」。',
+            installStepsAndroid: '點擊瀏覽器菜單（三個點），然後選擇「安裝應用」或「添加到主屏幕」。',
+            gotIt: '知道了！',
+            infoTitle: '關於與免責聲明',
+            infoHowToTitle: '使用說明',
+            infoHowTo1: '選擇比賽模式與規則。',
+            infoHowTo2: '點擊隊伍 1 或隊伍 2 進行記分。',
+            infoHowTo3: '如遇計分錯誤，請使用撤銷按鈕。',
+            infoHowTo4: '在「歷史記錄」中查看過往比賽。',
+            infoData: '您的所有比賽記錄和設置均保存在本地設備上。我們不會在雲端存儲任何數據。卸載應用或清除瀏覽器數據將永久刪除您的比賽記錄。',
+            infoUsage: '本項目開源。您可以自由使用和修改，但如果您將其用於個人項目，請務必註明出處並鳴謝原作者 (Amos)。',
+            infoFooter: '為匹克球社區用心設計 ❤️',
+            retreatTitle: '誰退賽了？',
+            t1Retreat: '隊伍 1 退賽',
+            t2Retreat: '隊伍 2 退賽',
+            quitMatch: '退出比賽',
+            quitConfirm: '確定要返回菜單嗎？這場比賽的記錄將不會被保存。',
+            yesQuit: '確定退出',
+            winByRetreat: '對方退賽，獲得勝利！',
+            loading: '載入中...'
           },
           es: {
             appTitle: "Pickleball", appSub: "Contador de Puntos", tapToStart: "Toca para empezar",
@@ -474,8 +509,9 @@
 
         const availableLanguages = [
           { code: 'en', name: 'English' },
-          { code: 'zh', name: '中文' },
-          { code: 'ms', name: 'Bahasa Melayu' },
+          { code: 'zh_CN', name: '简体中文' },
+          { code: 'zh_TW', name: '繁體中文' },
+          { code: 'ms', name: 'Bahasa' },
           { code: 'es', name: 'Español' },
           { code: 'fr', name: 'Français' },
           { code: 'ja', name: '日本語' },
@@ -539,9 +575,16 @@
             }
             
             // Load language preference if exists
-            const savedLang = localStorage.getItem('pb_lang_pref');
+            let savedLang = localStorage.getItem('pb_lang_pref');
+            if (savedLang === 'zh') savedLang = 'zh_CN'; // Fallback for previous users
             if (savedLang && dict[savedLang]) {
               setLang(savedLang);
+            }
+            
+            // Load theme preference if exists
+            const savedTheme = localStorage.getItem('pb_theme_pref');
+            if (savedTheme === 'dark') {
+              setIsDark(true);
             }
           }, []);
 
@@ -636,6 +679,12 @@
             setLang(code);
             setShowLangMenu(false);
             localStorage.setItem('pb_lang_pref', code);
+          };
+
+          const toggleTheme = () => {
+            const newTheme = !isDark;
+            setIsDark(newTheme);
+            localStorage.setItem('pb_theme_pref', newTheme ? 'dark' : 'light');
           };
 
           const clearHistory = () => {
@@ -936,7 +985,7 @@
                     <button onClick={() => setShowLangMenu(true)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 transition-transform`}>
                       <Globe size={18} className={textSub} />
                     </button>
-                    <button onClick={() => setIsDark(!isDark)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 transition-transform`}>
+                    <button onClick={toggleTheme} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 transition-transform`}>
                       {isDark ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-stone-500" />}
                     </button>
                   </div>
