@@ -204,6 +204,17 @@
           const t = dict[lang] || dict.en;
           const getT = (key) => t[key] || defaultLang[key];
 
+          const isModalOpen = !!(pendingGame || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || recoverGameData || showWinnerOverlay || showHistory);
+          
+          useEffect(() => {
+            if (isModalOpen) {
+              document.body.style.overflow = 'hidden';
+            } else {
+              document.body.style.overflow = '';
+            }
+            return () => { document.body.style.overflow = ''; };
+          }, [isModalOpen]);
+
           useEffect(() => {
             const saved = localStorage.getItem('pb_history_matches');
             if (saved) { try { setSavedMatches(JSON.parse(saved)); } catch (e) {} }
@@ -283,12 +294,10 @@
             if (type === 'win') navigator.vibrate([200, 100, 200]);
           };
 
-          // Modified: Uses multiple string arguments to force clear sequential speech queuing
           const announceText = (...texts) => {
             if (!soundEnabled || !('speechSynthesis' in window)) return;
             window.speechSynthesis.cancel();
             
-            // Adding a tiny 50ms delay after cancel() prevents a bug where Chrome Android mutes itself
             setTimeout(() => {
                 texts.forEach(text => {
                     const utterance = new SpeechSynthesisUtterance(text);
@@ -517,35 +526,29 @@
             </div>
           );
 
-          useEffect(() => {
-            const checkStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
-            setIsInstalled(checkStandalone());
-            const mediaQuery = window.matchMedia('(display-mode: standalone)');
-            const handleDisplayModeChange = (e) => setIsInstalled(e.matches);
-            mediaQuery.addEventListener('change', handleDisplayModeChange);
-            const handleBeforeInstall = (e) => { e.preventDefault(); setInstallPrompt(e); };
-            window.addEventListener('beforeinstallprompt', handleBeforeInstall);
-            return () => { mediaQuery.removeEventListener('change', handleDisplayModeChange); window.removeEventListener('beforeinstallprompt', handleBeforeInstall); };
-          }, []);
+          const handleLanguageChange = (code) => {
+            setLang(code);
+            setShowLangMenu(false);
+            localStorage.setItem('pb_lang_pref', code);
+          };
 
-          useEffect(() => {
-            const handlePointerMove = (e) => {
-              const x = e.touches ? e.touches[0].clientX : e.clientX;
-              const y = e.touches ? e.touches[0].clientY : e.clientY;
-              document.documentElement.style.setProperty('--cursor-x', `${x}px`);
-              document.documentElement.style.setProperty('--cursor-y', `${y}px`);
-            };
-            document.documentElement.style.setProperty('--cursor-x', '-1000px');
-            document.documentElement.style.setProperty('--cursor-y', '-1000px');
-            window.addEventListener('mousemove', handlePointerMove);
-            window.addEventListener('touchmove', handlePointerMove, { passive: true });
-            return () => { window.removeEventListener('mousemove', handlePointerMove); window.removeEventListener('touchmove', handlePointerMove); };
-          }, []);
+          const clearHistory = () => {
+            setSavedMatches([]);
+            localStorage.removeItem('pb_history_matches');
+            setShowClearConfirm(false);
+          };
 
-          const toggleTheme = () => {
-            const newTheme = !isDark;
-            setIsDark(newTheme);
-            localStorage.setItem('pb_theme_pref', newTheme ? 'dark' : 'light');
+          const handleInstallClick = async () => {
+            if (installPrompt) {
+              installPrompt.prompt();
+              const { outcome } = await installPrompt.userChoice;
+              if (outcome === 'accepted') {
+                  setInstallPrompt(null);
+                  setIsInstalled(true);
+              }
+            } else {
+              setShowInstallInstructions(true);
+            }
           };
 
           return (
