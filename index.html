@@ -206,21 +206,8 @@
           const t = dict[lang] || dict.en;
           const getT = (key) => t[key] || defaultLang[key];
 
-          const isModalOpen = !!(pendingGame || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || recoverGameData || showWinnerOverlay || showHistory);
-          
-          useEffect(() => {
-            if (isModalOpen) {
-              document.body.style.overflow = 'hidden';
-              document.documentElement.style.overflow = 'hidden';
-            } else {
-              document.body.style.overflow = '';
-              document.documentElement.style.overflow = '';
-            }
-            return () => { 
-              document.body.style.overflow = ''; 
-              document.documentElement.style.overflow = ''; 
-            };
-          }, [isModalOpen]);
+          // REMOVED: The isModalOpen useEffect that modified document.documentElement.style.overflow
+          // Modifying the overflow on the root HTML tag on iOS completely breaks the viewport-fit=cover (Notch rendering)
 
           useEffect(() => {
             const saved = localStorage.getItem('pb_history_matches');
