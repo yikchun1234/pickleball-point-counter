@@ -322,6 +322,37 @@
             localStorage.setItem('pb_sound_pref', newSound.toString());
           };
 
+          const handleLanguageChange = (code) => {
+            setLang(code);
+            setShowLangMenu(false);
+            localStorage.setItem('pb_lang_pref', code);
+          };
+
+          const clearHistory = () => {
+            setSavedMatches([]);
+            localStorage.removeItem('pb_history_matches');
+            setShowClearConfirm(false);
+          };
+
+          const handleInstallClick = async () => {
+            if (installPrompt) {
+              installPrompt.prompt();
+              const { outcome } = await installPrompt.userChoice;
+              if (outcome === 'accepted') {
+                  setInstallPrompt(null);
+                  setIsInstalled(true);
+              }
+            } else {
+              setShowInstallInstructions(true);
+            }
+          };
+
+          const toggleTheme = () => {
+            const newTheme = !isDark;
+            setIsDark(newTheme);
+            localStorage.setItem('pb_theme_pref', newTheme ? 'dark' : 'light');
+          };
+
           const handleRuleSelect = (mode, rules) => {
             setMatchTitleInput(''); setT1NameInput(''); setT2NameInput('');
             setCustomPlayTo(11); setCustomWinBy(2); setEnableSwitchEnds(false); setServeToWinAt14(false); setStartingServer(1); setPendingGame({ mode, rules });
@@ -526,30 +557,30 @@
             </div>
           );
 
-          const handleLanguageChange = (code) => {
-            setLang(code);
-            setShowLangMenu(false);
-            localStorage.setItem('pb_lang_pref', code);
-          };
+          useEffect(() => {
+            const checkStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
+            setIsInstalled(checkStandalone());
+            const mediaQuery = window.matchMedia('(display-mode: standalone)');
+            const handleDisplayModeChange = (e) => setIsInstalled(e.matches);
+            mediaQuery.addEventListener('change', handleDisplayModeChange);
+            const handleBeforeInstall = (e) => { e.preventDefault(); setInstallPrompt(e); };
+            window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+            return () => { mediaQuery.removeEventListener('change', handleDisplayModeChange); window.removeEventListener('beforeinstallprompt', handleBeforeInstall); };
+          }, []);
 
-          const clearHistory = () => {
-            setSavedMatches([]);
-            localStorage.removeItem('pb_history_matches');
-            setShowClearConfirm(false);
-          };
-
-          const handleInstallClick = async () => {
-            if (installPrompt) {
-              installPrompt.prompt();
-              const { outcome } = await installPrompt.userChoice;
-              if (outcome === 'accepted') {
-                  setInstallPrompt(null);
-                  setIsInstalled(true);
-              }
-            } else {
-              setShowInstallInstructions(true);
-            }
-          };
+          useEffect(() => {
+            const handlePointerMove = (e) => {
+              const x = e.touches ? e.touches[0].clientX : e.clientX;
+              const y = e.touches ? e.touches[0].clientY : e.clientY;
+              document.documentElement.style.setProperty('--cursor-x', `${x}px`);
+              document.documentElement.style.setProperty('--cursor-y', `${y}px`);
+            };
+            document.documentElement.style.setProperty('--cursor-x', '-1000px');
+            document.documentElement.style.setProperty('--cursor-y', '-1000px');
+            window.addEventListener('mousemove', handlePointerMove);
+            window.addEventListener('touchmove', handlePointerMove, { passive: true });
+            return () => { window.removeEventListener('mousemove', handlePointerMove); window.removeEventListener('touchmove', handlePointerMove); };
+          }, []);
 
           return (
             <div className={`min-h-screen flex flex-col ${textMain} ${bgMain} overflow-x-hidden relative selection:bg-stone-300 selection:text-stone-900 transition-colors duration-300`}>
