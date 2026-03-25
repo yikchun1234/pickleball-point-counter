@@ -74,7 +74,7 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;600;700&display=swap');
-        html, body { width: 100%; height: 100%; }
+        html, body { width: 100%; min-height: 100vh; min-height: 100dvh; background-color: var(--app-bg, #fafaf9); }
         body { font-family: 'Noto Sans', sans-serif; margin: 0; padding: 0; overscroll-behavior-y: none; }
     </style>
 </head>
@@ -291,17 +291,21 @@
 
           // Dynamically update the mobile status bar (notch area) color when theme changes
           useEffect(() => {
-            const metaThemeColor = document.querySelector('meta[name="theme-color"]');
             const bgColor = isDark ? '#1c1917' : '#fafaf9';
+            const metaThemeColor = document.querySelector('meta[name="theme-color"]');
             
             if (metaThemeColor) {
               metaThemeColor.setAttribute('content', bgColor);
             }
             
-            // Force the physical HTML and Body tags to match to fill the notch and overscroll areas
+            // Force CSS variable and background to update the notch and overscroll areas robustly
+            document.documentElement.style.setProperty('--app-bg', bgColor);
             document.documentElement.style.backgroundColor = bgColor;
             document.body.style.backgroundColor = bgColor;
-          }, [isDark]);
+
+            // Fix iOS Safari scroll gap bug when changing views (forces notch area to redraw correctly)
+            window.scrollTo(0, 0);
+          }, [isDark, appState]);
 
           const triggerHaptic = (type) => {
             if (!navigator.vibrate) return;
