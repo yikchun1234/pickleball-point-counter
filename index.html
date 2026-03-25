@@ -289,6 +289,14 @@
             if (timelineScrollRef.current) timelineScrollRef.current.scrollLeft = timelineScrollRef.current.scrollWidth;
           }, [history]);
 
+          // Dynamically update the mobile status bar (notch area) color when theme changes
+          useEffect(() => {
+            const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+            if (metaThemeColor) {
+              metaThemeColor.setAttribute('content', isDark ? '#1c1917' : '#fafaf9');
+            }
+          }, [isDark]);
+
           const triggerHaptic = (type) => {
             if (!navigator.vibrate) return;
             if (type === 'point') navigator.vibrate(50);
