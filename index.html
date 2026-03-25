@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Pickleball Point Counter</title>
     
     <!-- PWA Meta Tags -->
@@ -74,6 +74,7 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;600;700&display=swap');
+        html, body { width: 100%; height: 100%; }
         body { font-family: 'Noto Sans', sans-serif; margin: 0; padding: 0; overscroll-behavior-y: none; }
     </style>
 </head>
@@ -309,11 +310,10 @@
                             setTimeout(() => {
                                 const u2 = new SpeechSynthesisUtterance(text2);
                                 window.speechSynthesis.speak(u2);
-                            }, 500); // Added exact 0.5 second delay between phrases!
+                            }, 500); 
                         }
                     };
                     
-                    // Fallback trigger in case 'onend' doesn't fire cleanly on some mobile browsers
                     setTimeout(() => {
                         if (!hasEnded) {
                             hasEnded = true;
@@ -490,7 +490,7 @@
               grantPoint();
               if (winningTeam !== servingTeam) {
                 newServTeam = winningTeam; 
-                newServNum = 1; // Pure rally scoring resets server immediately without a 'second server' fault phase
+                newServNum = 1; 
               }
             }
 
@@ -616,7 +616,7 @@
           }, []);
 
           return (
-            <div className={`min-h-screen flex flex-col ${textMain} ${bgMain} overflow-x-hidden relative selection:bg-stone-300 selection:text-stone-900 transition-colors duration-300`}>
+            <div className={`min-h-screen w-full flex flex-col ${textMain} ${bgMain} overflow-x-hidden relative selection:bg-stone-300 selection:text-stone-900 transition-colors duration-300`}>
               <style>{`
                 @keyframes zoomThroughMinimal { 0% { transform: scale(1) translateY(0); opacity: 1; } 100% { transform: scale(30) translateY(50px); opacity: 0; } }
                 .animate-zoom-minimal { animation: zoomThroughMinimal 0.9s cubic-bezier(0.8, 0, 0.2, 1) forwards; }
@@ -716,11 +716,28 @@
                   </div>
                   
                   {/* --- RESTORED FOOTER --- */}
-                  <div className={`mt-12 text-center text-xs font-bold uppercase tracking-widest ${textSub}`}>
-                    <p>{getT('designBy')}</p>
+                  <div className="mt-12 mb-8 flex flex-col items-center gap-6">
+                    <div className={`text-center text-[10px] font-bold uppercase tracking-widest ${textSub}`}>
+                      <p>{getT('designBy')}</p>
+                    </div>
+
+                    <div className="flex flex-wrap justify-center gap-3">
+                       <a href="https://github.com/yikchun1234" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 text-[10px] font-bold uppercase tracking-widest`}>
+                         <Github size={14} /> GitHub
+                       </a>
+                       <a href="https://reclub.co/players/@amostan" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 text-[10px] font-bold uppercase tracking-widest`}>
+                         <img src="https://reclub.co/favicon.ico" alt="Reclub" className="w-3.5 h-3.5 rounded-sm" onError={(e) => { e.target.onerror = null; e.target.style.display='none'; }} />
+                         <span>Reclub</span>
+                       </a>
+                       <a href="https://reclub.co/clubs/@pick-to-sync" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 text-[10px] font-bold uppercase tracking-widest`}>
+                         <img src="https://reclub.co/favicon.ico" alt="Reclub Club" className="w-3.5 h-3.5 rounded-sm" onError={(e) => { e.target.onerror = null; e.target.style.display='none'; }} />
+                         <span>Reclub Club</span>
+                       </a>
+                    </div>
+
                     {!isInstalled && (
-                      <button onClick={handleInstallClick} className={`mt-4 mx-auto flex items-center gap-2 px-4 py-2 rounded-full border ${borderSub} ${bgCard} hover:scale-105 transition-transform shadow-sm`}>
-                        <Download size={14} /> {getT('installAsApp')}
+                      <button onClick={handleInstallClick} className={`mt-2 flex items-center gap-2 px-6 py-3 rounded-full bg-emerald-500 text-white hover:bg-emerald-600 transition-transform hover:scale-105 shadow-md font-bold text-xs uppercase tracking-widest`}>
+                        <Download size={16} /> {getT('installAsApp')}
                       </button>
                     )}
                   </div>
