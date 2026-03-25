@@ -292,9 +292,15 @@
           // Dynamically update the mobile status bar (notch area) color when theme changes
           useEffect(() => {
             const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+            const bgColor = isDark ? '#1c1917' : '#fafaf9';
+            
             if (metaThemeColor) {
-              metaThemeColor.setAttribute('content', isDark ? '#1c1917' : '#fafaf9');
+              metaThemeColor.setAttribute('content', bgColor);
             }
+            
+            // Force the physical HTML and Body tags to match to fill the notch and overscroll areas
+            document.documentElement.style.backgroundColor = bgColor;
+            document.body.style.backgroundColor = bgColor;
           }, [isDark]);
 
           const triggerHaptic = (type) => {
@@ -624,7 +630,7 @@
           }, []);
 
           return (
-            <div className={`min-h-screen w-full flex flex-col ${textMain} ${bgMain} overflow-x-hidden relative selection:bg-stone-300 selection:text-stone-900 transition-colors duration-300`}>
+            <div className={`min-h-[100dvh] w-full flex flex-col ${textMain} ${bgMain} overflow-x-hidden relative selection:bg-stone-300 selection:text-stone-900 transition-colors duration-300`}>
               <style>{`
                 @keyframes zoomThroughMinimal { 0% { transform: scale(1) translateY(0); opacity: 1; } 100% { transform: scale(30) translateY(50px); opacity: 0; } }
                 .animate-zoom-minimal { animation: zoomThroughMinimal 0.9s cubic-bezier(0.8, 0, 0.2, 1) forwards; }
