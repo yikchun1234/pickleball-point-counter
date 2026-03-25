@@ -6,9 +6,10 @@
     <title>Pickleball Point Counter</title>
     
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#fafaf9">
+    <meta name="theme-color" content="#fafaf9" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1c1917" media="(prefers-color-scheme: dark)">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Pickleball Point Counter">
     <meta name="mobile-web-app-capable" content="yes">
 
@@ -74,7 +75,7 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;600;700&display=swap');
-        html, body { width: 100%; min-height: 100vh; min-height: 100dvh; background-color: var(--app-bg, #fafaf9); }
+        html, body { width: 100%; min-height: 100vh; min-height: 100dvh; background-color: var(--app-bg, #fafaf9); -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Noto Sans', sans-serif; margin: 0; padding: 0; overscroll-behavior-y: none; }
     </style>
 </head>
@@ -210,10 +211,15 @@
           useEffect(() => {
             if (isModalOpen) {
               document.body.style.overflow = 'hidden';
+              document.documentElement.style.overflow = 'hidden';
             } else {
               document.body.style.overflow = '';
+              document.documentElement.style.overflow = '';
             }
-            return () => { document.body.style.overflow = ''; };
+            return () => { 
+              document.body.style.overflow = ''; 
+              document.documentElement.style.overflow = ''; 
+            };
           }, [isModalOpen]);
 
           useEffect(() => {
@@ -292,20 +298,18 @@
           // Dynamically update the mobile status bar (notch area) color when theme changes
           useEffect(() => {
             const bgColor = isDark ? '#1c1917' : '#fafaf9';
-            const metaThemeColor = document.querySelector('meta[name="theme-color"]');
             
-            if (metaThemeColor) {
-              metaThemeColor.setAttribute('content', bgColor);
-            }
+            // Force theme-color meta tags update
+            const metaThemeColors = document.querySelectorAll('meta[name="theme-color"]');
+            metaThemeColors.forEach(meta => meta.setAttribute('content', bgColor));
             
             // Force CSS variable and background to update the notch and overscroll areas robustly
             document.documentElement.style.setProperty('--app-bg', bgColor);
             document.documentElement.style.backgroundColor = bgColor;
             document.body.style.backgroundColor = bgColor;
 
-            // Fix iOS Safari scroll gap bug when changing views (forces notch area to redraw correctly)
-            window.scrollTo(0, 0);
-          }, [isDark, appState]);
+            // Notice: window.scrollTo(0,0) is specifically REMOVED here to prevent iOS Safari layout tearing.
+          }, [isDark]);
 
           const triggerHaptic = (type) => {
             if (!navigator.vibrate) return;
@@ -634,7 +638,7 @@
           }, []);
 
           return (
-            <div className={`min-h-[100dvh] w-full flex flex-col ${textMain} ${bgMain} overflow-x-hidden relative selection:bg-stone-300 selection:text-stone-900 transition-colors duration-300`}>
+            <div className={`min-h-[100vh] min-h-[100dvh] w-full flex flex-col ${textMain} ${bgMain} overflow-x-hidden relative selection:bg-stone-300 selection:text-stone-900 transition-colors duration-300`}>
               <style>{`
                 @keyframes zoomThroughMinimal { 0% { transform: scale(1) translateY(0); opacity: 1; } 100% { transform: scale(30) translateY(50px); opacity: 0; } }
                 .animate-zoom-minimal { animation: zoomThroughMinimal 0.9s cubic-bezier(0.8, 0, 0.2, 1) forwards; }
