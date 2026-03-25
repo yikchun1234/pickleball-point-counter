@@ -366,9 +366,18 @@
               const scoreAnnounce = servingTeam === 1 
                 ? `${t1}, ${t2}${!isSingle ? `, ${serverNumber}` : ''}` 
                 : `${t2}, ${t1}${!isSingle ? `, ${serverNumber}` : ''}`;
+                
               const lastEvent = newHistory[newHistory.length-1];
-              if (lastEvent.type === 'SIDEOUT') announceText(`Side out. ${scoreAnnounce}`);
-              else announceText(scoreAnnounce);
+              let announcement = scoreAnnounce;
+              
+              if (lastEvent) {
+                  if (lastEvent.type === 'FAULT') {
+                      announcement = `Side out 1. ${scoreAnnounce}`;
+                  } else if (lastEvent.type === 'SIDEOUT') {
+                      announcement = isSingle ? `Side out, server over. ${scoreAnnounce}` : `Side out 2, server over. ${scoreAnnounce}`;
+                  }
+              }
+              announceText(announcement);
             }
           };
 
@@ -433,6 +442,9 @@
           };
 
           const isSuddenDeath = ruleSet === '14-point' && team1Score === 14 && team2Score === 14;
+          const t1MatchPt = team1Score >= playTo - 1 && (team1Score - team2Score) >= (winByMargin - 1);
+          const t2MatchPt = team2Score >= playTo - 1 && (team2Score - team1Score) >= (winByMargin - 1);
+          const isCustomMatchPoint = ruleSet === 'custom' && serveToWinAt14 && (t1MatchPt || t2MatchPt);
 
           const textMain = isDark ? 'text-stone-100' : 'text-stone-800';
           const textSub = isDark ? 'text-stone-400' : 'text-stone-500';
