@@ -416,7 +416,7 @@
           const getT = (key) => t[key] || defaultLang[key];
 
           // Check if any overlay modal is currently open
-          const isModalOpen = !!(pendingGame || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || recoverGameData || showWinnerOverlay || showSnakeOverlay);
+          const isModalOpen = !!(pendingGame || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || (recoverGameData && appState !== 'splash') || showWinnerOverlay || showSnakeOverlay);
 
           // Lock body scrolling when a modal is open
           useEffect(() => {
@@ -960,8 +960,8 @@
                 </div>
               )}
 
-              {recoverGameData && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+              {recoverGameData && appState !== 'splash' && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-screen-enter">
                   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setRecoverGameData(null)}></div>
                   <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden`}>
                     <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50">
