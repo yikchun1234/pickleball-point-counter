@@ -82,7 +82,7 @@
             min-height: 100vh;
             min-height: 100dvh;
             -webkit-tap-highlight-color: transparent; 
-            background-color: var(--app-bg, #fafaf9); 
+            background-color: #fafaf9; /* Default Light Mode Base */
             transition: background-color 0.3s ease;
         }
         
@@ -173,18 +173,16 @@
           const [showInfo, setShowInfo] = useState(false);
           const [showRetreatModal, setShowRetreatModal] = useState(false);
           const [showBackConfirm, setShowBackConfirm] = useState(false);
-          
           const [isHistoryLoading, setIsHistoryLoading] = useState(false);
-          const [showHistory, setShowHistory] = useState(false);
-          const [dragY, setDragY] = useState(0);
-          const [startY, setStartY] = useState(null);
-
           const [showSwitchModal, setShowSwitchModal] = useState(false);
           const [recoverGameData, setRecoverGameData] = useState(null);
           const [editingMatchId, setEditingMatchId] = useState(null);
           
           const [lang, setLang] = useState('en');
           const [isDark, setIsDark] = useState(false);
+          const [devMode, setDevMode] = useState(false);
+          const soundClickCount = useRef(0);
+          
           const [soundEnabled, setSoundEnabled] = useState(true);
           const [installPrompt, setInstallPrompt] = useState(null);
           const [isInstalled, setIsInstalled] = useState(false);
@@ -216,9 +214,15 @@
           const [hasSwitchedEnds, setHasSwitchedEnds] = useState(false);
           const [elapsedTime, setElapsedTime] = useState(0);
           
+          const [showHistory, setShowHistory] = useState(false);
           const [history, setHistory] = useState([]); 
           const [stateHistory, setStateHistory] = useState([]);
           const [savedMatches, setSavedMatches] = useState([]);
+          
+          // High Performance Drag Refs for Bottom Sheet
+          const sheetRef = useRef(null);
+          const dragStartY = useRef(null);
+          const currentDragY = useRef(0);
           const timelineScrollRef = useRef(null);
           const wakeLockRef = useRef(null);
 
@@ -301,16 +305,10 @@
 
           // Dynamically update the mobile status bar and physical root styles to solve the notch issue
           useEffect(() => {
-            const bgColor = isDark ? '#1c1917' : '#fafaf9'; // bg-stone-900 / bg-stone-50
-            
-            // 1. Update theme-color meta tags
+            const bgColor = isDark ? '#1c1917' : '#fafaf9'; 
             const metaThemeColor = document.getElementById('theme-color-meta');
             if (metaThemeColor) metaThemeColor.setAttribute('content', bgColor);
-            
-            // 2. Set the CSS variable that strictly binds the html and body backgrounds
             document.documentElement.style.setProperty('--app-bg', bgColor);
-            document.documentElement.style.backgroundColor = bgColor;
-            document.body.style.backgroundColor = bgColor;
           }, [isDark]);
 
           const triggerHaptic = (type) => {
@@ -363,6 +361,17 @@
             } else {
               navigator.clipboard.writeText(text);
               alert('Result copied to clipboard!');
+            }
+          };
+
+          const handleSoundClick = () => {
+            toggleSound();
+            if (!devMode) {
+              soundClickCount.current += 1;
+              if (soundClickCount.current >= 7) {
+                setDevMode(true);
+                triggerHaptic('point');
+              }
             }
           };
 
@@ -433,7 +442,6 @@
             
             setAppState('game');
 
-            // Confidently announce the starting score to the players so they know it has begun
             setTimeout(() => {
                 const isServeToScore = rules === 'standard' || (rules === 'custom' && serveToWinAt14);
                 const srvNum = mode === 'double' ? 2 : 1; 
@@ -552,39 +560,36 @@
             return `${m}:${s}`;
           };
 
-          // --- History Drag Interaction Logic ---
-          const handleTouchStart = (e) => setStartY(e.touches[0].clientY);
+          // --- HIGH PERFORMANCE DRAG LOGIC (Bypasses React Render Cycle) ---
+          const handleTouchStart = (e) => {
+              dragStartY.current = e.touches ? e.touches[0].clientY : e.clientY;
+              if (sheetRef.current) sheetRef.current.style.transition = 'none';
+          };
           const handleTouchMove = (e) => {
-              if (startY === null) return;
-              const diff = e.touches[0].clientY - startY;
-              if (diff > 0) setDragY(diff);
+              if (dragStartY.current === null) return;
+              const y = e.touches ? e.touches[0].clientY : e.clientY;
+              const diff = y - dragStartY.current;
+              if (diff > 0) {
+                  currentDragY.current = diff;
+                  if (sheetRef.current) sheetRef.current.style.transform = `translate3d(-50%, ${diff}px, 0)`;
+                  if (e.cancelable) e.preventDefault(); 
+              }
           };
           const handleTouchEnd = () => {
-              if (dragY > 120) setShowHistory(false);
-              setStartY(null);
-              setDragY(0);
-          };
-          const handleMouseDown = (e) => setStartY(e.clientY);
-          const handleMouseMove = (e) => {
-              if (startY === null) return;
-              const diff = e.clientY - startY;
-              if (diff > 0) setDragY(diff);
-          };
-          const handleMouseUp = () => {
-              if (dragY > 120) setShowHistory(false);
-              setStartY(null);
-              setDragY(0);
+              if (dragStartY.current === null) return;
+              dragStartY.current = null;
+              if (sheetRef.current) {
+                  sheetRef.current.style.transition = 'transform 0.4s cubic-bezier(0.32, 0.72, 0, 1)';
+                  if (currentDragY.current > 120) {
+                      setShowHistory(false); 
+                  }
+                  sheetRef.current.style.transform = ''; 
+              }
+              currentDragY.current = 0;
           };
 
           const isSuddenDeath = ruleSet === '14-point' && team1Score === 14 && team2Score === 14;
-          const t1MatchPt = team1Score >= playTo - 1 && (team1Score - team2Score) >= (winByMargin - 1);
-          const t2MatchPt = team2Score >= playTo - 1 && (team2Score - team1Score) >= (winByMargin - 1);
-          const isCustomMatchPoint = ruleSet === 'custom' && serveToWinAt14 && (t1MatchPt || t2MatchPt);
-
-          const isServeToScoreModeUI = ruleSet === 'standard' || 
-                                     (ruleSet === 'custom' && serveToWinAt14) || 
-                                     (ruleSet === '14-point' && serveToWinAt14 && team1Score === 14 && team2Score === 14);
-
+          const isServeToScoreModeUI = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14) || (ruleSet === '14-point' && serveToWinAt14 && team1Score === 14 && team2Score === 14);
           const showServerNumberUI = gameMode === 'double' && isServeToScoreModeUI;
 
           const textMain = isDark ? 'text-stone-100' : 'text-stone-800';
@@ -648,31 +653,6 @@
             </div>
           );
 
-          useEffect(() => {
-            const checkStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
-            setIsInstalled(checkStandalone());
-            const mediaQuery = window.matchMedia('(display-mode: standalone)');
-            const handleDisplayModeChange = (e) => setIsInstalled(e.matches);
-            mediaQuery.addEventListener('change', handleDisplayModeChange);
-            const handleBeforeInstall = (e) => { e.preventDefault(); setInstallPrompt(e); };
-            window.addEventListener('beforeinstallprompt', handleBeforeInstall);
-            return () => { mediaQuery.removeEventListener('change', handleDisplayModeChange); window.removeEventListener('beforeinstallprompt', handleBeforeInstall); };
-          }, []);
-
-          useEffect(() => {
-            const handlePointerMove = (e) => {
-              const x = e.touches ? e.touches[0].clientX : e.clientX;
-              const y = e.touches ? e.touches[0].clientY : e.clientY;
-              document.documentElement.style.setProperty('--cursor-x', `${x}px`);
-              document.documentElement.style.setProperty('--cursor-y', `${y}px`);
-            };
-            document.documentElement.style.setProperty('--cursor-x', '-1000px');
-            document.documentElement.style.setProperty('--cursor-y', '-1000px');
-            window.addEventListener('mousemove', handlePointerMove);
-            window.addEventListener('touchmove', handlePointerMove, { passive: true });
-            return () => { window.removeEventListener('mousemove', handlePointerMove); window.removeEventListener('touchmove', handlePointerMove); };
-          }, []);
-
           return (
             <div className={`min-h-screen w-full flex flex-col ${textMain} ${bgMain} relative selection:bg-stone-300 selection:text-stone-900 transition-colors duration-300`}>
               <style>{`
@@ -691,14 +671,7 @@
                 .muji-scrollbar { scrollbar-width: thin; scrollbar-color: ${isDark ? '#57534e #292524' : '#d6d3d1 #f5f5f4'}; }
               `}</style>
               
-              {/* --- IOS NOTCH FILLER --- */}
-              <div 
-                className={`fixed top-0 left-0 w-full z-[9999] pointer-events-none transition-colors duration-300 ${bgMain}`} 
-                style={{ height: 'env(safe-area-inset-top)' }}
-              ></div>
-
               <div className="fixed inset-0 pointer-events-none z-0 bg-pattern-base transition-colors duration-300"></div>
-              <div className="fixed inset-0 pointer-events-none z-0 bg-pattern-zoomed transition-colors duration-300"></div>
 
               {appState !== 'splash' && (
                 <div 
@@ -713,7 +686,7 @@
                     {appState === 'game' && <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${bgCard} ${borderSub} border shadow-sm text-xs font-bold ${textSub}`}><Timer size={14}/> {formatTime(elapsedTime)}</div>}
                   </div>
                   <div className="flex items-center gap-2 pointer-events-auto">
-                    <button onClick={toggleSound} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}>
+                    <button onClick={handleSoundClick} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}>
                       {soundEnabled ? <Volume2 size={18} className={accentGreen} /> : <VolumeX size={18} className={textSub} />}
                     </button>
                     {appState === 'menu' && (
@@ -723,9 +696,11 @@
                       </>
                     )}
                     <button onClick={() => setShowLangMenu(true)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}><Globe size={18} className={textSub} /></button>
-                    <button onClick={toggleTheme} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}>
-                      {isDark ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-stone-500" />}
-                    </button>
+                    {devMode && (
+                      <button onClick={toggleTheme} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}>
+                        {isDark ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-stone-500" />}
+                      </button>
+                    )}
                     <button onClick={() => setShowInfo(true)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}><InfoIcon size={18} className={textSub} /></button>
                   </div>
                 </div>
@@ -796,12 +771,10 @@
                     </div>
                   </div>
                   
-                  {/* --- RESTORED FOOTER --- */}
                   <div className="mt-12 mb-8 flex flex-col items-center gap-6">
                     <div className={`text-center text-[10px] font-bold uppercase tracking-widest ${textSub}`}>
                       <p>{getT('designBy')}</p>
                     </div>
-
                     <div className="flex flex-wrap justify-center gap-3">
                        <a href="https://github.com/yikchun1234" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 active:scale-95 text-[10px] font-bold uppercase tracking-widest`}>
                          <Github size={14} /> GitHub
@@ -815,7 +788,6 @@
                          <span>Reclub Club</span>
                        </a>
                     </div>
-
                     {!isInstalled && (
                       <button onClick={handleInstallClick} className={`mt-2 flex items-center gap-2 px-6 py-3 rounded-full bg-emerald-500 text-white hover:bg-emerald-600 transition-transform hover:scale-105 active:scale-95 shadow-md font-bold text-xs uppercase tracking-widest`}>
                         <Download size={16} /> {getT('installAsApp')}
@@ -863,11 +835,9 @@
                 <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
                   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setPendingGame(null)}></div>
                   <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden`}>
-                    
                     <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50">
                       <h2 className={`text-xl font-bold ${textMain}`}>{pendingGame.mode === 'single' ? getT('singles') : getT('doubles')} - {pendingGame.rules === 'standard' ? getT('stdTitle') : pendingGame.rules === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</h2>
                     </div>
-
                     <div className="px-6 py-4 overflow-y-auto muji-scrollbar flex-1 overscroll-contain">
                       <div className="space-y-4">
                         <div><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('matchTitlePlaceholder')}</label><input type="text" placeholder={getT('untitledMatch')} value={matchTitleInput} onChange={(e) => setMatchTitleInput(e.target.value)} className={`w-full px-4 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} focus:outline-none focus:ring-2 focus:ring-emerald-500/50`} /></div>
@@ -878,12 +848,8 @@
                         <div className="flex flex-col gap-1.5 mt-2 mb-2">
                           <label className={`block text-[10px] font-bold uppercase tracking-widest ${textSub}`}>{getT('firstServer')}</label>
                           <div className={`flex rounded-xl border ${borderSub} p-1 ${bgMain}`}>
-                            <button onClick={() => setStartingServer(1)} className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${startingServer === 1 ? 'bg-emerald-500 text-white shadow-md' : `${textSub} hover:${textMain}`}`}>
-                              {t1NameInput || getT('team1')}
-                            </button>
-                            <button onClick={() => setStartingServer(2)} className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${startingServer === 2 ? 'bg-rose-500 text-white shadow-md' : `${textSub} hover:${textMain}`}`}>
-                              {t2NameInput || getT('team2')}
-                            </button>
+                            <button onClick={() => setStartingServer(1)} className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${startingServer === 1 ? 'bg-emerald-500 text-white shadow-md' : `${textSub} hover:${textMain}`}`}>{t1NameInput || getT('team1')}</button>
+                            <button onClick={() => setStartingServer(2)} className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${startingServer === 2 ? 'bg-rose-500 text-white shadow-md' : `${textSub} hover:${textMain}`}`}>{t2NameInput || getT('team2')}</button>
                           </div>
                         </div>
                         {pendingGame.rules === 'custom' && (
@@ -894,13 +860,8 @@
                         )}
                         {(pendingGame.rules === '14-point' || pendingGame.rules === 'custom') && (
                           <div className={`p-4 rounded-xl border ${borderSub} ${bgMain} flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform`} onClick={() => setServeToWinAt14(!serveToWinAt14)}>
-                            <div className="pr-4">
-                              <h3 className={`font-bold text-sm ${textMain}`}>{pendingGame.rules === '14-point' ? getT('serveToWinOption') : getT('customServeToWin')}</h3>
-                              <p className={`text-xs mt-1 ${textSub}`}>{pendingGame.rules === '14-point' ? getT('serveToWinDesc') : getT('customServeToWinDesc')}</p>
-                            </div>
-                            <button className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${serveToWinAt14 ? 'bg-emerald-500' : 'bg-stone-300 dark:bg-stone-600'}`}>
-                              <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-300 ${serveToWinAt14 ? 'translate-x-6' : 'translate-x-0'}`} />
-                            </button>
+                            <div className="pr-4"><h3 className={`font-bold text-sm ${textMain}`}>{pendingGame.rules === '14-point' ? getT('serveToWinOption') : getT('customServeToWin')}</h3><p className={`text-xs mt-1 ${textSub}`}>{pendingGame.rules === '14-point' ? getT('serveToWinDesc') : getT('customServeToWinDesc')}</p></div>
+                            <button className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${serveToWinAt14 ? 'bg-emerald-500' : 'bg-stone-300 dark:bg-stone-600'}`}><div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-300 ${serveToWinAt14 ? 'translate-x-6' : 'translate-x-0'}`} /></button>
                           </div>
                         )}
                         <div className={`p-4 rounded-xl border ${borderSub} ${bgMain} flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform`} onClick={() => setEnableSwitchEnds(!enableSwitchEnds)}>
@@ -909,14 +870,12 @@
                         </div>
                       </div>
                     </div>
-
                     <div className="p-6 pt-4 flex-shrink-0 border-t border-stone-100 dark:border-stone-800/50">
                       <div className="flex gap-3">
                         <button onClick={() => setPendingGame(null)} className={`flex-1 py-3 rounded-xl font-semibold border ${borderSub} ${textSub} hover:${textMain}`}>{getT('cancel')}</button>
                         <button onClick={() => { startGame(pendingGame.mode, pendingGame.rules, matchTitleInput, t1NameInput, t2NameInput, customPlayTo, customWinBy, enableSwitchEnds, startingServer); setPendingGame(null); }} className={`flex-1 py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-md transition-colors`}>{getT('startMatch')}</button>
                       </div>
                     </div>
-
                   </div>
                 </div>
               )}
@@ -950,8 +909,6 @@
                       <div className="flex flex-col items-center"><span className={`text-xs font-semibold uppercase tracking-widest mb-2 truncate max-w-[100px] ${textSub}`}>{t1Name}</span><span className={`text-8xl md:text-9xl font-bold tracking-tighter ${servingTeam === 1 && !winner ? accentGreen : textMain}`}>{team1Score}</span></div>
                       <span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span>
                       <div className="flex flex-col items-center"><span className={`text-xs font-semibold uppercase tracking-widest mb-2 truncate max-w-[100px] ${textSub}`}>{t2Name}</span><span className={`text-8xl md:text-9xl font-bold tracking-tighter ${servingTeam === 2 && !winner ? accentRed : textMain}`}>{team2Score}</span></div>
-                      
-                      {/* Only show Server Number if in Doubles AND Serve-to-Score rule is active */}
                       {showServerNumberUI && <><span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span><div className="flex flex-col items-center"><span className={`text-xs font-semibold uppercase tracking-widest mb-2 ${textSub}`}>{getT('server')}</span><span className={`text-8xl md:text-9xl font-bold tracking-tighter ${winner ? textMain : 'text-amber-500'}`}>{serverNumber}</span></div></>}
                     </div>
 
@@ -969,10 +926,7 @@
                         </button>
                       </div>
                     </div>
-                    
-                    <div className="mb-6">
-                      {renderTimeline(history, true)}
-                    </div>
+                    <div className="mb-6">{renderTimeline(history, true)}</div>
                   </main>
                 </div>
               )}
@@ -1033,41 +987,31 @@
                 </div>
               )}
 
-              {/* --- RESTORED INSTALL INSTRUCTIONS MODAL --- */}
               {showInstallInstructions && (
                 <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
                   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowInstallInstructions(false)}></div>
                   <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl text-center`}>
                     <Download size={48} className="mx-auto text-emerald-500 mb-4" />
                     <h2 className={`text-lg font-bold mb-2 ${textMain}`}>{getT('installAsApp')}</h2>
-                    <p className={`text-sm mb-6 ${textSub}`}>
-                      {/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) ? getT('installStepsIOS') : getT('installStepsAndroid')}
-                    </p>
+                    <p className={`text-sm mb-6 ${textSub}`}>{/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) ? getT('installStepsIOS') : getT('installStepsAndroid')}</p>
                     <button onClick={() => setShowInstallInstructions(false)} className={`w-full py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-md`}>{getT('gotIt')}</button>
                   </div>
                 </div>
               )}
 
-              {/* Info & Disclaimer Modal */}
               {showInfo && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" style={{touchAction: 'none'}} onClick={() => setShowInfo(false)}></div>
                   <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl transition-all duration-200 max-h-[85vh] overflow-hidden`}>
-                    
                     <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50">
                       <div className="flex items-center gap-3"><InfoIcon size={24} className={accentGreen} /><h2 className={`text-xl font-bold ${textMain}`}>{getT('infoTitle')}</h2></div>
                     </div>
-                    
                     <div className="px-6 py-5 overflow-y-auto muji-scrollbar flex-1 overscroll-contain">
                       <div className={`text-sm ${textSub} text-left space-y-5`}>
                         <div>
                           <h3 className={`font-bold ${textMain} mb-2`}>{getT('infoHowToTitle')}</h3>
                           <ul className="space-y-1.5 list-none pl-1 text-xs md:text-sm">
-                             <li>{getT('infoHowTo1')}</li>
-                             <li>{getT('infoHowTo2')}</li>
-                             <li>{getT('infoHowTo3')}</li>
-                             <li>{getT('infoHowTo4')}</li>
-                             <li>{getT('infoHowTo5')}</li>
+                             <li>{getT('infoHowTo1')}</li><li>{getT('infoHowTo2')}</li><li>{getT('infoHowTo3')}</li><li>{getT('infoHowTo4')}</li><li>{getT('infoHowTo5')}</li>
                           </ul>
                         </div>
                         <div className={`w-full h-px bg-stone-200 dark:bg-stone-700`}></div>
@@ -1076,11 +1020,9 @@
                         <p className={`text-center pt-2 italic text-xs ${textSub}`}>{getT('infoFooter')}</p>
                       </div>
                     </div>
-                    
                     <div className="p-6 pt-4 flex-shrink-0 border-t border-stone-100 dark:border-stone-800/50">
                       <button onClick={() => setShowInfo(false)} className={`w-full py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors shadow-md`}>{getT('gotIt')}</button>
                     </div>
-
                   </div>
                 </div>
               )}
@@ -1100,32 +1042,31 @@
                 </div>
               )}
 
-              {/* --- HISTORY BOTTOM SHEET --- */}
+              {/* --- HIGH PERFORMANCE BOTTOM SHEET (HISTORY) --- */}
               <div 
                 className={`fixed inset-0 z-[200] transition-opacity duration-300 ${showHistory ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
               >
                 <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowHistory(false)}></div>
                 
                 <div 
-                  className={`absolute bottom-0 left-1/2 w-full max-w-4xl flex flex-col rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.15)] ${bgMain} overflow-hidden`}
+                  ref={sheetRef}
+                  className={`absolute bottom-0 left-1/2 w-full max-w-4xl flex flex-col rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.15)] ${bgMain} overflow-hidden transition-transform duration-400 ease-out`}
                   style={{
                       height: '90vh',
                       paddingBottom: 'env(safe-area-inset-bottom)',
-                      transform: showHistory ? `translate(-50%, ${dragY}px)` : 'translate(-50%, 100%)',
-                      transition: startY !== null ? 'none' : 'transform 0.4s cubic-bezier(0.32, 0.72, 0, 1)'
+                      transform: showHistory ? 'translate3d(-50%, 0, 0)' : 'translate3d(-50%, 100%, 0)'
                   }}
                 >
-                  {/* Draggable Header Area */}
                   <div 
                     className={`flex-shrink-0 pt-4 pb-4 px-6 border-b ${borderSub} cursor-grab active:cursor-grabbing z-10 ${bgMain}`}
                     style={{ touchAction: 'none' }}
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
-                    onMouseDown={handleMouseDown}
-                    onMouseMove={handleMouseMove}
-                    onMouseUp={handleMouseUp}
-                    onMouseLeave={() => { if(startY !== null) handleTouchEnd(); }}
+                    onMouseDown={handleTouchStart}
+                    onMouseMove={handleTouchMove}
+                    onMouseUp={handleTouchEnd}
+                    onMouseLeave={handleTouchEnd}
                   >
                     <div className={`w-12 h-1.5 rounded-full mx-auto mb-5 ${isDark ? 'bg-stone-700' : 'bg-stone-300'}`}></div>
                     <div className="flex items-center justify-between">
@@ -1141,7 +1082,6 @@
                     </div>
                   </div>
 
-                  {/* Scrollable Content Area */}
                   <main className="flex-1 overflow-y-auto muji-scrollbar px-4 sm:px-6 pt-6 pb-12 overscroll-contain">
                     {isHistoryLoading ? <div className={`flex flex-col items-center justify-center h-64 text-center ${textSub}`}><div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div><p>{getT('loading')}</p></div>
                     : savedMatches.length === 0 ? <div className={`flex flex-col items-center justify-center h-64 text-center ${textSub}`}><HistoryIcon size={48} className="mb-4 opacity-50" /><p>{getT('noHistory')}</p></div>
