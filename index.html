@@ -77,27 +77,29 @@
         
         /* * ULTIMATE IOS NOTCH FIX: 
          * Lock the body strictly to the viewport size.
-         * The #root element becomes the scrollable container, preventing 100dvh recalculation bugs.
+         * The #root element becomes the static container, and the inner React div handles scrolling.
          */
         html, body { 
+            position: fixed;
+            inset: 0;
             width: 100%; 
             height: 100%; 
             overflow: hidden; 
             background-color: var(--app-bg, #fafaf9); 
             -webkit-tap-highlight-color: transparent; 
+            overscroll-behavior: none;
         }
         body { 
             font-family: 'Noto Sans', sans-serif; 
             margin: 0; 
             padding: 0; 
-            overscroll-behavior-y: none; 
         }
         #root { 
-            height: 100%; 
+            position: absolute;
+            inset: 0;
             width: 100%;
-            overflow-y: auto; 
-            overflow-x: hidden; 
-            -webkit-overflow-scrolling: touch;
+            height: 100%;
+            overflow: hidden; 
         }
     </style>
 </head>
@@ -227,25 +229,6 @@
 
           const t = dict[lang] || dict.en;
           const getT = (key) => t[key] || defaultLang[key];
-
-          const isModalOpen = !!(pendingGame || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || recoverGameData || showWinnerOverlay || showHistory);
-          
-          // Lock the scrollable #root container instead of document body when a modal is open.
-          // This entirely bypasses the iOS Safari notch-breaking bug.
-          useEffect(() => {
-            const rootEl = document.getElementById('root');
-            if (!rootEl) return;
-            if (isModalOpen) {
-              rootEl.style.overflow = 'hidden';
-            } else {
-              rootEl.style.overflowY = 'auto';
-              rootEl.style.overflowX = 'hidden';
-            }
-            return () => { 
-              rootEl.style.overflowY = 'auto';
-              rootEl.style.overflowX = 'hidden'; 
-            };
-          }, [isModalOpen]);
 
           useEffect(() => {
             const saved = localStorage.getItem('pb_history_matches');
@@ -671,7 +654,7 @@
           }, []);
 
           return (
-            <div className={`min-h-full w-full flex flex-col ${textMain} ${bgMain} relative selection:bg-stone-300 selection:text-stone-900 transition-colors duration-300`}>
+            <div id="app-container" className={`absolute inset-0 w-full flex flex-col ${textMain} ${bgMain} overflow-x-hidden overflow-y-auto selection:bg-stone-300 selection:text-stone-900 transition-colors duration-300`} style={{ WebkitOverflowScrolling: 'touch' }}>
               <style>{`
                 @keyframes zoomThroughMinimal { 0% { transform: scale(1) translateY(0); opacity: 1; } 100% { transform: scale(30) translateY(50px); opacity: 0; } }
                 .animate-zoom-minimal { animation: zoomThroughMinimal 0.9s cubic-bezier(0.8, 0, 0.2, 1) forwards; }
@@ -703,18 +686,18 @@
                     {appState === 'game' && <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${bgCard} ${borderSub} border shadow-sm text-xs font-bold ${textSub}`}><Timer size={14}/> {formatTime(elapsedTime)}</div>}
                   </div>
                   <div className="flex items-center gap-2 pointer-events-auto">
-                    <button onClick={toggleSound} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 transition-transform`}>
+                    <button onClick={toggleSound} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}>
                       {soundEnabled ? <Volume2 size={18} className={accentGreen} /> : <VolumeX size={18} className={textSub} />}
                     </button>
                     {appState === 'menu' && (
                       <>
-                        <button onClick={() => setAppState('stats')} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 transition-transform`}><BarChart2 size={18} className={textSub} /></button>
-                        <button onClick={() => { setShowHistory(true); setIsHistoryLoading(true); setTimeout(() => setIsHistoryLoading(false), 400); }} className={`flex items-center gap-1.5 px-3 py-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 transition-transform text-xs font-bold ${textSub}`}><HistoryIcon size={16} /> <span className="hidden sm:inline">History</span></button>
+                        <button onClick={() => setAppState('stats')} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}><BarChart2 size={18} className={textSub} /></button>
+                        <button onClick={() => { setShowHistory(true); setIsHistoryLoading(true); setTimeout(() => setIsHistoryLoading(false), 400); }} className={`flex items-center gap-1.5 px-3 py-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform text-xs font-bold ${textSub}`}><HistoryIcon size={16} /> <span className="hidden sm:inline">History</span></button>
                       </>
                     )}
-                    <button onClick={() => setShowLangMenu(true)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 transition-transform`}><Globe size={18} className={textSub} /></button>
-                    <button onClick={toggleTheme} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 transition-transform`}>{isDark ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-stone-500" />}</button>
-                    <button onClick={() => setShowInfo(true)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 transition-transform`}><InfoIcon size={18} className={textSub} /></button>
+                    <button onClick={() => setShowLangMenu(true)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}><Globe size={18} className={textSub} /></button>
+                    <button onClick={toggleTheme} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}>{isDark ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-stone-500" />}</button>
+                    <button onClick={() => setShowInfo(true)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}><InfoIcon size={18} className={textSub} /></button>
                   </div>
                 </div>
               )}
@@ -727,7 +710,7 @@
                       <RotateCcw size={48} className="mx-auto text-emerald-500 mb-4" />
                       <h2 className={`text-xl font-bold mb-2 text-center ${textMain}`}>{getT('resumeMatch')}</h2>
                     </div>
-                    <div className="px-6 py-4 overflow-y-auto muji-scrollbar flex-1 text-center">
+                    <div className="px-6 py-4 overflow-y-auto muji-scrollbar flex-1 text-center overscroll-contain">
                       <p className={`text-sm mb-2 ${textSub}`}>{getT('resumeDesc')}</p>
                     </div>
                     <div className="p-6 pt-4 flex-shrink-0 border-t border-stone-100 dark:border-stone-800/50">
@@ -791,21 +774,21 @@
                     </div>
 
                     <div className="flex flex-wrap justify-center gap-3">
-                       <a href="https://github.com/yikchun1234" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 text-[10px] font-bold uppercase tracking-widest`}>
+                       <a href="https://github.com/yikchun1234" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 active:scale-95 text-[10px] font-bold uppercase tracking-widest`}>
                          <Github size={14} /> GitHub
                        </a>
-                       <a href="https://reclub.co/players/@amostan" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 text-[10px] font-bold uppercase tracking-widest`}>
+                       <a href="https://reclub.co/players/@amostan" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 active:scale-95 text-[10px] font-bold uppercase tracking-widest`}>
                          <img src="https://reclub.co/favicon.ico" alt="Reclub" className="w-3.5 h-3.5 rounded-sm" onError={(e) => { e.target.onerror = null; e.target.style.display='none'; }} />
                          <span>Reclub</span>
                        </a>
-                       <a href="https://reclub.co/clubs/@pick-to-sync" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 text-[10px] font-bold uppercase tracking-widest`}>
+                       <a href="https://reclub.co/clubs/@pick-to-sync" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 active:scale-95 text-[10px] font-bold uppercase tracking-widest`}>
                          <img src="https://reclub.co/favicon.ico" alt="Reclub Club" className="w-3.5 h-3.5 rounded-sm" onError={(e) => { e.target.onerror = null; e.target.style.display='none'; }} />
                          <span>Reclub Club</span>
                        </a>
                     </div>
 
                     {!isInstalled && (
-                      <button onClick={handleInstallClick} className={`mt-2 flex items-center gap-2 px-6 py-3 rounded-full bg-emerald-500 text-white hover:bg-emerald-600 transition-transform hover:scale-105 shadow-md font-bold text-xs uppercase tracking-widest`}>
+                      <button onClick={handleInstallClick} className={`mt-2 flex items-center gap-2 px-6 py-3 rounded-full bg-emerald-500 text-white hover:bg-emerald-600 transition-transform hover:scale-105 active:scale-95 shadow-md font-bold text-xs uppercase tracking-widest`}>
                         <Download size={16} /> {getT('installAsApp')}
                       </button>
                     )}
@@ -856,7 +839,7 @@
                       <h2 className={`text-xl font-bold ${textMain}`}>{pendingGame.mode === 'single' ? getT('singles') : getT('doubles')} - {pendingGame.rules === 'standard' ? getT('stdTitle') : pendingGame.rules === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</h2>
                     </div>
 
-                    <div className="px-6 py-4 overflow-y-auto muji-scrollbar flex-1">
+                    <div className="px-6 py-4 overflow-y-auto muji-scrollbar flex-1 overscroll-contain">
                       <div className="space-y-4">
                         <div><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('matchTitlePlaceholder')}</label><input type="text" placeholder={getT('untitledMatch')} value={matchTitleInput} onChange={(e) => setMatchTitleInput(e.target.value)} className={`w-full px-4 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} focus:outline-none focus:ring-2 focus:ring-emerald-500/50`} /></div>
                         <div className="flex gap-3">
@@ -926,7 +909,7 @@
                     <div className="flex items-center gap-3"><button onClick={() => setShowHistory(false)} className={`p-2 -ml-2 rounded-lg ${textSub} hover:${textMain}`}><ArrowLeft size={20} /></button><h1 className={`text-xl font-bold ${textMain}`}>{getT('matchHistory')}</h1></div>
                     {savedMatches.length > 0 && !isHistoryLoading && <button onClick={() => setShowClearConfirm(true)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30`}><Trash2 size={16} /> <span className="hidden sm:inline">{getT('clearHistory')}</span></button>}
                   </header>
-                  <main className="flex-1 overflow-y-auto muji-scrollbar pr-2">
+                  <main className="flex-1 overflow-y-auto muji-scrollbar pr-2 overscroll-contain">
                     {isHistoryLoading ? <div className={`flex flex-col items-center justify-center h-64 text-center ${textSub}`}><div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div><p>{getT('loading')}</p></div>
                     : savedMatches.length === 0 ? <div className={`flex flex-col items-center justify-center h-64 text-center ${textSub}`}><HistoryIcon size={48} className="mb-4 opacity-50" /><p>{getT('noHistory')}</p></div>
                     : (
@@ -1108,7 +1091,7 @@
                       <div className="flex items-center gap-3"><InfoIcon size={24} className={accentGreen} /><h2 className={`text-xl font-bold ${textMain}`}>{getT('infoTitle')}</h2></div>
                     </div>
                     
-                    <div className="px-6 py-5 overflow-y-auto muji-scrollbar flex-1">
+                    <div className="px-6 py-5 overflow-y-auto muji-scrollbar flex-1 overscroll-contain">
                       <div className={`text-sm ${textSub} text-left space-y-5`}>
                         <div>
                           <h3 className={`font-bold ${textMain} mb-2`}>{getT('infoHowToTitle')}</h3>
