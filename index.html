@@ -6,8 +6,7 @@
     <title>Pickleball Point Counter</title>
     
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#fafaf9" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#1c1917" media="(prefers-color-scheme: dark)">
+    <meta id="theme-color-meta" name="theme-color" content="#fafaf9">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Pickleball Point Counter">
@@ -75,8 +74,31 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;600;700&display=swap');
-        html, body { width: 100%; min-height: 100vh; min-height: 100dvh; background-color: var(--app-bg, #fafaf9); -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Noto Sans', sans-serif; margin: 0; padding: 0; overscroll-behavior-y: none; }
+        
+        /* * ULTIMATE IOS NOTCH FIX: 
+         * Lock the body strictly to the viewport size.
+         * The #root element becomes the scrollable container, preventing 100dvh recalculation bugs.
+         */
+        html, body { 
+            width: 100%; 
+            height: 100%; 
+            overflow: hidden; 
+            background-color: var(--app-bg, #fafaf9); 
+            -webkit-tap-highlight-color: transparent; 
+        }
+        body { 
+            font-family: 'Noto Sans', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            overscroll-behavior-y: none; 
+        }
+        #root { 
+            height: 100%; 
+            width: 100%;
+            overflow-y: auto; 
+            overflow-x: hidden; 
+            -webkit-overflow-scrolling: touch;
+        }
     </style>
 </head>
 <body>
@@ -206,8 +228,24 @@
           const t = dict[lang] || dict.en;
           const getT = (key) => t[key] || defaultLang[key];
 
-          // REMOVED: The isModalOpen useEffect that modified document.documentElement.style.overflow
-          // Modifying the overflow on the root HTML tag on iOS completely breaks the viewport-fit=cover (Notch rendering)
+          const isModalOpen = !!(pendingGame || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || recoverGameData || showWinnerOverlay || showHistory);
+          
+          // Lock the scrollable #root container instead of document body when a modal is open.
+          // This entirely bypasses the iOS Safari notch-breaking bug.
+          useEffect(() => {
+            const rootEl = document.getElementById('root');
+            if (!rootEl) return;
+            if (isModalOpen) {
+              rootEl.style.overflow = 'hidden';
+            } else {
+              rootEl.style.overflowY = 'auto';
+              rootEl.style.overflowX = 'hidden';
+            }
+            return () => { 
+              rootEl.style.overflowY = 'auto';
+              rootEl.style.overflowX = 'hidden'; 
+            };
+          }, [isModalOpen]);
 
           useEffect(() => {
             const saved = localStorage.getItem('pb_history_matches');
@@ -286,16 +324,14 @@
           useEffect(() => {
             const bgColor = isDark ? '#1c1917' : '#fafaf9';
             
-            // Force theme-color meta tags update
-            const metaThemeColors = document.querySelectorAll('meta[name="theme-color"]');
-            metaThemeColors.forEach(meta => meta.setAttribute('content', bgColor));
+            // Update the single meta tag specifically to trigger iOS UI changes safely
+            const metaThemeColor = document.getElementById('theme-color-meta');
+            if (metaThemeColor) metaThemeColor.setAttribute('content', bgColor);
             
-            // Force CSS variable and background to update the notch and overscroll areas robustly
+            // Force CSS variable and background to update the un-scrollable root body dynamically
             document.documentElement.style.setProperty('--app-bg', bgColor);
             document.documentElement.style.backgroundColor = bgColor;
             document.body.style.backgroundColor = bgColor;
-
-            // Notice: window.scrollTo(0,0) is specifically REMOVED here to prevent iOS Safari layout tearing.
           }, [isDark]);
 
           const triggerHaptic = (type) => {
@@ -408,13 +444,23 @@
             let pTo = 11; let wBy = 2;
             if (rules === '14-point') { pTo = 15; wBy = 1; }
             if (rules === 'custom') { pTo = cPlayTo; wBy = cWinBy; }
+            
             setCurrentMatchId(Date.now()); setMatchTitle(title); setGameMode(mode); setRuleSet(rules);
             setPlayTo(pTo); setWinByMargin(wBy); setEnableSwitchEnds(enableSwitch);
             setT1Name(t1N || getT('team1')); setT2Name(t2N || getT('team2'));
             setTeam1Score(0); setTeam2Score(0); setServingTeam(startServ); setServerNumber(mode === 'double' ? 2 : 1);
             setWinner(null); setWinReason('score'); setShowWinnerOverlay(false);
             setHistory([]); setStateHistory([]); setHasSwitchedEnds(false); setElapsedTime(0);
+            
             setAppState('game');
+
+            // Wait 0.2s then confidently announce the starting score to the players
+            setTimeout(() => {
+                const isServeToScore = rules === 'standard' || (rules === 'custom' && serveToWinAt14);
+                const srvNum = mode === 'double' ? 2 : 1; 
+                const initialAnnounce = `0, 0${mode === 'double' && isServeToScore ? `, ${srvNum}` : ''}`;
+                announceText(null, initialAnnounce);
+            }, 200);
           };
 
           const saveStateForUndo = () => {
@@ -625,7 +671,7 @@
           }, []);
 
           return (
-            <div className={`min-h-[100vh] min-h-[100dvh] w-full flex flex-col ${textMain} ${bgMain} overflow-x-hidden relative selection:bg-stone-300 selection:text-stone-900 transition-colors duration-300`}>
+            <div className={`min-h-full w-full flex flex-col ${textMain} ${bgMain} relative selection:bg-stone-300 selection:text-stone-900 transition-colors duration-300`}>
               <style>{`
                 @keyframes zoomThroughMinimal { 0% { transform: scale(1) translateY(0); opacity: 1; } 100% { transform: scale(30) translateY(50px); opacity: 0; } }
                 .animate-zoom-minimal { animation: zoomThroughMinimal 0.9s cubic-bezier(0.8, 0, 0.2, 1) forwards; }
@@ -646,7 +692,7 @@
 
               {appState !== 'splash' && (
                 <div 
-                  className="absolute top-0 w-full flex justify-between items-center z-50 pointer-events-none"
+                  className="fixed top-0 w-full flex justify-between items-center z-50 pointer-events-none"
                   style={{
                     paddingTop: 'max(1rem, env(safe-area-inset-top))',
                     paddingLeft: 'max(1rem, env(safe-area-inset-left))',
@@ -675,7 +721,7 @@
 
               {recoverGameData && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setRecoverGameData(null)}></div>
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setRecoverGameData(null)}></div>
                   <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden`}>
                     <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50">
                       <RotateCcw size={48} className="mx-auto text-emerald-500 mb-4" />
@@ -721,7 +767,7 @@
                     <div className="space-y-4">
                       <div className={`flex items-center gap-2 mb-4 pb-2 border-b ${borderSub}`}><User className={accentGreen} size={20} /><h2 className={`text-lg font-semibold ${textMain}`}>{getT('singles')}</h2></div>
                       {['standard', '14-point', 'custom'].map(r => (
-                        <button key={r} onClick={() => handleRuleSelect('single', r)} className={`w-full text-left p-5 muji-card transition-shadow hover:muji-shadow`}>
+                        <button key={r} onClick={() => handleRuleSelect('single', r)} className={`w-full text-left p-5 muji-card transition-shadow hover:muji-shadow active:scale-[0.99] transition-transform duration-200`}>
                           <div className="flex justify-between items-center mb-1"><h3 className={`font-bold ${textMain}`}>{r === 'standard' ? getT('stdTitle') : r === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</h3><ChevronRight size={16} className={textSub} /></div>
                           <p className={`text-xs ${textSub}`}>{r === 'standard' ? getT('stdDescSingle') : r === '14-point' ? getT('fourteenDesc') : getT('customDesc')}</p>
                         </button>
@@ -730,7 +776,7 @@
                     <div className="space-y-4 mt-6 md:mt-0">
                       <div className={`flex items-center gap-2 mb-4 pb-2 border-b ${borderSub}`}><Users className={accentRed} size={20} /><h2 className={`text-lg font-semibold ${textMain}`}>{getT('doubles')}</h2></div>
                       {['standard', '14-point', 'custom'].map(r => (
-                        <button key={r} onClick={() => handleRuleSelect('double', r)} className={`w-full text-left p-5 muji-card transition-shadow hover:muji-shadow`}>
+                        <button key={r} onClick={() => handleRuleSelect('double', r)} className={`w-full text-left p-5 muji-card transition-shadow hover:muji-shadow active:scale-[0.99] transition-transform duration-200`}>
                           <div className="flex justify-between items-center mb-1"><h3 className={`font-bold ${textMain}`}>{r === 'standard' ? getT('stdTitle') : r === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</h3><ChevronRight size={16} className={textSub} /></div>
                           <p className={`text-xs ${textSub}`}>{r === 'standard' ? getT('stdDescDouble') : r === '14-point' ? getT('fourteenDesc') : getT('customDesc')}</p>
                         </button>
@@ -803,7 +849,7 @@
 
               {pendingGame && (
                 <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setPendingGame(null)}></div>
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setPendingGame(null)}></div>
                   <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden`}>
                     
                     <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50">
@@ -855,7 +901,7 @@
                     <div className="p-6 pt-4 flex-shrink-0 border-t border-stone-100 dark:border-stone-800/50">
                       <div className="flex gap-3">
                         <button onClick={() => setPendingGame(null)} className={`flex-1 py-3 rounded-xl font-semibold border ${borderSub} ${textSub} hover:${textMain}`}>{getT('cancel')}</button>
-                        <button onClick={() => { startGame(pendingGame.mode, pendingGame.rules, matchTitleInput, t1NameInput, t2NameInput, customPlayTo, customWinBy, enableSwitchEnds, startingServer); setPendingGame(null); }} className={`flex-1 py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-md`}>{getT('startMatch')}</button>
+                        <button onClick={() => { startGame(pendingGame.mode, pendingGame.rules, matchTitleInput, t1NameInput, t2NameInput, customPlayTo, customWinBy, enableSwitchEnds, startingServer); setPendingGame(null); }} className={`flex-1 py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-md transition-colors`}>{getT('startMatch')}</button>
                       </div>
                     </div>
 
@@ -913,7 +959,7 @@
 
               {showClearConfirm && (
                 <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
-                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowClearConfirm(false)}></div>
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowClearConfirm(false)}></div>
                   <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl text-center`}>
                     <AlertTriangle size={48} className="mx-auto text-rose-500 mb-4" />
                     <h2 className={`text-lg font-bold mb-6 ${textMain}`}>{getT('confirmClear')}</h2>
@@ -961,12 +1007,12 @@
 
                     <div className="mt-auto relative z-10">
                       <div className="grid grid-cols-2 gap-4 h-40 md:h-48">
-                        <button onClick={() => handleRallyWin(1)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all active:scale-[0.98] ${servingTeam === 1 && !winner ? bgAccentGreen : `muji-card ${bgCard} ${winner ? 'opacity-50' : ''}`}`}>
+                        <button onClick={() => handleRallyWin(1)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${servingTeam === 1 && !winner ? bgAccentGreen : `muji-card ${bgCard} ${winner ? 'opacity-50' : 'hover:bg-stone-100 dark:hover:bg-stone-700'}`}`}>
                           <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${servingTeam === 1 && !winner ? accentGreen : textMain}`}>{t1Name}</span>
                           <span className={`text-sm font-semibold ${servingTeam === 1 && !winner ? accentGreen : textSub}`}>{getT('wonRally')}</span>
                           {servingTeam === 1 && !winner && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentGreen}`}><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>{getT('serving')}</div>}
                         </button>
-                        <button onClick={() => handleRallyWin(2)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all active:scale-[0.98] ${servingTeam === 2 && !winner ? bgAccentRed : `muji-card ${bgCard} ${winner ? 'opacity-50' : ''}`}`}>
+                        <button onClick={() => handleRallyWin(2)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${servingTeam === 2 && !winner ? bgAccentRed : `muji-card ${bgCard} ${winner ? 'opacity-50' : 'hover:bg-stone-100 dark:hover:bg-stone-700'}`}`}>
                           <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${servingTeam === 2 && !winner ? accentRed : textMain}`}>{t2Name}</span>
                           <span className={`text-sm font-semibold ${servingTeam === 2 && !winner ? accentRed : textSub}`}>{getT('wonRally')}</span>
                           {servingTeam === 2 && !winner && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentRed}`}><div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></div>{getT('serving')}</div>}
@@ -984,7 +1030,7 @@
               {/* --- IN-GAME OVERLAYS & MODALS --- */}
               {showSwitchModal && (
                 <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
-                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowSwitchModal(false)}></div>
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowSwitchModal(false)}></div>
                   <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl text-center`}>
                     <RotateCcw size={48} className="mx-auto text-amber-500 mb-4 animate-spin" style={{animationIterationCount: 1}}/>
                     <h2 className={`text-xl font-bold mb-2 ${textMain}`}>{getT('switchEnds')}</h2>
@@ -996,7 +1042,7 @@
 
               {showRetreatModal && (
                 <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
-                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowRetreatModal(false)}></div>
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowRetreatModal(false)}></div>
                   <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl text-center`}>
                     <h2 className={`text-xl font-bold mb-6 ${textMain}`}>{getT('retreatTitle')}</h2>
                     <div className="flex flex-col gap-3">
@@ -1024,7 +1070,7 @@
               
               {showBackConfirm && (
                 <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
-                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowBackConfirm(false)}></div>
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowBackConfirm(false)}></div>
                   <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl text-center`}>
                     <AlertTriangle size={48} className="mx-auto text-amber-500 mb-4" />
                     <h2 className={`text-lg font-bold mb-2 ${textMain}`}>{getT('quitMatch')}</h2>
@@ -1040,7 +1086,7 @@
               {/* --- RESTORED INSTALL INSTRUCTIONS MODAL --- */}
               {showInstallInstructions && (
                 <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
-                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowInstallInstructions(false)}></div>
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowInstallInstructions(false)}></div>
                   <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl text-center`}>
                     <Download size={48} className="mx-auto text-emerald-500 mb-4" />
                     <h2 className={`text-lg font-bold mb-2 ${textMain}`}>{getT('installAsApp')}</h2>
@@ -1055,7 +1101,7 @@
               {/* Info & Disclaimer Modal */}
               {showInfo && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={() => setShowInfo(false)}></div>
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" style={{touchAction: 'none'}} onClick={() => setShowInfo(false)}></div>
                   <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl transition-all duration-200 max-h-[85vh] overflow-hidden`}>
                     
                     <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50">
@@ -1091,7 +1137,7 @@
 
               {showLangMenu && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={() => setShowLangMenu(false)}></div>
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" style={{touchAction: 'none'}} onClick={() => setShowLangMenu(false)}></div>
                   <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl`}>
                     <div className="flex items-center gap-3 mb-6"><Globe size={24} className={accentGreen} /><h2 className={`text-xl font-bold ${textMain}`}>Select Language</h2></div>
                     <div className="grid grid-cols-2 gap-3 mb-6">
