@@ -108,7 +108,7 @@
             animation: scaleFadeOut 0.28s cubic-bezier(0.4, 0, 1, 1) forwards;
         }
 
-        /* * Button Pop Animations */
+        /* * Button Pop Animations (Kept for reference if needed elsewhere) */
         @keyframes popInButton {
             0% { opacity: 0; transform: scale(0.8) translateY(-10px); }
             100% { opacity: 1; transform: scale(1) translateY(0); }
@@ -706,6 +706,8 @@
             return () => { window.removeEventListener('mousemove', handlePointerMove); window.removeEventListener('touchmove', handlePointerMove); };
           }, []);
 
+          const showMenuButtons = appState === 'menu' && closingScreen !== 'menu';
+
           return (
             <div className={`min-h-screen w-full flex flex-col ${textMain} ${bgMain} relative selection:bg-stone-300 selection:text-stone-900 transition-colors duration-300`}>
               <style>{`
@@ -748,16 +750,18 @@
                   
                   {/* --- ALWAYS VISIBLE GLOBAL MENU --- */}
                   <div className={`flex items-center gap-2 pointer-events-auto`}>
-                    <button onClick={handleSoundClick} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}>
+                    <button onClick={handleSoundClick} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform relative z-10`}>
                       {soundEnabled ? <Volume2 size={18} className={accentGreen} /> : <VolumeX size={18} className={textSub} />}
                     </button>
-                    {appState === 'menu' && closingScreen !== 'stats' && closingScreen !== 'history' && (
-                      <>
-                        <button onClick={() => openScreenFromMenu('stats')} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm transition-transform ${closingScreen === 'menu' ? 'animate-pop-out-btn-1' : 'hover:scale-105 active:scale-95 animate-pop-btn-1'}`}><BarChart2 size={18} className={textSub} /></button>
-                        <button onClick={() => openScreenFromMenu('history')} className={`flex items-center gap-1.5 px-3 py-2 rounded-full ${bgCard} ${borderSub} border shadow-sm transition-transform text-xs font-bold ${textSub} ${closingScreen === 'menu' ? 'animate-pop-out-btn-2' : 'hover:scale-105 active:scale-95 animate-pop-btn-2'}`}><HistoryIcon size={16} /> <span className="hidden sm:inline">History</span></button>
-                      </>
-                    )}
-                    <button onClick={() => setShowLangMenu(true)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}>
+                    
+                    <div className={`flex items-center overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.2,1,0.4,1)] ${showMenuButtons ? 'max-w-[200px] opacity-100' : 'max-w-0 opacity-0 -ml-2 pointer-events-none'}`}>
+                      <div className={`flex items-center gap-2 min-w-max transition-transform duration-500 ease-[cubic-bezier(0.2,1,0.4,1)] ${showMenuButtons ? 'translate-x-0 scale-100' : 'translate-x-4 scale-95'}`}>
+                        <button onClick={() => openScreenFromMenu('stats')} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-all`}><BarChart2 size={18} className={textSub} /></button>
+                        <button onClick={() => openScreenFromMenu('history')} className={`flex items-center gap-1.5 px-3 py-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-all text-xs font-bold ${textSub}`}><HistoryIcon size={16} /> <span className="hidden sm:inline">History</span></button>
+                      </div>
+                    </div>
+
+                    <button onClick={() => setShowLangMenu(true)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform relative z-10`}>
                       <Globe size={18} className={textSub} />
                     </button>
                     {devMode && (
