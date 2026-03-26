@@ -82,7 +82,7 @@
             min-height: 100vh;
             min-height: 100dvh;
             -webkit-tap-highlight-color: transparent; 
-            background-color: #fafaf9; /* Default Light Mode Base */
+            background-color: var(--app-bg, #fafaf9) !important; 
             transition: background-color 0.3s ease;
         }
         
@@ -223,6 +223,7 @@
           const sheetRef = useRef(null);
           const dragStartY = useRef(null);
           const currentDragY = useRef(0);
+          const dragRafId = useRef(null);
           const timelineScrollRef = useRef(null);
           const wakeLockRef = useRef(null);
 
@@ -560,7 +561,7 @@
             return `${m}:${s}`;
           };
 
-          // --- HIGH PERFORMANCE DRAG LOGIC (Bypasses React Render Cycle) ---
+          // --- 120FPS HIGH PERFORMANCE DRAG LOGIC ---
           const handleTouchStart = (e) => {
               dragStartY.current = e.touches ? e.touches[0].clientY : e.clientY;
               if (sheetRef.current) sheetRef.current.style.transition = 'none';
@@ -571,13 +572,24 @@
               const diff = y - dragStartY.current;
               if (diff > 0) {
                   currentDragY.current = diff;
-                  if (sheetRef.current) sheetRef.current.style.transform = `translate3d(-50%, ${diff}px, 0)`;
+                  if (!dragRafId.current) {
+                      dragRafId.current = requestAnimationFrame(() => {
+                          if (sheetRef.current) {
+                              sheetRef.current.style.transform = `translate3d(-50%, ${currentDragY.current}px, 0)`;
+                          }
+                          dragRafId.current = null;
+                      });
+                  }
                   if (e.cancelable) e.preventDefault(); 
               }
           };
           const handleTouchEnd = () => {
               if (dragStartY.current === null) return;
               dragStartY.current = null;
+              if (dragRafId.current) {
+                  cancelAnimationFrame(dragRafId.current);
+                  dragRafId.current = null;
+              }
               if (sheetRef.current) {
                   sheetRef.current.style.transition = 'transform 0.4s cubic-bezier(0.32, 0.72, 0, 1)';
                   if (currentDragY.current > 120) {
@@ -653,6 +665,31 @@
             </div>
           );
 
+          useEffect(() => {
+            const checkStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
+            setIsInstalled(checkStandalone());
+            const mediaQuery = window.matchMedia('(display-mode: standalone)');
+            const handleDisplayModeChange = (e) => setIsInstalled(e.matches);
+            mediaQuery.addEventListener('change', handleDisplayModeChange);
+            const handleBeforeInstall = (e) => { e.preventDefault(); setInstallPrompt(e); };
+            window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+            return () => { mediaQuery.removeEventListener('change', handleDisplayModeChange); window.removeEventListener('beforeinstallprompt', handleBeforeInstall); };
+          }, []);
+
+          useEffect(() => {
+            const handlePointerMove = (e) => {
+              const x = e.touches ? e.touches[0].clientX : e.clientX;
+              const y = e.touches ? e.touches[0].clientY : e.clientY;
+              document.documentElement.style.setProperty('--cursor-x', `${x}px`);
+              document.documentElement.style.setProperty('--cursor-y', `${y}px`);
+            };
+            document.documentElement.style.setProperty('--cursor-x', '-1000px');
+            document.documentElement.style.setProperty('--cursor-y', '-1000px');
+            window.addEventListener('mousemove', handlePointerMove);
+            window.addEventListener('touchmove', handlePointerMove, { passive: true });
+            return () => { window.removeEventListener('mousemove', handlePointerMove); window.removeEventListener('touchmove', handlePointerMove); };
+          }, []);
+
           return (
             <div className={`min-h-screen w-full flex flex-col ${textMain} ${bgMain} relative selection:bg-stone-300 selection:text-stone-900 transition-colors duration-300`}>
               <style>{`
@@ -671,7 +708,14 @@
                 .muji-scrollbar { scrollbar-width: thin; scrollbar-color: ${isDark ? '#57534e #292524' : '#d6d3d1 #f5f5f4'}; }
               `}</style>
               
+              {/* --- IOS NOTCH FILLER --- */}
+              <div 
+                className={`fixed top-0 left-0 w-full z-[9999] pointer-events-none transition-colors duration-300 ${bgMain}`} 
+                style={{ height: 'env(safe-area-inset-top)' }}
+              ></div>
+
               <div className="fixed inset-0 pointer-events-none z-0 bg-pattern-base transition-colors duration-300"></div>
+              <div className="fixed inset-0 pointer-events-none z-0 bg-pattern-zoomed transition-colors duration-300"></div>
 
               {appState !== 'splash' && (
                 <div 
