@@ -671,8 +671,16 @@
                             </div>
                             <div className="h-4 flex items-center justify-center w-full">
                                 {(event.type === 'SIDEOUT' || event.type === 'FAULT') && (
-                                  <div className={`w-4 h-4 rounded-sm rotate-45 border flex items-center justify-center shadow-sm z-10 ${isDark ? 'bg-stone-600 border-stone-500' : 'bg-stone-200 border-stone-300'}`} title={event.type}>
-                                    <span className={`text-[8px] font-black -rotate-45 ${isDark ? 'text-white' : 'text-stone-700'}`}>{event.type === 'FAULT' ? 'F' : 'S'}</span>
+                                  <div className={`w-4 h-4 rounded-sm rotate-45 border flex items-center justify-center shadow-sm z-10 ${
+                                      event.team === 2 
+                                        ? (isDark ? 'bg-emerald-900/40 border-emerald-600' : 'bg-emerald-100 border-emerald-300') 
+                                        : (isDark ? 'bg-rose-900/40 border-rose-600' : 'bg-rose-100 border-rose-300')
+                                  }`} title={event.type}>
+                                    <span className={`text-[8px] font-black -rotate-45 ${
+                                        event.team === 2 
+                                          ? (isDark ? 'text-emerald-400' : 'text-emerald-700') 
+                                          : (isDark ? 'text-rose-400' : 'text-rose-700')
+                                    }`}>{event.type === 'FAULT' ? 'F' : 'S'}</span>
                                   </div>
                                 )}
                             </div>
