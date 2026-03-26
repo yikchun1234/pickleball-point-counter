@@ -1216,13 +1216,20 @@
                   </div>
 
                   <main className="flex-1 flex flex-col justify-center relative mt-2">
-                    {isSuddenDeath && !winner && <div className="absolute -top-6 left-0 w-full flex justify-center"><span className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-900/50 dark:text-rose-300 dark:border-rose-800`}>🔥 {getT('suddenDeath')} - {serveToWinAt14 ? getT('suddenDeathServeDesc') : getT('nextPointWins')} 🔥</span></div>}
-                    <div className="flex justify-center items-center gap-6 md:gap-16 mb-12 mt-4 relative z-10">
+                    <div className={`flex justify-center items-center gap-6 md:gap-16 ${isSuddenDeath && !winner ? 'mb-6' : 'mb-12'} mt-4 relative z-10`}>
                       <div className="flex flex-col items-center"><span className={`text-xs font-semibold uppercase tracking-widest mb-2 truncate max-w-[100px] ${textSub}`}>{t1Name}</span><span className={`text-8xl md:text-9xl font-bold tracking-tighter ${servingTeam === 1 && !winner ? accentGreen : textMain}`}>{team1Score}</span></div>
                       <span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span>
                       <div className="flex flex-col items-center"><span className={`text-xs font-semibold uppercase tracking-widest mb-2 truncate max-w-[100px] ${textSub}`}>{t2Name}</span><span className={`text-8xl md:text-9xl font-bold tracking-tighter ${servingTeam === 2 && !winner ? accentRed : textMain}`}>{team2Score}</span></div>
                       {showServerNumberUI && <><span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span><div className="flex flex-col items-center"><span className={`text-xs font-semibold uppercase tracking-widest mb-2 ${textSub}`}>{getT('server')}</span><span className={`text-8xl md:text-9xl font-bold tracking-tighter ${winner ? textMain : 'text-amber-500'}`}>{serverNumber}</span></div></>}
                     </div>
+
+                    {isSuddenDeath && !winner && (
+                      <div className="flex justify-center w-full mb-8 relative z-10 animate-screen-enter">
+                        <span className={`px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-900/50 dark:text-rose-300 dark:border-rose-800 shadow-sm text-center max-w-[90%]`}>
+                          🔥 {getT('suddenDeath')} - {serveToWinAt14 ? getT('suddenDeathServeDesc') : getT('nextPointWins')} 🔥
+                        </span>
+                      </div>
+                    )}
 
                     <div className="mt-auto relative z-10">
                       <div className="grid grid-cols-2 gap-4 h-40 md:h-48">
