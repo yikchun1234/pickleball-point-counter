@@ -108,7 +108,7 @@
             animation: scaleFadeOut 0.28s cubic-bezier(0.4, 0, 1, 1) forwards;
         }
 
-        /* * Button Pop Animations (Kept for reference if needed elsewhere) */
+        /* * Button Pop Animations */
         @keyframes popInButton {
             0% { opacity: 0; transform: scale(0.8) translateY(-10px); }
             100% { opacity: 1; transform: scale(1) translateY(0); }
@@ -131,6 +131,16 @@
         }
         .animate-pop-out-btn-2 {
             animation: popOutButton 0.25s cubic-bezier(0.4, 0, 1, 1) 0.05s forwards;
+        }
+
+        @keyframes secretHintBounce {
+            0%, 90%, 100% { transform: scale(1) translateY(0); }
+            95% { transform: scale(1.02) translateY(-4px); }
+        }
+        .animate-secret-hint {
+            animation: secretHintBounce 5s infinite ease-in-out;
+            cursor: pointer;
+            display: inline-block;
         }
     </style>
 </head>
@@ -183,6 +193,9 @@
         const Share2 = (props) => <IconWrapper iconObj={lucide.icons.Share2} {...props} />;
         const Timer = (props) => <IconWrapper iconObj={lucide.icons.Timer} {...props} />;
         const Check = (props) => <IconWrapper iconObj={lucide.icons.Check} {...props} />;
+        const ChevronUp = (props) => <IconWrapper iconObj={lucide.icons.ChevronUp} {...props} />;
+        const ChevronDown = (props) => <IconWrapper iconObj={lucide.icons.ChevronDown} {...props} />;
+        const ChevronLeft = (props) => <IconWrapper iconObj={lucide.icons.ChevronLeft} {...props} />;
 
         const dict = {
           en: { appTitle: "Pickleball", appSub: "Point Counter", tapToStart: "Tap to start", newMatch: "Pickleball Point Counter", selectFormat: "Select match format & rules", singles: "Singles", doubles: "Doubles", stdTitle: "Standard (11 Pts)", stdDescSingle: "0-0 Rule • Play to 11 • Win by 2", stdDescDouble: "0-0-2 Rule • Play to 11 • Win by 2", fourteenTitle: "14-Point Rule", fourteenDesc: "Rally Scoring • Play to 15 • No serve needed", customFormat: "Custom Rules", customDesc: "Set your own points and win margin", playTo: "Play To", winBy: "Win By", t1Name: "Team 1 Name", t2Name: "Team 2 Name", team1: "Team 1", team2: "Team 2", server: "Server", wonRally: "Won Rally", serving: "Serving", winner: "Wins the Match!", playAgain: "Play Again", undo: "Undo", reset: "Retreat", timeline: "Rally Timeline", awaiting: "Awaiting first serve...", suddenDeath: "Sudden Death", nextPointWins: "Next point wins", install: "Install App", serveToWinOption: "14-14 Serve to Win", serveToWinDesc: "Must be serving to win at 14-14", suddenDeathServeDesc: "Must serve to win", switchEndsOption: "Switch Ends at Half", switchEndsOptionDesc: "Prompt to switch sides at half points", customServeToWin: "Serve to Score", customServeToWinDesc: "Only serving team scores (0-0-2 rule)", matchPoint: "Match Point", cancel: "Cancel", startMatch: "Start Match", t1Label: "T1", t2Label: "T2", installAsApp: "Install as a native app", designBy: "Designed by Amos © 2026", matchTitlePlaceholder: "Match Title (Optional)", matchHistory: "Match History", clearHistory: "Clear History", reviewMatch: "Review Timeline", noHistory: "No matches saved yet.", untitledMatch: "Friendly Match", confirmClear: "Clear all match history?", yesClear: "Yes, Clear All", showResults: "Show Results", installStepsIOS: 'Tap Share icon at the bottom, then "Add to Home Screen".', installStepsAndroid: 'Tap browser menu and select "Install App".', gotIt: 'Got it!', infoTitle: 'About & Disclaimer', infoHowToTitle: 'How to Use', infoHowTo1: '1. Select format (Standard, 14-Point, Custom).', infoHowTo2: '2. Tap a team to score. Use Undo for mistakes.', infoHowTo3: '3. Turn on volume for voice score announcements.', infoHowTo4: '4. Check History for stats, timelines, and sharing.', infoHowTo5: '5. Rename matches or retreat from active games.', infoData: 'All history is saved locally on your device. No cloud storage. Clearing browser data will delete history.', infoUsage: 'Open-source project. Free to use with credit to creator (Amos).', infoFooter: 'Designed with ❤️ for the Pickleball community.', retreatTitle: 'Who retreated?', t1Retreat: 'Team 1 Retreated', t2Retreat: 'Team 2 Retreated', quitMatch: 'Quit Match', quitConfirm: 'Return to menu? This match will not be saved.', yesQuit: 'Yes, Quit', winByRetreat: 'Wins by Retreat!', loading: 'Loading...', switchEnds: "Switch Ends!", switchEndsDesc: "Players should now switch sides of the court.", resumeMatch: "Resume Match", resumeDesc: "You have an unfinished match. Do you want to resume?", stats: "Statistics", totalMatches: "Total Matches", avgDuration: "Avg Duration", share: "Share", edit: "Edit", winRate: "T1 Win Rate", time: "Time", firstServer: "First Server", sideOut: "Side out", secondServer: "Second server" },
@@ -203,6 +216,140 @@
           { code: 'ja', name: '日本語' }, { code: 'ko', name: '한국어' }, { code: 'de', name: 'Deutsch' }, { code: 'pt', name: 'Português' }
         ];
 
+        /* --- HIDDEN SNAKE GAME COMPONENT --- */
+        const SnakeGame = ({ onClose }) => {
+            const GRID_SIZE = 15;
+            const [snake, setSnake] = useState([{x: 7, y: 7}]);
+            const [dir, setDir] = useState({x: 0, y: -1});
+            const [food, setFood] = useState({x: 5, y: 5});
+            const [speed, setSpeed] = useState(200);
+            const [gameOver, setGameOver] = useState(false);
+            const [gameWon, setGameWon] = useState(false);
+            const [score, setScore] = useState(0);
+
+            const snakeRef = useRef(snake);
+            const dirRef = useRef(dir);
+            const lastProcessedDirRef = useRef(dir);
+
+            useEffect(() => { snakeRef.current = snake; }, [snake]);
+            useEffect(() => { dirRef.current = dir; }, [dir]);
+
+            const generateFood = (currentSnake) => {
+                if (currentSnake.length >= GRID_SIZE * GRID_SIZE) return null;
+                let newFood;
+                while (true) {
+                    newFood = { x: Math.floor(Math.random() * GRID_SIZE), y: Math.floor(Math.random() * GRID_SIZE) };
+                    if (!currentSnake.some(s => s.x === newFood.x && s.y === newFood.y)) break;
+                }
+                return newFood;
+            };
+
+            useEffect(() => {
+                if (gameOver || gameWon) return;
+                const moveSnake = () => {
+                    lastProcessedDirRef.current = dirRef.current;
+                    const head = snakeRef.current[0];
+                    const newHead = { x: head.x + dirRef.current.x, y: head.y + dirRef.current.y };
+
+                    if (newHead.x < 0 || newHead.x >= GRID_SIZE || newHead.y < 0 || newHead.y >= GRID_SIZE) {
+                        setGameOver(true); return;
+                    }
+                    if (snakeRef.current.some(s => s.x === newHead.x && s.y === newHead.y)) {
+                        setGameOver(true); return;
+                    }
+
+                    const newSnake = [newHead, ...snakeRef.current];
+                    if (newHead.x === food.x && newHead.y === food.y) {
+                        setScore(s => s + 10);
+                        setSpeed(s => Math.max(60, s - 4));
+                        const nextFood = generateFood(newSnake);
+                        if (nextFood) setFood(nextFood);
+                        else setGameWon(true);
+                    } else {
+                        newSnake.pop();
+                    }
+                    setSnake(newSnake);
+                };
+
+                const interval = setInterval(moveSnake, speed);
+                return () => clearInterval(interval);
+            }, [food, speed, gameOver, gameWon]);
+
+            const changeDir = (dx, dy) => {
+                if (lastProcessedDirRef.current.x === -dx && lastProcessedDirRef.current.y === -dy) return;
+                setDir({x: dx, y: dy});
+            };
+
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    switch(e.key) {
+                        case 'ArrowUp': e.preventDefault(); changeDir(0, -1); break;
+                        case 'ArrowDown': e.preventDefault(); changeDir(0, 1); break;
+                        case 'ArrowLeft': e.preventDefault(); changeDir(-1, 0); break;
+                        case 'ArrowRight': e.preventDefault(); changeDir(1, 0); break;
+                    }
+                };
+                window.addEventListener('keydown', handleKeyDown);
+                return () => window.removeEventListener('keydown', handleKeyDown);
+            }, []);
+
+            const resetGame = () => {
+                setSnake([{x: 7, y: 7}]); setDir({x: 0, y: -1}); setFood({x: 5, y: 5});
+                setSpeed(200); setGameOver(false); setGameWon(false); setScore(0);
+            };
+
+            return (
+                <div className="fixed inset-0 z-[200] bg-stone-900 flex flex-col text-stone-100 animate-screen-enter">
+                    <header className="p-4 flex justify-between items-center bg-stone-950 border-b border-stone-800" style={{paddingTop: 'max(1rem, env(safe-area-inset-top))'}}>
+                        <h2 className="font-bold text-emerald-400 text-lg flex items-center gap-2"><Zap size={20}/> Snake <span className="text-stone-500 font-normal text-sm ml-2">Score: {score}</span></h2>
+                        <button onClick={onClose} className="p-2 bg-stone-800 rounded-full hover:bg-stone-700 text-stone-400 transition-colors"><X size={20}/></button>
+                    </header>
+
+                    <div className="flex-1 flex flex-col items-center justify-center p-4 relative">
+                        <div className="w-full max-w-[360px] aspect-square bg-stone-950 border-4 border-stone-800 rounded-lg grid" style={{gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`}}>
+                            {Array.from({length: GRID_SIZE * GRID_SIZE}).map((_, i) => {
+                                const x = i % GRID_SIZE;
+                                const y = Math.floor(i / GRID_SIZE);
+                                const isHead = snake[0].x === x && snake[0].y === y;
+                                const isBody = snake.some((s, idx) => idx !== 0 && s.x === x && s.y === y);
+                                const isFood = food.x === x && food.y === y;
+
+                                let bg = 'bg-transparent';
+                                if (isHead) bg = 'bg-emerald-400 rounded-sm scale-110 shadow-sm z-10 relative';
+                                else if (isBody) bg = 'bg-emerald-600/80 rounded-sm scale-90';
+                                else if (isFood) bg = 'bg-rose-500 rounded-full scale-75 shadow-[0_0_10px_rgba(244,63,94,0.8)] animate-pulse';
+
+                                return <div key={i} className={`w-full h-full flex items-center justify-center`}><div className={`w-full h-full ${bg}`}></div></div>
+                            })}
+                        </div>
+
+                        {(gameOver || gameWon) && (
+                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-20">
+                                <h2 className={`text-5xl font-black mb-2 drop-shadow-lg ${gameWon ? 'text-emerald-400' : 'text-rose-500'}`}>{gameWon ? 'YOU WIN!' : 'GAME OVER'}</h2>
+                                <p className="text-stone-200 mb-8 font-bold text-xl drop-shadow-md">Final Score: {score}</p>
+                                <button onClick={resetGame} className="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl shadow-xl active:scale-95 transition-transform flex items-center gap-2"><RotateCcw size={20}/> Play Again</button>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="p-6 pb-12 flex justify-center bg-stone-950/50 border-t border-stone-800" style={{paddingBottom: 'max(3rem, env(safe-area-inset-bottom))'}}>
+                        <div className="grid grid-cols-3 gap-3">
+                            <div />
+                            <button onClick={() => changeDir(0, -1)} className="w-16 h-16 bg-stone-800 rounded-2xl flex items-center justify-center border-b-4 border-stone-900 active:border-b-0 active:translate-y-1 transition-all"><ChevronUp size={36} className="text-stone-300"/></button>
+                            <div />
+                            <button onClick={() => changeDir(-1, 0)} className="w-16 h-16 bg-stone-800 rounded-2xl flex items-center justify-center border-b-4 border-stone-900 active:border-b-0 active:translate-y-1 transition-all"><ChevronLeft size={36} className="text-stone-300"/></button>
+                            <div className="w-16 h-16 bg-stone-900 rounded-2xl border-4 border-stone-800 flex items-center justify-center"><div className="w-4 h-4 rounded-full bg-stone-700" /></div>
+                            <button onClick={() => changeDir(1, 0)} className="w-16 h-16 bg-stone-800 rounded-2xl flex items-center justify-center border-b-4 border-stone-900 active:border-b-0 active:translate-y-1 transition-all"><ChevronRight size={36} className="text-stone-300"/></button>
+                            <div />
+                            <button onClick={() => changeDir(0, 1)} className="w-16 h-16 bg-stone-800 rounded-2xl flex items-center justify-center border-b-4 border-stone-900 active:border-b-0 active:translate-y-1 transition-all"><ChevronDown size={36} className="text-stone-300"/></button>
+                            <div />
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        /* --- END HIDDEN SNAKE GAME --- */
+
         function PickleballApp() {
           const [appState, setAppState] = useState('splash'); 
           const [closingScreen, setClosingScreen] = useState(null); 
@@ -218,11 +365,13 @@
           const [showSwitchModal, setShowSwitchModal] = useState(false);
           const [recoverGameData, setRecoverGameData] = useState(null);
           const [editingMatchId, setEditingMatchId] = useState(null);
+          const [showSnakeOverlay, setShowSnakeOverlay] = useState(false);
           
           const [lang, setLang] = useState('en');
           const [isDark, setIsDark] = useState(false);
           const [devMode, setDevMode] = useState(false);
           const soundClickCount = useRef(0);
+          const secretClickCount = useRef(0);
           
           const [soundEnabled, setSoundEnabled] = useState(true);
           const [installPrompt, setInstallPrompt] = useState(null);
@@ -267,7 +416,7 @@
           const getT = (key) => t[key] || defaultLang[key];
 
           // Check if any overlay modal is currently open
-          const isModalOpen = !!(pendingGame || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || recoverGameData || showWinnerOverlay);
+          const isModalOpen = !!(pendingGame || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || recoverGameData || showWinnerOverlay || showSnakeOverlay);
 
           // Lock body scrolling when a modal is open
           useEffect(() => {
@@ -446,6 +595,15 @@
                 triggerHaptic('point');
               }
             }
+          };
+          
+          const handleSecretClick = () => {
+              secretClickCount.current += 1;
+              if (secretClickCount.current >= 10) {
+                  setShowSnakeOverlay(true);
+                  secretClickCount.current = 0;
+                  triggerHaptic('win');
+              }
           };
 
           const toggleSound = () => {
@@ -842,7 +1000,7 @@
                     paddingRight: 'max(1.5rem, env(safe-area-inset-right))'
                   }}
                 >
-                  <header className="mb-10 text-center"><h1 className={`text-3xl font-bold ${textMain}`}>{getT('newMatch')}</h1><p className={`mt-2 text-base font-medium ${textSub}`}>{getT('selectFormat')}</p></header>
+                  <header className="mb-10 text-center"><h1 onClick={handleSecretClick} className={`text-3xl font-bold ${textMain} animate-secret-hint select-none active:scale-95 transition-transform`}>{getT('newMatch')}</h1><p className={`mt-2 text-base font-medium ${textSub}`}>{getT('selectFormat')}</p></header>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
                     <div className="space-y-4">
                       <div className={`flex items-center gap-2 mb-4 pb-2 border-b ${borderSub}`}><User className={accentGreen} size={20} /><h2 className={`text-lg font-semibold ${textMain}`}>{getT('singles')}</h2></div>
@@ -1155,7 +1313,10 @@
                   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" style={{touchAction: 'none'}} onClick={() => setShowInfo(false)}></div>
                   <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl transition-all duration-200 max-h-[85vh] overflow-hidden`}>
                     <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50">
-                      <div className="flex items-center gap-3"><InfoIcon size={24} className={accentGreen} /><h2 className={`text-xl font-bold ${textMain}`}>{getT('infoTitle')}</h2></div>
+                      <div className="flex items-center gap-3">
+                        <InfoIcon size={24} className={accentGreen} />
+                        <h2 className={`text-xl font-bold ${textMain}`}>{getT('infoTitle')}</h2>
+                      </div>
                     </div>
                     <div className="px-6 py-5 overflow-y-auto muji-scrollbar flex-1 overscroll-contain">
                       <div className={`text-sm ${textSub} text-left space-y-5`}>
@@ -1207,6 +1368,9 @@
                   </div>
                 </div>
               )}
+
+              {/* --- SECRET SNAKE GAME OVERLAY --- */}
+              {showSnakeOverlay && <SnakeGame onClose={() => setShowSnakeOverlay(false)} />}
 
             </div>
           );
