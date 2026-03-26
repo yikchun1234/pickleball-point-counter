@@ -72,6 +72,11 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- Disable Context Menu / Long Press Default Behaviors -->
+    <script>
+        document.addEventListener('contextmenu', event => event.preventDefault());
+    </script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;600;700&display=swap');
         
@@ -83,6 +88,12 @@
             -webkit-tap-highlight-color: transparent; 
             background-color: var(--app-bg, #fafaf9) !important; 
             transition: background-color 0.3s ease;
+            -webkit-touch-callout: none; /* Disable iOS long press popup */
+            -webkit-user-select: none;   /* Disable text selection */
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
         
         body { 
@@ -90,6 +101,15 @@
             margin: 0; 
             padding: 0; 
             overscroll-behavior-y: none; 
+        }
+
+        /* Ensure input fields remain selectable and editable */
+        input, select, textarea {
+            -webkit-user-select: auto !important;
+            -khtml-user-select: auto !important;
+            -moz-user-select: auto !important;
+            -ms-user-select: auto !important;
+            user-select: auto !important;
         }
 
         /* * Screen Animations */
