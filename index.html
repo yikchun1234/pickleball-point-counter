@@ -216,7 +216,9 @@
           { code: 'ja', name: '日本語' }, { code: 'ko', name: '한국어' }, { code: 'de', name: 'Deutsch' }, { code: 'pt', name: 'Português' }
         ];
 
-        /* --- HIDDEN SNAKE GAME COMPONENT --- */
+        /* --- HIDDEN MINI-GAMES --- */
+        
+        // GAME 1: SNAKE
         const SnakeGame = ({ onClose }) => {
             const GRID_SIZE = 15;
             const [snake, setSnake] = useState([{x: 7, y: 7}]);
@@ -348,7 +350,165 @@
                 </div>
             );
         };
-        /* --- END HIDDEN SNAKE GAME --- */
+
+        // GAME 2: PICKLE JUMP
+        const PickleJump = ({ onClose }) => {
+            const [gameState, setGameState] = useState({ dinoY: 0, dinoVy: 0, obsX: 360, score: 0, gameOver: false });
+            
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setGameState(prev => {
+                        if (prev.gameOver) return prev;
+                        let { dinoY, dinoVy, obsX, score } = prev;
+                        
+                        dinoY += dinoVy;
+                        dinoVy -= 1.8; // Gravity pulls down
+                        if (dinoY <= 0) { dinoY = 0; dinoVy = 0; }
+                        
+                        obsX -= 8 + (score * 0.3); // Moves left, speeds up gradually
+                        if (obsX < -30) { obsX = 360; score += 1; }
+                        
+                        let gameOver = false;
+                        // Collision logic based on fixed container size
+                        // Dino is roughly at X: 40 to 70
+                        if (obsX < 70 && obsX + 24 > 40) {
+                            if (dinoY < 45) gameOver = true;
+                        }
+                        
+                        return { dinoY, dinoVy, obsX, score, gameOver };
+                    });
+                }, 30);
+                return () => clearInterval(interval);
+            }, []);
+
+            const handleJump = () => {
+                setGameState(prev => {
+                    if (prev.dinoY === 0 && !prev.gameOver) {
+                        return { ...prev, dinoVy: 18 };
+                    }
+                    return prev;
+                });
+            };
+
+            useEffect(() => {
+                const handleKeyDown = (e) => { if (e.code === 'Space') handleJump(); };
+                window.addEventListener('keydown', handleKeyDown);
+                return () => window.removeEventListener('keydown', handleKeyDown);
+            }, []);
+
+            const resetGame = () => setGameState({ dinoY: 0, dinoVy: 0, obsX: 360, score: 0, gameOver: false });
+
+            return (
+                <div className="fixed inset-0 z-[200] bg-stone-900 flex flex-col text-stone-100 animate-screen-enter">
+                    <header className="p-4 flex justify-between items-center bg-stone-950 border-b border-stone-800 relative z-10" style={{paddingTop: 'max(1rem, env(safe-area-inset-top))'}}>
+                        <h2 className="font-bold text-emerald-400 text-lg flex items-center gap-2"><Play size={20}/> Jumper <span className="text-stone-500 font-normal text-sm ml-2">Score: {gameState.score}</span></h2>
+                        <button onClick={(e) => { e.stopPropagation(); onClose(); }} className="p-2 bg-stone-800 rounded-full hover:bg-stone-700 text-stone-400 transition-colors"><X size={20}/></button>
+                    </header>
+
+                    <div className="flex-1 flex flex-col items-center justify-center p-4 relative" onPointerDown={handleJump}>
+                        <div className="text-center mb-8 text-stone-500 font-bold tracking-widest uppercase text-sm animate-pulse select-none pointer-events-none">Tap anywhere to jump</div>
+                        <div className="relative w-full max-w-[360px] h-[250px] bg-stone-950 border-4 border-stone-800 rounded-xl overflow-hidden pointer-events-none">
+                            {/* Ground */}
+                            <div className="absolute bottom-0 w-full h-[10px] bg-stone-800"></div>
+                            
+                            {/* Player / Dino */}
+                            <div className="absolute left-[40px] w-[30px] h-[30px] bg-emerald-400 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(52,211,153,0.5)]" style={{ bottom: `${gameState.dinoY + 10}px` }}>
+                                <User size={20} className="text-stone-900" />
+                            </div>
+                            
+                            {/* Obstacle */}
+                            <div className="absolute bottom-[10px] w-[24px] h-[45px] bg-rose-500 rounded-t-lg shadow-[0_0_15px_rgba(244,63,94,0.5)]" style={{ left: `${gameState.obsX}px` }}></div>
+                        </div>
+
+                        {gameState.gameOver && (
+                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-20">
+                                <h2 className="text-5xl font-black mb-2 drop-shadow-lg text-rose-500">CRASHED!</h2>
+                                <p className="text-stone-200 mb-8 font-bold text-xl drop-shadow-md">Score: {gameState.score}</p>
+                                <button onPointerDown={(e) => { e.stopPropagation(); resetGame(); }} className="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl shadow-xl active:scale-95 transition-transform flex items-center gap-2 pointer-events-auto"><RotateCcw size={20}/> Try Again</button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // GAME 3: MEMORY MATCH
+        const MemoryGame = ({ onClose }) => {
+            const ICONS = [Zap, Trophy, Sun, Moon, Timer, User, Globe, Play];
+            const [cards, setCards] = useState([]);
+            const [flipped, setFlipped] = useState([]);
+            const [matched, setMatched] = useState([]);
+            const [moves, setMoves] = useState(0);
+            const [gameWon, setGameWon] = useState(false);
+
+            const initGame = () => {
+                const deck = [...ICONS, ...ICONS]
+                    .sort(() => Math.random() - 0.5)
+                    .map((Icon, idx) => ({ id: idx, Icon }));
+                setCards(deck);
+                setFlipped([]);
+                setMatched([]);
+                setMoves(0);
+                setGameWon(false);
+            };
+
+            useEffect(() => { initGame(); }, []);
+
+            const handleCardClick = (index) => {
+                if (flipped.length === 2 || flipped.includes(index) || matched.includes(index)) return;
+                
+                const newFlipped = [...flipped, index];
+                setFlipped(newFlipped);
+
+                if (newFlipped.length === 2) {
+                    setMoves(m => m + 1);
+                    if (cards[newFlipped[0]].Icon === cards[newFlipped[1]].Icon) {
+                        setMatched(prev => [...prev, newFlipped[0], newFlipped[1]]);
+                        setFlipped([]);
+                    } else {
+                        setTimeout(() => setFlipped([]), 800);
+                    }
+                }
+            };
+
+            useEffect(() => {
+                if (cards.length > 0 && matched.length === cards.length) {
+                    setGameWon(true);
+                }
+            }, [matched, cards]);
+
+            return (
+                <div className="fixed inset-0 z-[200] bg-stone-900 flex flex-col text-stone-100 animate-screen-enter">
+                    <header className="p-4 flex justify-between items-center bg-stone-950 border-b border-stone-800 relative z-10" style={{paddingTop: 'max(1rem, env(safe-area-inset-top))'}}>
+                        <h2 className="font-bold text-emerald-400 text-lg flex items-center gap-2"><Trophy size={20}/> Memory <span className="text-stone-500 font-normal text-sm ml-2">Moves: {moves}</span></h2>
+                        <button onClick={onClose} className="p-2 bg-stone-800 rounded-full hover:bg-stone-700 text-stone-400 transition-colors"><X size={20}/></button>
+                    </header>
+
+                    <div className="flex-1 flex flex-col items-center justify-center p-4 relative">
+                        <div className="w-full max-w-[360px] grid grid-cols-4 gap-3">
+                            {cards.map((card, idx) => {
+                                const isFlipped = flipped.includes(idx) || matched.includes(idx);
+                                const Icon = card.Icon;
+                                return (
+                                    <button key={card.id} onClick={() => handleCardClick(idx)} className={`aspect-square rounded-2xl flex items-center justify-center transition-all duration-300 transform ${isFlipped ? 'bg-stone-800 border-2 border-stone-700' : 'bg-emerald-500 border-b-4 border-emerald-700 hover:bg-emerald-400 active:translate-y-1 active:border-b-0'}`}>
+                                        {isFlipped ? <Icon size={32} className={`${matched.includes(idx) ? 'text-stone-500' : 'text-emerald-400'} animate-pop-btn-1`} /> : <div className="w-4 h-4 rounded-full bg-emerald-100 opacity-50" />}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {gameWon && (
+                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-20">
+                                <h2 className="text-5xl font-black mb-2 drop-shadow-lg text-emerald-400">YOU WIN!</h2>
+                                <p className="text-stone-200 mb-8 font-bold text-xl drop-shadow-md">Moves: {moves}</p>
+                                <button onClick={initGame} className="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl shadow-xl active:scale-95 transition-transform flex items-center gap-2"><RotateCcw size={20}/> Play Again</button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+        /* --- END HIDDEN MINI-GAMES --- */
 
         function PickleballApp() {
           const [appState, setAppState] = useState('splash'); 
@@ -365,7 +525,9 @@
           const [showSwitchModal, setShowSwitchModal] = useState(false);
           const [recoverGameData, setRecoverGameData] = useState(null);
           const [editingMatchId, setEditingMatchId] = useState(null);
-          const [showSnakeOverlay, setShowSnakeOverlay] = useState(false);
+          
+          // Secret Game State (null, 'snake', 'jump', or 'memory')
+          const [secretGame, setSecretGame] = useState(null);
           
           const [lang, setLang] = useState('en');
           const [isDark, setIsDark] = useState(false);
@@ -414,7 +576,7 @@
           const getT = (key) => t[key] || defaultLang[key];
 
           // Check if any overlay modal is currently open
-          const isModalOpen = !!(pendingGame || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || (recoverGameData && appState !== 'splash') || showWinnerOverlay || showSnakeOverlay);
+          const isModalOpen = !!(pendingGame || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || (recoverGameData && appState !== 'splash') || showWinnerOverlay || secretGame);
 
           // Lock body scrolling when a modal is open
           useEffect(() => {
@@ -591,7 +753,10 @@
           const handleSecretClick = () => {
               secretClickCount.current += 1;
               if (secretClickCount.current >= 10) {
-                  setShowSnakeOverlay(true);
+                  // Randomly pick one of the 3 mini games
+                  const games = ['snake', 'jump', 'memory'];
+                  const randomGame = games[Math.floor(Math.random() * games.length)];
+                  setSecretGame(randomGame);
                   secretClickCount.current = 0;
                   triggerHaptic('win');
               }
@@ -1370,8 +1535,10 @@
                 </div>
               )}
 
-              {/* --- SECRET SNAKE GAME OVERLAY --- */}
-              {showSnakeOverlay && <SnakeGame onClose={() => setShowSnakeOverlay(false)} />}
+              {/* --- SECRET MINI GAMES --- */}
+              {secretGame === 'snake' && <SnakeGame onClose={() => setSecretGame(null)} />}
+              {secretGame === 'jump' && <PickleJump onClose={() => setSecretGame(null)} />}
+              {secretGame === 'memory' && <MemoryGame onClose={() => setSecretGame(null)} />}
 
             </div>
           );
