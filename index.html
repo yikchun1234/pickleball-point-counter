@@ -710,7 +710,8 @@
               announceText(null, `Game over. ${winTeam === 1 ? t1Name : t2Name} wins.`);
             } else {
               const isSingle = gameMode === 'single';
-              const showSrvNum = gameMode === 'double' && isServeToScore;
+              const isSuddenDeathAnnounce = ruleSet === '14-point' && serveToWinAt14 && t1 === 14 && t2 === 14;
+              const showSrvNum = gameMode === 'double' && isServeToScore && !isSuddenDeathAnnounce;
               
               const scoreAnnounce = newServTeam === 1 
                 ? `${t1}, ${t2}${showSrvNum ? `, ${newServNum}` : ''}` 
@@ -740,17 +741,19 @@
             let newT1 = team1Score; let newT2 = team2Score; let newServTeam = servingTeam; let newServNum = serverNumber; let evType = '';
             
             let isServeToScoreMode = false;
+            let isStrictSuddenDeath = false;
             if (ruleSet === 'standard') {
               isServeToScoreMode = true;
             } else if (ruleSet === 'custom' && serveToWinAt14) {
               isServeToScoreMode = true;
             } else if (ruleSet === '14-point' && serveToWinAt14 && team1Score === 14 && team2Score === 14) {
               isServeToScoreMode = true;
+              isStrictSuddenDeath = true;
             }
 
             const grantPoint = () => { if (winningTeam === 1) { newT1 += 1; evType = 'T1_POINT'; } else { newT2 += 1; evType = 'T2_POINT'; } };
             const grantSideout = () => {
-              if (gameMode === 'single') { newServTeam = winningTeam; evType = 'SIDEOUT'; }
+              if (gameMode === 'single' || isStrictSuddenDeath) { newServTeam = winningTeam; evType = 'SIDEOUT'; newServNum = 1; }
               else {
                 if (serverNumber === 1) { newServNum = 2; evType = 'FAULT'; }
                 else { newServTeam = winningTeam; newServNum = 1; evType = 'SIDEOUT'; }
@@ -793,7 +796,7 @@
 
           const isSuddenDeath = ruleSet === '14-point' && team1Score === 14 && team2Score === 14;
           const isServeToScoreModeUI = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14) || (ruleSet === '14-point' && serveToWinAt14 && team1Score === 14 && team2Score === 14);
-          const showServerNumberUI = gameMode === 'double' && isServeToScoreModeUI;
+          const showServerNumberUI = gameMode === 'double' && isServeToScoreModeUI && !isSuddenDeath;
 
           const textMain = isDark ? 'text-stone-100' : 'text-stone-800';
           const textSub = isDark ? 'text-stone-400' : 'text-stone-500';
