@@ -180,8 +180,9 @@
           
           const [lang, setLang] = useState('en');
           
-          // Hardcode isDark to false to guarantee stability. Dark mode is completely disabled.
-          const isDark = false; 
+          const [isDark, setIsDark] = useState(false);
+          const [devMode, setDevMode] = useState(false);
+          const soundClickCount = useRef(0);
           
           const [soundEnabled, setSoundEnabled] = useState(true);
           const [installPrompt, setInstallPrompt] = useState(null);
@@ -214,7 +215,6 @@
           const [hasSwitchedEnds, setHasSwitchedEnds] = useState(false);
           const [elapsedTime, setElapsedTime] = useState(0);
           
-          // Removed showHistory state - History is now managed natively by appState to fix iOS Notch bugs
           const [history, setHistory] = useState([]); 
           const [stateHistory, setStateHistory] = useState([]);
           const [savedMatches, setSavedMatches] = useState([]);
@@ -231,6 +231,7 @@
             if (savedLang === 'zh') savedLang = 'zh_CN'; 
             if (savedLang && dict[savedLang]) setLang(savedLang);
             
+            if (localStorage.getItem('pb_theme_pref') === 'dark') setIsDark(true);
             if (localStorage.getItem('pb_sound_pref') === 'false') setSoundEnabled(false);
 
             const savedActive = localStorage.getItem('pb_active_game');
@@ -364,6 +365,17 @@
             }
           };
 
+          const handleSoundClick = () => {
+            toggleSound();
+            if (!devMode) {
+              soundClickCount.current += 1;
+              if (soundClickCount.current >= 7) {
+                setDevMode(true);
+                if (navigator.vibrate) navigator.vibrate(100);
+              }
+            }
+          };
+
           const toggleSound = () => {
             const newSound = !soundEnabled;
             setSoundEnabled(newSound);
@@ -393,6 +405,12 @@
             } else {
               setShowInstallInstructions(true);
             }
+          };
+
+          const toggleTheme = () => {
+            const newTheme = !isDark;
+            setIsDark(newTheme);
+            localStorage.setItem('pb_theme_pref', newTheme ? 'dark' : 'light');
           };
 
           const handleRuleSelect = (mode, rules) => {
@@ -681,7 +699,7 @@
                     {appState === 'game' && <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${bgCard} ${borderSub} border shadow-sm text-xs font-bold ${textSub}`}><Timer size={14}/> {formatTime(elapsedTime)}</div>}
                   </div>
                   <div className="flex items-center gap-2 pointer-events-auto">
-                    <button onClick={toggleSound} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}>
+                    <button onClick={handleSoundClick} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}>
                       {soundEnabled ? <Volume2 size={18} className={accentGreen} /> : <VolumeX size={18} className={textSub} />}
                     </button>
                     {appState === 'menu' && (
@@ -691,6 +709,9 @@
                       </>
                     )}
                     <button onClick={() => setShowLangMenu(true)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}><Globe size={18} className={textSub} /></button>
+                    {devMode && (
+                      <button onClick={toggleTheme} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}>{isDark ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-stone-500" />}</button>
+                    )}
                     <button onClick={() => setShowInfo(true)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}><InfoIcon size={18} className={textSub} /></button>
                   </div>
                 </div>
@@ -932,7 +953,7 @@
                     )}
                   </main>
                 </div>
-              </div>
+              )}
 
               {showClearConfirm && (
                 <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
