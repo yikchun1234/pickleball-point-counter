@@ -183,6 +183,10 @@
           const [soundEnabled, setSoundEnabled] = useState(true);
           const [installPrompt, setInstallPrompt] = useState(null);
           const [isInstalled, setIsInstalled] = useState(false);
+          
+          // Hidden Developer Mode State
+          const [devMode, setDevMode] = useState(false);
+          const soundClickCount = useRef(0);
 
           const [matchTitleInput, setMatchTitleInput] = useState('');
           const [t1NameInput, setT1NameInput] = useState('');
@@ -227,7 +231,10 @@
             let savedLang = localStorage.getItem('pb_lang_pref');
             if (savedLang === 'zh') savedLang = 'zh_CN'; 
             if (savedLang && dict[savedLang]) setLang(savedLang);
-            if (localStorage.getItem('pb_theme_pref') === 'dark') setIsDark(true);
+            
+            // Note: Dark mode persistence is disabled until UI is fully stable.
+            // if (localStorage.getItem('pb_theme_pref') === 'dark') setIsDark(true);
+            
             if (localStorage.getItem('pb_sound_pref') === 'false') setSoundEnabled(false);
 
             const savedActive = localStorage.getItem('pb_active_game');
@@ -365,6 +372,18 @@
             const newSound = !soundEnabled;
             setSoundEnabled(newSound);
             localStorage.setItem('pb_sound_pref', newSound.toString());
+          };
+
+          // Hidden Developer Toggle
+          const handleSoundClick = () => {
+            toggleSound();
+            if (!devMode) {
+              soundClickCount.current += 1;
+              if (soundClickCount.current >= 7) {
+                setDevMode(true);
+                if (navigator.vibrate) navigator.vibrate(100); // Tiny haptic feedback to confirm unlock
+              }
+            }
           };
 
           const handleLanguageChange = (code) => {
@@ -673,7 +692,7 @@
 
               {appState !== 'splash' && (
                 <div 
-                  className="absolute top-0 w-full flex justify-between items-center z-50 pointer-events-none"
+                  className="fixed top-0 w-full flex justify-between items-center z-50 pointer-events-none"
                   style={{
                     paddingTop: 'max(1rem, env(safe-area-inset-top))',
                     paddingLeft: 'max(1rem, env(safe-area-inset-left))',
@@ -684,7 +703,7 @@
                     {appState === 'game' && <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${bgCard} ${borderSub} border shadow-sm text-xs font-bold ${textSub}`}><Timer size={14}/> {formatTime(elapsedTime)}</div>}
                   </div>
                   <div className="flex items-center gap-2 pointer-events-auto">
-                    <button onClick={toggleSound} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}>
+                    <button onClick={handleSoundClick} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}>
                       {soundEnabled ? <Volume2 size={18} className={accentGreen} /> : <VolumeX size={18} className={textSub} />}
                     </button>
                     {appState === 'menu' && (
@@ -694,7 +713,9 @@
                       </>
                     )}
                     <button onClick={() => setShowLangMenu(true)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}><Globe size={18} className={textSub} /></button>
-                    <button onClick={toggleTheme} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}>{isDark ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-stone-500" />}</button>
+                    {devMode && (
+                      <button onClick={toggleTheme} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}>{isDark ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-stone-500" />}</button>
+                    )}
                     <button onClick={() => setShowInfo(true)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}><InfoIcon size={18} className={textSub} /></button>
                   </div>
                 </div>
