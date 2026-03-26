@@ -164,7 +164,7 @@
         ];
 
         function PickleballApp() {
-          const [appState, setAppState] = useState('splash'); // 'splash', 'menu', 'game', 'stats', 'history'
+          const [appState, setAppState] = useState('splash'); 
           const [zoomActive, setZoomActive] = useState(false);
           const [pendingGame, setPendingGame] = useState(null);
           const [showClearConfirm, setShowClearConfirm] = useState(false);
@@ -220,9 +220,30 @@
           
           const timelineScrollRef = useRef(null);
           const wakeLockRef = useRef(null);
+          const lastScrollY = useRef(0);
+          const [showTopRight, setShowTopRight] = useState(true);
 
           const t = dict[lang] || dict.en;
           const getT = (key) => t[key] || defaultLang[key];
+
+          // Smart Scroll Header Logic
+          useEffect(() => {
+            const handleScroll = () => {
+              const currentScrollY = window.scrollY;
+              // If scrolled down past 50px, hide the top right menu
+              if (currentScrollY > 50 && currentScrollY > lastScrollY.current) {
+                setShowTopRight(false);
+              } 
+              // If scrolling back up, show it again
+              else if (currentScrollY < lastScrollY.current || currentScrollY <= 50) {
+                setShowTopRight(true);
+              }
+              lastScrollY.current = currentScrollY;
+            };
+
+            window.addEventListener('scroll', handleScroll, { passive: true });
+            return () => window.removeEventListener('scroll', handleScroll);
+          }, []);
 
           useEffect(() => {
             const saved = localStorage.getItem('pb_history_matches');
@@ -298,7 +319,6 @@
             if (timelineScrollRef.current) timelineScrollRef.current.scrollLeft = timelineScrollRef.current.scrollWidth;
           }, [history]);
 
-          // Dynamically update the mobile status bar and physical root styles to solve the notch issue
           useEffect(() => {
             const bgColor = isDark ? '#1c1917' : '#fafaf9'; 
             const metaThemeColor = document.getElementById('theme-color-meta');
@@ -674,7 +694,7 @@
 
               {appState !== 'splash' && (
                 <div 
-                  className="fixed top-0 w-full flex justify-between items-center z-50 pointer-events-none"
+                  className="fixed top-0 w-full flex justify-between items-start z-50 pointer-events-none"
                   style={{
                     paddingTop: 'max(1rem, env(safe-area-inset-top))',
                     paddingLeft: 'max(1rem, env(safe-area-inset-left))',
@@ -684,7 +704,9 @@
                   <div className="pointer-events-auto">
                     {appState === 'game' && <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${bgCard} ${borderSub} border shadow-sm text-xs font-bold ${textSub}`}><Timer size={14}/> {formatTime(elapsedTime)}</div>}
                   </div>
-                  <div className="flex items-center gap-2 pointer-events-auto">
+                  
+                  {/* --- SMART SCROLL HEADER LOGIC --- */}
+                  <div className={`flex items-center gap-2 pointer-events-auto transition-all duration-300 ${showTopRight ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-8 pointer-events-none'}`}>
                     <button onClick={handleSoundClick} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}>
                       {soundEnabled ? <Volume2 size={18} className={accentGreen} /> : <VolumeX size={18} className={textSub} />}
                     </button>
@@ -830,6 +852,55 @@
                 </div>
               )}
 
+              {pendingGame && (
+                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setPendingGame(null)}></div>
+                  <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden`}>
+                    <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50">
+                      <h2 className={`text-xl font-bold ${textMain}`}>{pendingGame.mode === 'single' ? getT('singles') : getT('doubles')} - {pendingGame.rules === 'standard' ? getT('stdTitle') : pendingGame.rules === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</h2>
+                    </div>
+                    <div className="px-6 py-4 overflow-y-auto muji-scrollbar flex-1 overscroll-contain">
+                      <div className="space-y-4">
+                        <div><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('matchTitlePlaceholder')}</label><input type="text" placeholder={getT('untitledMatch')} value={matchTitleInput} onChange={(e) => setMatchTitleInput(e.target.value)} className={`w-full px-4 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} focus:outline-none focus:ring-2 focus:ring-emerald-500/50`} /></div>
+                        <div className="flex gap-3">
+                          <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('t1Name')}</label><input type="text" placeholder={getT('team1')} value={t1NameInput} onChange={(e) => setT1NameInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
+                          <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('t2Name')}</label><input type="text" placeholder={getT('team2')} value={t2NameInput} onChange={(e) => setT2NameInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
+                        </div>
+                        <div className="flex flex-col gap-1.5 mt-2 mb-2">
+                          <label className={`block text-[10px] font-bold uppercase tracking-widest ${textSub}`}>{getT('firstServer')}</label>
+                          <div className={`flex rounded-xl border ${borderSub} p-1 ${bgMain}`}>
+                            <button onClick={() => setStartingServer(1)} className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${startingServer === 1 ? 'bg-emerald-500 text-white shadow-md' : `${textSub} hover:${textMain}`}`}>{t1NameInput || getT('team1')}</button>
+                            <button onClick={() => setStartingServer(2)} className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${startingServer === 2 ? 'bg-rose-500 text-white shadow-md' : `${textSub} hover:${textMain}`}`}>{t2NameInput || getT('team2')}</button>
+                          </div>
+                        </div>
+                        {pendingGame.rules === 'custom' && (
+                          <div className="flex gap-3">
+                            <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('playTo')}</label><input type="number" inputMode="numeric" pattern="[0-9]*" value={customPlayTo} onChange={(e) => setCustomPlayTo(parseInt(e.target.value)||11)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
+                            <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('winBy')}</label><select value={customWinBy} onChange={(e) => setCustomWinBy(parseInt(e.target.value))} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none cursor-pointer`}><option value={1}>1</option><option value={2}>2</option></select></div>
+                          </div>
+                        )}
+                        {(pendingGame.rules === '14-point' || pendingGame.rules === 'custom') && (
+                          <div className={`p-4 rounded-xl border ${borderSub} ${bgMain} flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform`} onClick={() => setServeToWinAt14(!serveToWinAt14)}>
+                            <div className="pr-4"><h3 className={`font-bold text-sm ${textMain}`}>{pendingGame.rules === '14-point' ? getT('serveToWinOption') : getT('customServeToWin')}</h3><p className={`text-xs mt-1 ${textSub}`}>{pendingGame.rules === '14-point' ? getT('serveToWinDesc') : getT('customServeToWinDesc')}</p></div>
+                            <button className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${serveToWinAt14 ? 'bg-emerald-500' : 'bg-stone-300 dark:bg-stone-600'}`}><div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-300 ${serveToWinAt14 ? 'translate-x-6' : 'translate-x-0'}`} /></button>
+                          </div>
+                        )}
+                        <div className={`p-4 rounded-xl border ${borderSub} ${bgMain} flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform`} onClick={() => setEnableSwitchEnds(!enableSwitchEnds)}>
+                          <div className="pr-4"><h3 className={`font-bold text-sm ${textMain}`}>{getT('switchEndsOption')}</h3><p className={`text-xs mt-1 ${textSub}`}>{getT('switchEndsOptionDesc')}</p></div>
+                          <button className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${enableSwitchEnds ? 'bg-emerald-500' : 'bg-stone-300 dark:bg-stone-600'}`}><div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-300 ${enableSwitchEnds ? 'translate-x-6' : 'translate-x-0'}`} /></button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-6 pt-4 flex-shrink-0 border-t border-stone-100 dark:border-stone-800/50">
+                      <div className="flex gap-3">
+                        <button onClick={() => setPendingGame(null)} className={`flex-1 py-3 rounded-xl font-semibold border ${borderSub} ${textSub} hover:${textMain}`}>{getT('cancel')}</button>
+                        <button onClick={() => { startGame(pendingGame.mode, pendingGame.rules, matchTitleInput, t1NameInput, t2NameInput, customPlayTo, customWinBy, enableSwitchEnds, startingServer); setPendingGame(null); }} className={`flex-1 py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-md transition-colors`}>{getT('startMatch')}</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* --- STATIC HISTORY SCREEN --- */}
               {appState === 'history' && (
                 <div 
@@ -880,55 +951,6 @@
                       </div>
                     )}
                   </main>
-                </div>
-              )}
-
-              {pendingGame && (
-                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setPendingGame(null)}></div>
-                  <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden`}>
-                    <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50">
-                      <h2 className={`text-xl font-bold ${textMain}`}>{pendingGame.mode === 'single' ? getT('singles') : getT('doubles')} - {pendingGame.rules === 'standard' ? getT('stdTitle') : pendingGame.rules === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</h2>
-                    </div>
-                    <div className="px-6 py-4 overflow-y-auto muji-scrollbar flex-1 overscroll-contain">
-                      <div className="space-y-4">
-                        <div><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('matchTitlePlaceholder')}</label><input type="text" placeholder={getT('untitledMatch')} value={matchTitleInput} onChange={(e) => setMatchTitleInput(e.target.value)} className={`w-full px-4 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} focus:outline-none focus:ring-2 focus:ring-emerald-500/50`} /></div>
-                        <div className="flex gap-3">
-                          <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('t1Name')}</label><input type="text" placeholder={getT('team1')} value={t1NameInput} onChange={(e) => setT1NameInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
-                          <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('t2Name')}</label><input type="text" placeholder={getT('team2')} value={t2NameInput} onChange={(e) => setT2NameInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
-                        </div>
-                        <div className="flex flex-col gap-1.5 mt-2 mb-2">
-                          <label className={`block text-[10px] font-bold uppercase tracking-widest ${textSub}`}>{getT('firstServer')}</label>
-                          <div className={`flex rounded-xl border ${borderSub} p-1 ${bgMain}`}>
-                            <button onClick={() => setStartingServer(1)} className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${startingServer === 1 ? 'bg-emerald-500 text-white shadow-md' : `${textSub} hover:${textMain}`}`}>{t1NameInput || getT('team1')}</button>
-                            <button onClick={() => setStartingServer(2)} className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${startingServer === 2 ? 'bg-rose-500 text-white shadow-md' : `${textSub} hover:${textMain}`}`}>{t2NameInput || getT('team2')}</button>
-                          </div>
-                        </div>
-                        {pendingGame.rules === 'custom' && (
-                          <div className="flex gap-3">
-                            <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('playTo')}</label><input type="number" inputMode="numeric" pattern="[0-9]*" value={customPlayTo} onChange={(e) => setCustomPlayTo(parseInt(e.target.value)||11)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
-                            <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('winBy')}</label><select value={customWinBy} onChange={(e) => setCustomWinBy(parseInt(e.target.value))} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none cursor-pointer`}><option value={1}>1</option><option value={2}>2</option></select></div>
-                          </div>
-                        )}
-                        {(pendingGame.rules === '14-point' || pendingGame.rules === 'custom') && (
-                          <div className={`p-4 rounded-xl border ${borderSub} ${bgMain} flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform`} onClick={() => setServeToWinAt14(!serveToWinAt14)}>
-                            <div className="pr-4"><h3 className={`font-bold text-sm ${textMain}`}>{pendingGame.rules === '14-point' ? getT('serveToWinOption') : getT('customServeToWin')}</h3><p className={`text-xs mt-1 ${textSub}`}>{pendingGame.rules === '14-point' ? getT('serveToWinDesc') : getT('customServeToWinDesc')}</p></div>
-                            <button className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${serveToWinAt14 ? 'bg-emerald-500' : 'bg-stone-300 dark:bg-stone-600'}`}><div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-300 ${serveToWinAt14 ? 'translate-x-6' : 'translate-x-0'}`} /></button>
-                          </div>
-                        )}
-                        <div className={`p-4 rounded-xl border ${borderSub} ${bgMain} flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform`} onClick={() => setEnableSwitchEnds(!enableSwitchEnds)}>
-                          <div className="pr-4"><h3 className={`font-bold text-sm ${textMain}`}>{getT('switchEndsOption')}</h3><p className={`text-xs mt-1 ${textSub}`}>{getT('switchEndsOptionDesc')}</p></div>
-                          <button className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${enableSwitchEnds ? 'bg-emerald-500' : 'bg-stone-300 dark:bg-stone-600'}`}><div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-300 ${enableSwitchEnds ? 'translate-x-6' : 'translate-x-0'}`} /></button>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-6 pt-4 flex-shrink-0 border-t border-stone-100 dark:border-stone-800/50">
-                      <div className="flex gap-3">
-                        <button onClick={() => setPendingGame(null)} className={`flex-1 py-3 rounded-xl font-semibold border ${borderSub} ${textSub} hover:${textMain}`}>{getT('cancel')}</button>
-                        <button onClick={() => { startGame(pendingGame.mode, pendingGame.rules, matchTitleInput, t1NameInput, t2NameInput, customPlayTo, customWinBy, enableSwitchEnds, startingServer); setPendingGame(null); }} className={`flex-1 py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-md transition-colors`}>{getT('startMatch')}</button>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               )}
 
