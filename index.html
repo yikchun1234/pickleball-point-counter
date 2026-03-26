@@ -369,8 +369,6 @@
           
           const [lang, setLang] = useState('en');
           const [isDark, setIsDark] = useState(false);
-          const [devMode, setDevMode] = useState(false);
-          const soundClickCount = useRef(0);
           const secretClickCount = useRef(0);
           
           const [soundEnabled, setSoundEnabled] = useState(true);
@@ -588,13 +586,6 @@
 
           const handleSoundClick = () => {
             toggleSound();
-            if (!devMode) {
-              soundClickCount.current += 1;
-              if (soundClickCount.current >= 7) {
-                setDevMode(true);
-                triggerHaptic('point');
-              }
-            }
           };
           
           const handleSecretClick = () => {
@@ -950,11 +941,11 @@
                     <button onClick={() => setShowLangMenu(true)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform relative z-10`}>
                       <Globe size={18} className={textSub} />
                     </button>
-                    {devMode && (
-                      <button onClick={toggleTheme} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}>
-                        {isDark ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-stone-500" />}
-                      </button>
-                    )}
+                    
+                    <button onClick={toggleTheme} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform relative z-10`}>
+                      {isDark ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-stone-500" />}
+                    </button>
+                    
                     <button onClick={() => setShowInfo(true)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}><InfoIcon size={18} className={textSub} /></button>
                   </div>
                 </div>
