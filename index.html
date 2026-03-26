@@ -974,12 +974,12 @@
 
                     <div className="mt-auto relative z-10">
                       <div className="grid grid-cols-2 gap-4 h-40 md:h-48">
-                        <button onClick={() => handleRallyWin(1)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${servingTeam === 1 && !winner ? bgAccentGreen : `muji-card ${bgCard} ${winner ? 'opacity-50' : 'hover:bg-stone-100 dark:hover:bg-stone-700'}`}`}>
+                        <button onClick={() => handleRallyWin(1)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${servingTeam === 1 && !winner ? bgAccentGreen : `muji-card ${bgCard} ${winner ? 'opacity-50' : ''}`}`}>
                           <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${servingTeam === 1 && !winner ? accentGreen : textMain}`}>{t1Name}</span>
                           <span className={`text-sm font-semibold ${servingTeam === 1 && !winner ? accentGreen : textSub}`}>{getT('wonRally')}</span>
                           {servingTeam === 1 && !winner && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentGreen}`}><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>{getT('serving')}</div>}
                         </button>
-                        <button onClick={() => handleRallyWin(2)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${servingTeam === 2 && !winner ? bgAccentRed : `muji-card ${bgCard} ${winner ? 'opacity-50' : 'hover:bg-stone-100 dark:hover:bg-stone-700'}`}`}>
+                        <button onClick={() => handleRallyWin(2)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${servingTeam === 2 && !winner ? bgAccentRed : `muji-card ${bgCard} ${winner ? 'opacity-50' : ''}`}`}>
                           <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${servingTeam === 2 && !winner ? accentRed : textMain}`}>{t2Name}</span>
                           <span className={`text-sm font-semibold ${servingTeam === 2 && !winner ? accentRed : textSub}`}>{getT('wonRally')}</span>
                           {servingTeam === 2 && !winner && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentRed}`}><div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></div>{getT('serving')}</div>}
