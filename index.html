@@ -1887,40 +1887,54 @@
                       <div className="absolute inset-0 z-0 bg-[linear-gradient(rgba(120,113,108,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(120,113,108,0.1)_1px,transparent_1px)]" style={{backgroundSize: '40px 40px'}}></div>
 
                       <div className="relative z-10 flex flex-col h-full justify-between items-center text-center">
-                          <div className="mt-16 w-full flex flex-col items-center">
-                              <Trophy size={80} className="text-emerald-500 mb-8" />
+                          {/* Header */}
+                          <div className="mt-8 w-full flex flex-col items-center">
+                              <Trophy size={80} className="text-emerald-500 mb-6" />
                               <h2 className={`text-5xl font-black tracking-widest uppercase ${isDark ? 'text-stone-200' : 'text-stone-800'}`}>{matchToExport.title}</h2>
-                              <p className="text-3xl font-medium mt-6 text-stone-500">{matchToExport.date}</p>
+                              <p className="text-3xl font-medium mt-4 text-stone-500">{matchToExport.date}</p>
                           </div>
 
-                          <div className="flex items-center justify-center gap-12 w-full px-12">
-                              <div className="flex flex-col items-center w-2/5">
-                                  <span className="text-5xl font-bold uppercase tracking-widest mb-8 text-stone-500 truncate w-full">{matchToExport.t1Name}</span>
-                                  <span className={`text-[14rem] font-black leading-none ${matchToExport.winner === 1 ? 'text-emerald-500' : isDark ? 'text-stone-200' : 'text-stone-800'}`}>{matchToExport.t1Score}</span>
-                                  {matchToExport.winner === 1 && <span className="mt-12 px-8 py-3 bg-emerald-500/20 text-emerald-500 border-4 border-emerald-500 rounded-full text-3xl font-bold uppercase tracking-widest">Winner</span>}
+                          {/* Scores - Uses Grid for perfect html2canvas centering */}
+                          <div className="grid grid-cols-[1fr_auto_1fr] items-center justify-center w-full px-8 my-auto">
+                              <div className="flex flex-col items-center justify-center w-full">
+                                  <div className="h-24 flex items-center justify-center w-full overflow-hidden px-4">
+                                      <span className="text-5xl font-bold uppercase tracking-widest text-stone-500 text-center" style={{ maxWidth: '400px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{matchToExport.t1Name}</span>
+                                  </div>
+                                  <span className={`text-[15rem] font-black leading-none py-4 ${matchToExport.winner === 1 ? 'text-emerald-500' : isDark ? 'text-stone-200' : 'text-stone-800'}`}>{matchToExport.t1Score}</span>
+                                  <div className="h-24 flex items-center justify-center mt-6">
+                                      {matchToExport.winner === 1 && <span className="px-10 py-3 bg-emerald-500/20 text-emerald-500 border-4 border-emerald-500 rounded-full text-3xl font-bold uppercase tracking-widest">Winner</span>}
+                                  </div>
                               </div>
 
-                              <span className="text-[10rem] font-light text-stone-300 dark:text-stone-700">-</span>
+                              <div className="flex flex-col items-center justify-center px-6 pb-24">
+                                  <span className="text-[12rem] font-light text-stone-300 dark:text-stone-700 leading-none">-</span>
+                              </div>
 
-                              <div className="flex flex-col items-center w-2/5">
-                                  <span className="text-5xl font-bold uppercase tracking-widest mb-8 text-stone-500 truncate w-full">{matchToExport.t2Name}</span>
-                                  <span className={`text-[14rem] font-black leading-none ${matchToExport.winner === 2 ? 'text-rose-500' : isDark ? 'text-stone-200' : 'text-stone-800'}`}>{matchToExport.t2Score}</span>
-                                  {matchToExport.winner === 2 && <span className="mt-12 px-8 py-3 bg-rose-500/20 text-rose-500 border-4 border-rose-500 rounded-full text-3xl font-bold uppercase tracking-widest">Winner</span>}
+                              <div className="flex flex-col items-center justify-center w-full">
+                                  <div className="h-24 flex items-center justify-center w-full overflow-hidden px-4">
+                                      <span className="text-5xl font-bold uppercase tracking-widest text-stone-500 text-center" style={{ maxWidth: '400px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{matchToExport.t2Name}</span>
+                                  </div>
+                                  <span className={`text-[15rem] font-black leading-none py-4 ${matchToExport.winner === 2 ? 'text-rose-500' : isDark ? 'text-stone-200' : 'text-stone-800'}`}>{matchToExport.t2Score}</span>
+                                  <div className="h-24 flex items-center justify-center mt-6">
+                                      {matchToExport.winner === 2 && <span className="px-10 py-3 bg-rose-500/20 text-rose-500 border-4 border-rose-500 rounded-full text-3xl font-bold uppercase tracking-widest">Winner</span>}
+                                  </div>
                               </div>
                           </div>
 
-                          <div className="mb-16 flex flex-col items-center">
-                              <div className="flex items-center gap-8 mb-10 text-3xl font-medium text-stone-500">
+                          {/* Footer with URL */}
+                          <div className="mb-4 flex flex-col items-center w-full">
+                              <div className="flex items-center gap-8 mb-10 text-3xl font-medium text-stone-500 bg-stone-900/5 dark:bg-white/5 px-10 py-4 rounded-3xl">
                                   <span>{matchToExport.mode === 'single' ? getT('singles') : getT('doubles')}</span>
                                   <span>•</span>
                                   <span>{matchToExport.rules === 'standard' ? getT('stdTitle') : matchToExport.rules === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</span>
                                   <span>•</span>
                                   <span>{formatTime(matchToExport.elapsedTime || 0)}</span>
                               </div>
-                              <div className={`px-10 py-5 rounded-full border-4 flex items-center gap-6 ${isDark ? 'border-stone-800 bg-stone-900' : 'border-stone-200 bg-white shadow-xl'}`}>
+                              <div className={`px-10 py-5 rounded-full border-4 flex items-center gap-6 mb-8 ${isDark ? 'border-stone-800 bg-stone-900' : 'border-stone-200 bg-white shadow-xl'}`}>
                                   <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg"><div className="w-6 h-6 bg-white rounded-full"></div></div>
                                   <span className={`text-3xl font-bold tracking-widest uppercase ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>Pickleball Point Counter</span>
                               </div>
+                              <p className="text-2xl font-bold text-stone-400 dark:text-stone-600 tracking-wider">https://pickleball-point-counter.pages.dev</p>
                           </div>
                       </div>
                   </div>
