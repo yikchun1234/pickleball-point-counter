@@ -232,7 +232,6 @@
         const ChevronDown = (props) => <IconWrapper iconObj={lucide.icons.ChevronDown} {...props} />;
         const ChevronLeft = (props) => <IconWrapper iconObj={lucide.icons.ChevronLeft} {...props} />;
         const Activity = (props) => <IconWrapper iconObj={lucide.icons.Activity} {...props} />;
-        const MapIcon = (props) => <IconWrapper iconObj={lucide.icons.Map} {...props} />;
 
         const dict = {
           en: { appTitle: "Pickleball", appSub: "Point Counter", tapToStart: "Tap to start", newMatch: "Pickleball Point Counter", selectFormat: "Select match format & rules", singles: "Singles", doubles: "Doubles", stdTitle: "Standard (11 Pts)", stdDescSingle: "0-0 Rule • Play to 11 • Win by 2", stdDescDouble: "0-0-2 Rule • Play to 11 • Win by 2", fourteenTitle: "14-Point Rule", fourteenDesc: "Rally Scoring • Play to 15 • No serve needed", customFormat: "Custom Rules", customDesc: "Set your own points and win margin", playTo: "Play To", winBy: "Win By", t1Name: "Team 1 Name", t2Name: "Team 2 Name", team1: "Team 1", team2: "Team 2", server: "Server", wonRally: "Won Rally", serving: "Serving", winner: "Wins the Match!", playAgain: "Play Again", undo: "Undo", reset: "Retreat", timeline: "Rally Timeline", awaiting: "Awaiting first serve...", suddenDeath: "Sudden Death", nextPointWins: "Next point wins", install: "Install App", serveToWinOption: "14-14 Serve to Win", serveToWinDesc: "Must be serving to win at 14-14", suddenDeathServeDesc: "Must serve to win", switchEndsOption: "Switch Ends at Half", switchEndsOptionDesc: "Prompt to switch sides at half points", customServeToWin: "Serve to Score", customServeToWinDesc: "Only serving team scores (0-0-2 rule)", matchPoint: "Match Point", cancel: "Cancel", startMatch: "Start Match", t1Label: "T1", t2Label: "T2", installAsApp: "Install as a native app", designBy: "Designed by Amos © 2026", matchTitlePlaceholder: "Match Title (Optional)", matchHistory: "Match History", clearHistory: "Clear History", reviewMatch: "Review Timeline", noHistory: "No matches saved yet.", untitledMatch: "Friendly Match", confirmClear: "Clear all match history?", yesClear: "Yes, Clear All", showResults: "Show Results", installStepsIOS: 'Tap Share icon at the bottom, then "Add to Home Screen".', installStepsAndroid: 'Tap browser menu and select "Install App".', gotIt: 'Got it!', infoTitle: 'About & Disclaimer', infoHowToTitle: 'How to Use', infoHowTo1: '1. Select format (Standard, 14-Point, Custom).', infoHowTo2: '2. Tap a team to score. Use Undo for mistakes.', infoHowTo3: '3. Turn on volume for voice score announcements.', infoHowTo4: '4. Check History for stats, timelines, and sharing.', infoHowTo5: '5. Rename matches or retreat from active games.', infoData: 'All history is saved locally on your device. No cloud storage. Clearing browser data will delete history.', infoUsage: 'Open-source project. Free to use with credit to creator (Amos).', infoFooter: 'Designed with ❤️ for the Pickleball community.', retreatTitle: 'Who retreated?', t1Retreat: 'Team 1 Retreated', t2Retreat: 'Team 2 Retreated', quitMatch: 'Quit Match', quitConfirm: 'Return to menu? This match will not be saved.', yesQuit: 'Yes, Quit', winByRetreat: 'Wins by Retreat!', loading: 'Loading...', switchEnds: "Switch Ends!", switchEndsDesc: "Players should now switch sides of the court.", resumeMatch: "Resume Match", resumeDesc: "You have an unfinished match. Do you want to resume?", stats: "Statistics", totalMatches: "Total Matches", avgDuration: "Avg Duration", share: "Share", edit: "Edit", winRate: "T1 Win Rate", time: "Time", firstServer: "First Server", sideOut: "Side out", secondServer: "Second server", totalPoints: "Total Points", winDist: "Win Distribution", formatStats: "Format Breakdown", enableTimeouts: "Enable Timeouts", timeoutsDesc: "2 timeouts per team per game", callTimeout: "Call Timeout", courtPosTitle: "Court Guide", courtPosDesc: "Server and receiver starting positions", receiver: "Receiver", generatingImage: "Generating Image" },
@@ -1091,29 +1090,31 @@
           const doublesCount = savedMatches.filter(m => m.mode === 'double').length;
           
           // --- COURT POSITIONING LOGIC ---
-          let ptsWonThisTurn = 0;
-          for (let i = history.length - 1; i >= 0; i--) {
-              if (history[i].type === 'SIDEOUT') break;
-              if (history[i].type === `T${servingTeam}_POINT`) {
-                  ptsWonThisTurn++;
+          let effectiveScore = servingTeam === 1 ? team1Score : team2Score;
+          
+          if (ruleSet === '14-point' && team1Score === 14 && team2Score === 14) {
+              let sideoutsAt14 = 0;
+              for (let i = history.length - 1; i >= 0; i--) {
+                  if (history[i].type === 'SIDEOUT') sideoutsAt14++;
+                  else if (history[i].type.includes('POINT')) break;
               }
+              effectiveScore += sideoutsAt14;
           }
 
           let courtServerPos = '';
           let courtReceiverPos = '';
 
           if (gameMode === 'single') {
-              const score = servingTeam === 1 ? team1Score : team2Score;
-              courtServerPos = score % 2 === 0 ? 'Right' : 'Left';
+              courtServerPos = effectiveScore % 2 === 0 ? 'Right' : 'Left';
           } else {
               const isFirstTurnOfMatch = history.filter(h => h.type === 'SIDEOUT').length === 0;
               if (isFirstTurnOfMatch) {
-                  courtServerPos = ptsWonThisTurn % 2 === 0 ? 'Right' : 'Left';
+                  courtServerPos = effectiveScore % 2 === 0 ? 'Right' : 'Left';
               } else {
                   if (serverNumber === 1) {
-                      courtServerPos = ptsWonThisTurn % 2 === 0 ? 'Right' : 'Left';
+                      courtServerPos = effectiveScore % 2 === 0 ? 'Right' : 'Left';
                   } else {
-                      courtServerPos = ptsWonThisTurn % 2 === 0 ? 'Left' : 'Right';
+                      courtServerPos = effectiveScore % 2 === 0 ? 'Left' : 'Right';
                   }
               }
           }
@@ -1612,39 +1613,43 @@
                   </div>
 
                   <main className="flex-1 flex flex-col justify-center relative mt-2">
-                    <div className={`flex justify-center items-start gap-4 md:gap-10 ${isSuddenDeath && !winner ? 'mb-8' : 'mb-14 md:mb-16'} mt-4 relative z-10`}>
+                    
+                    {/* --- PERFECT SCOREBOARD ALIGNMENT --- */}
+                    <div className={`flex justify-center items-center gap-4 md:gap-8 mt-10 mb-8 relative z-10`}>
                       
-                      {/* TEAM 1 SCORE & TIMEOUTS */}
+                      {/* TEAM 1 */}
                       <div className="flex flex-col items-center relative">
-                        <span className={`text-xs font-semibold uppercase tracking-widest mb-2 truncate max-w-[100px] ${textSub}`}>{t1Name}</span>
+                        <span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest truncate max-w-[120px] ${textSub}`}>{t1Name}</span>
                         <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${servingTeam === 1 && !winner ? accentGreen : textMain}`}>{team1Score}</span>
                         {enableTimeouts && !winner && (
-                          <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 flex gap-2 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t1Timeouts > 0 && setShowTimeoutConfirm(1)} title={getT('callTimeout')}>
+                          <div className="absolute top-full mt-3 flex gap-2 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t1Timeouts > 0 && setShowTimeoutConfirm(1)} title={getT('callTimeout')}>
                             <div className={`w-2.5 h-2.5 rounded-full transition-colors ${t1Timeouts >= 1 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>
                             <div className={`w-2.5 h-2.5 rounded-full transition-colors ${t1Timeouts >= 2 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>
                           </div>
                         )}
                       </div>
                       
-                      <span className={`text-3xl md:text-5xl font-light mt-8 ${textSub}`}>-</span>
+                      {/* HYPHEN */}
+                      <span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span>
                       
-                      {/* TEAM 2 SCORE & TIMEOUTS */}
+                      {/* TEAM 2 */}
                       <div className="flex flex-col items-center relative">
-                        <span className={`text-xs font-semibold uppercase tracking-widest mb-2 truncate max-w-[100px] ${textSub}`}>{t2Name}</span>
+                        <span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest truncate max-w-[120px] ${textSub}`}>{t2Name}</span>
                         <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${servingTeam === 2 && !winner ? accentRed : textMain}`}>{team2Score}</span>
                         {enableTimeouts && !winner && (
-                          <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 flex gap-2 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t2Timeouts > 0 && setShowTimeoutConfirm(2)} title={getT('callTimeout')}>
+                          <div className="absolute top-full mt-3 flex gap-2 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t2Timeouts > 0 && setShowTimeoutConfirm(2)} title={getT('callTimeout')}>
                             <div className={`w-2.5 h-2.5 rounded-full transition-colors ${t2Timeouts >= 1 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>
                             <div className={`w-2.5 h-2.5 rounded-full transition-colors ${t2Timeouts >= 2 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>
                           </div>
                         )}
                       </div>
                       
+                      {/* SERVER */}
                       {showServerNumberUI && (
                           <>
-                              <span className={`text-3xl md:text-5xl font-light mt-8 ${textSub}`}>-</span>
-                              <div className="flex flex-col items-center">
-                                  <span className={`text-xs font-semibold uppercase tracking-widest mb-2 ${textSub}`}>{getT('server')}</span>
+                              <span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span>
+                              <div className="flex flex-col items-center relative">
+                                  <span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest ${textSub}`}>{getT('server')}</span>
                                   <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${winner ? textMain : 'text-amber-500'}`}>{serverNumber}</span>
                               </div>
                           </>
@@ -1883,56 +1888,48 @@
 
               {/* --- IMAGE EXPORT RENDER CARD (HIDDEN) --- */}
               {matchToExport && (
-                  <div id="match-export-card" className={`fixed top-0 left-[-9999px] w-[1080px] h-[1080px] flex flex-col p-16 ${isDark ? 'bg-[#1c1917]' : 'bg-[#fafaf9]'}`} style={{fontFamily: "'Noto Sans', sans-serif"}}>
+                  <div id="match-export-card" className={`fixed top-0 left-[-9999px] w-[1080px] h-[1080px] p-16 ${isDark ? 'bg-[#1c1917]' : 'bg-[#fafaf9]'}`} style={{fontFamily: "'Noto Sans', sans-serif"}}>
                       {/* Background Design */}
                       <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.15)_0,transparent_60%)]"></div>
                       <div className="absolute inset-0 z-0 bg-[linear-gradient(rgba(120,113,108,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(120,113,108,0.1)_1px,transparent_1px)]" style={{backgroundSize: '40px 40px'}}></div>
 
-                      <div className="relative z-10 flex flex-col h-full justify-between items-center text-center">
+                      <div className="relative z-10 w-full h-full">
                           {/* Header */}
-                          <div className="mt-8 w-full flex flex-col items-center">
+                          <div className="absolute top-8 w-full flex flex-col items-center text-center">
                               <Trophy size={80} className="text-emerald-500 mb-6" />
                               <h2 className={`text-5xl font-black tracking-widest uppercase ${isDark ? 'text-stone-200' : 'text-stone-800'}`}>{matchToExport.title}</h2>
                               <p className="text-3xl font-medium mt-4 text-stone-500">{matchToExport.date}</p>
                           </div>
 
-                          {/* Scores - Uses robust Flexbox for safe html2canvas rendering */}
-                          <div className="flex items-start justify-between w-full px-8 mt-12 mb-auto">
-                              <div className="flex flex-col items-center justify-start w-[40%]">
-                                  <div className="h-32 flex items-center justify-center w-full px-2 overflow-hidden mb-8">
-                                      <span className="text-4xl font-bold uppercase tracking-widest text-stone-500 text-center leading-snug">{matchToExport.t1Name}</span>
-                                  </div>
-                                  <span className={`text-[14rem] font-black leading-none mb-16 ${matchToExport.winner === 1 ? 'text-emerald-500' : isDark ? 'text-stone-200' : 'text-stone-800'}`}>{matchToExport.t1Score}</span>
-                                  <div className="h-24">
-                                      {matchToExport.winner === 1 && <span className="px-10 py-4 bg-emerald-500/20 text-emerald-500 border-4 border-emerald-500 rounded-full text-3xl font-bold uppercase tracking-widest inline-block">Winner</span>}
-                                  </div>
-                              </div>
-
-                              <div className="flex flex-col items-center justify-start w-[20%] pt-24">
-                                  <span className="text-[10rem] font-light text-stone-300 dark:text-stone-700 leading-none">-</span>
-                              </div>
-
-                              <div className="flex flex-col items-center justify-start w-[40%]">
-                                  <div className="h-32 flex items-center justify-center w-full px-2 overflow-hidden mb-8">
-                                      <span className="text-4xl font-bold uppercase tracking-widest text-stone-500 text-center leading-snug">{matchToExport.t2Name}</span>
-                                  </div>
-                                  <span className={`text-[14rem] font-black leading-none mb-16 ${matchToExport.winner === 2 ? 'text-rose-500' : isDark ? 'text-stone-200' : 'text-stone-800'}`}>{matchToExport.t2Score}</span>
-                                  <div className="h-24">
-                                      {matchToExport.winner === 2 && <span className="px-10 py-4 bg-rose-500/20 text-rose-500 border-4 border-rose-500 rounded-full text-3xl font-bold uppercase tracking-widest inline-block">Winner</span>}
-                                  </div>
-                              </div>
+                          {/* Scores - Absolute Positioned for html2canvas stability */}
+                          <div className="absolute top-[400px] w-full flex items-center justify-center">
+                              <span className="text-[12rem] font-light text-stone-300 dark:text-stone-700 leading-none">-</span>
                           </div>
 
-                          {/* Footer with URL */}
-                          <div className="mb-4 flex flex-col items-center w-full">
-                              <div className="flex items-center gap-8 mb-10 text-3xl font-medium text-stone-500 bg-stone-900/5 dark:bg-white/5 px-10 py-4 rounded-3xl">
+                          {/* Team 1 - Left */}
+                          <div className="absolute top-[350px] left-0 w-[450px] flex flex-col items-center text-center">
+                              <span className="text-4xl font-bold uppercase tracking-widest text-stone-500 w-full px-4 mb-6 leading-snug">{matchToExport.t1Name}</span>
+                              <span className={`text-[15rem] font-black leading-none mb-6 ${matchToExport.winner === 1 ? 'text-emerald-500' : isDark ? 'text-stone-200' : 'text-stone-800'}`}>{matchToExport.t1Score}</span>
+                              {matchToExport.winner === 1 && <span className="px-10 py-4 bg-emerald-500/20 text-emerald-500 border-4 border-emerald-500 rounded-full text-3xl font-bold uppercase tracking-widest">Winner</span>}
+                          </div>
+
+                          {/* Team 2 - Right */}
+                          <div className="absolute top-[350px] right-0 w-[450px] flex flex-col items-center text-center">
+                              <span className="text-4xl font-bold uppercase tracking-widest text-stone-500 w-full px-4 mb-6 leading-snug">{matchToExport.t2Name}</span>
+                              <span className={`text-[15rem] font-black leading-none mb-6 ${matchToExport.winner === 2 ? 'text-rose-500' : isDark ? 'text-stone-200' : 'text-stone-800'}`}>{matchToExport.t2Score}</span>
+                              {matchToExport.winner === 2 && <span className="px-10 py-4 bg-rose-500/20 text-rose-500 border-4 border-rose-500 rounded-full text-3xl font-bold uppercase tracking-widest">Winner</span>}
+                          </div>
+
+                          {/* Footer */}
+                          <div className="absolute bottom-8 w-full flex flex-col items-center text-center">
+                              <div className="flex items-center justify-center gap-8 mb-10 text-3xl font-medium text-stone-500 bg-stone-900/5 dark:bg-white/5 px-10 py-4 rounded-3xl">
                                   <span>{matchToExport.mode === 'single' ? getT('singles') : getT('doubles')}</span>
                                   <span>•</span>
                                   <span>{matchToExport.rules === 'standard' ? getT('stdTitle') : matchToExport.rules === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</span>
                                   <span>•</span>
                                   <span>{formatTime(matchToExport.elapsedTime || 0)}</span>
                               </div>
-                              <div className={`px-10 py-5 rounded-full border-4 flex items-center gap-6 mb-8 ${isDark ? 'border-stone-800 bg-stone-900' : 'border-stone-200 bg-white shadow-xl'}`}>
+                              <div className={`px-10 py-5 rounded-full border-4 inline-flex items-center gap-6 mb-8 ${isDark ? 'border-stone-800 bg-stone-900' : 'border-stone-200 bg-white shadow-xl'}`}>
                                   <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg"><div className="w-6 h-6 bg-white rounded-full"></div></div>
                                   <span className={`text-3xl font-bold tracking-widest uppercase ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>Pickleball Point Counter</span>
                               </div>
