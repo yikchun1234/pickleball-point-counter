@@ -1039,16 +1039,39 @@
           const doublesCount = savedMatches.filter(m => m.mode === 'double').length;
           
           // --- COURT POSITIONING LOGIC ---
-          const isT1Even = team1Score % 2 === 0;
-          const isT2Even = team2Score % 2 === 0;
+          let ptsWonThisTurn = 0;
+          for (let i = history.length - 1; i >= 0; i--) {
+              if (history[i].type === 'SIDEOUT') break;
+              if (history[i].type === `T${servingTeam}_POINT`) {
+                  ptsWonThisTurn++;
+              }
+          }
+
           let courtServerPos = '';
           let courtReceiverPos = '';
-          if (servingTeam === 1) {
-              courtServerPos = isT1Even ? 'bottom-right' : 'bottom-left';
-              courtReceiverPos = isT1Even ? 'top-left' : 'top-right';
+
+          if (gameMode === 'single') {
+              const score = servingTeam === 1 ? team1Score : team2Score;
+              courtServerPos = score % 2 === 0 ? 'Right' : 'Left';
           } else {
-              courtServerPos = isT2Even ? 'top-left' : 'top-right'; 
-              courtReceiverPos = isT2Even ? 'bottom-right' : 'bottom-left';
+              const isFirstTurnOfMatch = history.filter(h => h.type === 'SIDEOUT').length === 0;
+              if (isFirstTurnOfMatch) {
+                  courtServerPos = ptsWonThisTurn % 2 === 0 ? 'Right' : 'Left';
+              } else {
+                  if (serverNumber === 1) {
+                      courtServerPos = ptsWonThisTurn % 2 === 0 ? 'Right' : 'Left';
+                  } else {
+                      courtServerPos = ptsWonThisTurn % 2 === 0 ? 'Left' : 'Right';
+                  }
+              }
+          }
+
+          if (servingTeam === 1) {
+              courtServerPos = courtServerPos === 'Right' ? 'bottom-right' : 'bottom-left';
+              courtReceiverPos = courtServerPos === 'bottom-right' ? 'top-left' : 'top-right'; 
+          } else {
+              courtServerPos = courtServerPos === 'Right' ? 'top-left' : 'top-right';
+              courtReceiverPos = courtServerPos === 'top-left' ? 'bottom-right' : 'bottom-left'; 
           }
 
           const renderTimeline = (timelineData, useScrollRef = false) => (
@@ -1537,7 +1560,7 @@
                   </div>
 
                   <main className="flex-1 flex flex-col justify-center relative mt-2">
-                    <div className={`flex justify-center items-start gap-6 md:gap-16 mt-4 relative z-10`}>
+                    <div className={`flex justify-center items-center gap-6 md:gap-16 ${isSuddenDeath && !winner ? 'mb-4' : 'mb-6'} mt-4 relative z-10`}>
                       
                       {/* TEAM 1 SCORE & TIMEOUTS */}
                       <div className="flex flex-col items-center">
@@ -1551,7 +1574,7 @@
                         )}
                       </div>
                       
-                      <span className={`text-3xl md:text-5xl font-light mt-8 ${textSub}`}>-</span>
+                      <span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span>
                       
                       {/* TEAM 2 SCORE & TIMEOUTS */}
                       <div className="flex flex-col items-center">
@@ -1565,39 +1588,48 @@
                         )}
                       </div>
                       
-                      {showServerNumberUI && <><span className={`text-3xl md:text-5xl font-light mt-8 ${textSub}`}>-</span><div className="flex flex-col items-center"><span className={`text-xs font-semibold uppercase tracking-widest mb-2 ${textSub}`}>{getT('server')}</span><span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${winner ? textMain : 'text-amber-500'}`}>{serverNumber}</span></div></>}
+                      {showServerNumberUI && <><span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span><div className="flex flex-col items-center"><span className={`text-xs font-semibold uppercase tracking-widest mb-2 ${textSub}`}>{getT('server')}</span><span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${winner ? textMain : 'text-amber-500'}`}>{serverNumber}</span></div></>}
                     </div>
 
                     {/* MINI COURT BELOW SCORES */}
-                    <div className={`flex justify-center w-full mt-4 ${isSuddenDeath && !winner ? 'mb-4' : 'mb-6'} relative z-10`}>
+                    <div className={`flex justify-center w-full ${isSuddenDeath && !winner ? 'mb-4' : 'mb-8'} relative z-10 animate-screen-enter`}>
                         <div className="flex flex-col items-center justify-center">
-                            <div className="w-16 h-28 md:w-20 md:h-32 bg-emerald-600 rounded-[3px] border-[3px] border-white/90 shadow-md relative flex flex-col overflow-hidden pointer-events-none">
+                            <div className="w-20 h-32 md:w-24 md:h-40 bg-emerald-600 rounded-[4px] border-[3px] border-white/90 shadow-md relative flex flex-col overflow-hidden pointer-events-none">
+                                
+                                <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+                                    {courtServerPos === 'bottom-right' || courtServerPos === 'top-left' ? (
+                                        <line x1="75%" y1="85%" x2="25%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" />
+                                    ) : (
+                                        <line x1="25%" y1="85%" x2="75%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" />
+                                    )}
+                                </svg>
+
                                 {/* T2 Backcourt */}
-                                <div className="flex-1 relative border-b border-white/50">
+                                <div className="flex-1 relative border-b border-white/50 z-20">
                                     <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
                                     <div className="absolute top-1.5 left-0 w-1/2 flex justify-center">
-                                        {courtServerPos === 'top-left' && <div className="w-4 h-4 md:w-5 md:h-5 bg-amber-400 rounded-full shadow-md flex items-center justify-center text-[8px] md:text-[10px] font-bold text-amber-900 leading-none pt-[1px]">{serverLabel}</div>}
-                                        {courtReceiverPos === 'top-left' && <div className="w-4 h-4 md:w-5 md:h-5 bg-white rounded-full shadow-md flex items-center justify-center text-[8px] md:text-[10px] font-bold text-emerald-700 leading-none pt-[1px]">R</div>}
+                                        {courtServerPos === 'top-left' && <div className="w-5 h-5 md:w-6 md:h-6 bg-amber-400 rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-amber-900 leading-none pt-[1px]">{serverLabel}</div>}
+                                        {courtReceiverPos === 'top-left' && <div className="w-5 h-5 md:w-6 md:h-6 bg-white rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-emerald-700 leading-none pt-[1px]">R</div>}
                                     </div>
                                     <div className="absolute top-1.5 right-0 w-1/2 flex justify-center">
-                                        {courtServerPos === 'top-right' && <div className="w-4 h-4 md:w-5 md:h-5 bg-amber-400 rounded-full shadow-md flex items-center justify-center text-[8px] md:text-[10px] font-bold text-amber-900 leading-none pt-[1px]">{serverLabel}</div>}
-                                        {courtReceiverPos === 'top-right' && <div className="w-4 h-4 md:w-5 md:h-5 bg-white rounded-full shadow-md flex items-center justify-center text-[8px] md:text-[10px] font-bold text-emerald-700 leading-none pt-[1px]">R</div>}
+                                        {courtServerPos === 'top-right' && <div className="w-5 h-5 md:w-6 md:h-6 bg-amber-400 rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-amber-900 leading-none pt-[1px]">{serverLabel}</div>}
+                                        {courtReceiverPos === 'top-right' && <div className="w-5 h-5 md:w-6 md:h-6 bg-white rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-emerald-700 leading-none pt-[1px]">R</div>}
                                     </div>
                                 </div>
                                 {/* T2 Kitchen */}
-                                <div className="h-4 md:h-5 border-b-2 border-white/80 bg-emerald-500"></div>
+                                <div className="h-4 md:h-6 border-b-2 border-white/80 bg-emerald-500 z-20"></div>
                                 {/* T1 Kitchen */}
-                                <div className="h-4 md:h-5 border-b border-white/50 bg-emerald-500"></div>
+                                <div className="h-4 md:h-6 border-b border-white/50 bg-emerald-500 z-20"></div>
                                 {/* T1 Backcourt */}
-                                <div className="flex-1 relative">
+                                <div className="flex-1 relative z-20">
                                     <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
                                     <div className="absolute bottom-1.5 left-0 w-1/2 flex justify-center">
-                                        {courtServerPos === 'bottom-left' && <div className="w-4 h-4 md:w-5 md:h-5 bg-amber-400 rounded-full shadow-md flex items-center justify-center text-[8px] md:text-[10px] font-bold text-amber-900 leading-none pt-[1px]">{serverLabel}</div>}
-                                        {courtReceiverPos === 'bottom-left' && <div className="w-4 h-4 md:w-5 md:h-5 bg-white rounded-full shadow-md flex items-center justify-center text-[8px] md:text-[10px] font-bold text-emerald-700 leading-none pt-[1px]">R</div>}
+                                        {courtServerPos === 'bottom-left' && <div className="w-5 h-5 md:w-6 md:h-6 bg-amber-400 rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-amber-900 leading-none pt-[1px]">{serverLabel}</div>}
+                                        {courtReceiverPos === 'bottom-left' && <div className="w-5 h-5 md:w-6 md:h-6 bg-white rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-emerald-700 leading-none pt-[1px]">R</div>}
                                     </div>
                                     <div className="absolute bottom-1.5 right-0 w-1/2 flex justify-center">
-                                        {courtServerPos === 'bottom-right' && <div className="w-4 h-4 md:w-5 md:h-5 bg-amber-400 rounded-full shadow-md flex items-center justify-center text-[8px] md:text-[10px] font-bold text-amber-900 leading-none pt-[1px]">{serverLabel}</div>}
-                                        {courtReceiverPos === 'bottom-right' && <div className="w-4 h-4 md:w-5 md:h-5 bg-white rounded-full shadow-md flex items-center justify-center text-[8px] md:text-[10px] font-bold text-emerald-700 leading-none pt-[1px]">R</div>}
+                                        {courtServerPos === 'bottom-right' && <div className="w-5 h-5 md:w-6 md:h-6 bg-amber-400 rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-amber-900 leading-none pt-[1px]">{serverLabel}</div>}
+                                        {courtReceiverPos === 'bottom-right' && <div className="w-5 h-5 md:w-6 md:h-6 bg-white rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-emerald-700 leading-none pt-[1px]">R</div>}
                                     </div>
                                 </div>
                             </div>
