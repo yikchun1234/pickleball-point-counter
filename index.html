@@ -1902,32 +1902,49 @@
                               <p className="text-3xl font-medium mt-4 text-stone-500">{matchToExport.date}</p>
                           </div>
 
-                          {/* Scores - Natural Flexbox Flow to prevent overlap */}
-                          <div className="flex items-start justify-center w-full px-4 my-auto gap-8">
+                          {/* Scores - Strict Grid + Absolute positioning for flawless html2canvas alignment */}
+                          <div className="grid grid-cols-[1fr_auto_1fr] items-center justify-center w-full px-4 my-auto mt-40 mb-32">
+                              
                               {/* Team 1 - Left */}
-                              <div className="flex flex-col items-center text-center flex-1">
-                                  <div className="flex items-center justify-center min-h-[120px] mb-8">
-                                      <span className="text-4xl font-bold uppercase tracking-widest text-stone-500 leading-snug break-words max-w-[400px]">{matchToExport.t1Name}</span>
+                              <div className="flex flex-col items-center justify-center flex-1 relative">
+                                  <div className="absolute bottom-full mb-10 w-[150%] flex justify-center">
+                                      <span className="text-4xl font-bold uppercase tracking-widest text-stone-500 leading-snug break-words max-w-[450px] text-center">{matchToExport.t1Name}</span>
                                   </div>
-                                  <span className={`text-[16rem] font-black leading-none pb-6 ${matchToExport.winner === 1 ? 'text-emerald-500' : isDark ? 'text-stone-200' : 'text-stone-800'}`}>{matchToExport.t1Score}</span>
-                                  <div className="h-32 flex items-center justify-center mt-6">
-                                      {matchToExport.winner === 1 && <span className="px-10 py-4 bg-emerald-500/20 text-emerald-500 border-4 border-emerald-500 rounded-full text-4xl font-bold uppercase tracking-widest shadow-sm">Winner</span>}
+                                  
+                                  <span className={`text-[16rem] font-black leading-none ${matchToExport.winner === 1 ? 'text-emerald-500' : isDark ? 'text-stone-200' : 'text-stone-800'}`}>
+                                      {matchToExport.t1Score}
+                                  </span>
+                                  
+                                  <div className="absolute top-full mt-12 w-[150%] flex justify-center">
+                                      {matchToExport.winner === 1 && (
+                                          <div className="h-24 px-10 flex items-center justify-center pt-2 border-4 border-emerald-500 bg-emerald-500/20 rounded-full shadow-sm">
+                                              <span className="text-4xl font-bold uppercase tracking-widest text-emerald-500 leading-none">Winner</span>
+                                          </div>
+                                      )}
                                   </div>
                               </div>
 
-                              {/* Hyphen */}
-                              <div className="flex flex-col items-center justify-start pt-32 px-4">
+                              {/* Hyphen - Perfectly centered and shifted up slightly */}
+                              <div className="flex items-center justify-center px-8" style={{ transform: 'translateY(-1.5rem)' }}>
                                   <span className="text-[12rem] font-light text-stone-300 dark:text-stone-700 leading-none">-</span>
                               </div>
 
                               {/* Team 2 - Right */}
-                              <div className="flex flex-col items-center text-center flex-1">
-                                  <div className="flex items-center justify-center min-h-[120px] mb-8">
-                                      <span className="text-4xl font-bold uppercase tracking-widest text-stone-500 leading-snug break-words max-w-[400px]">{matchToExport.t2Name}</span>
+                              <div className="flex flex-col items-center justify-center flex-1 relative">
+                                  <div className="absolute bottom-full mb-10 w-[150%] flex justify-center">
+                                      <span className="text-4xl font-bold uppercase tracking-widest text-stone-500 leading-snug break-words max-w-[450px] text-center">{matchToExport.t2Name}</span>
                                   </div>
-                                  <span className={`text-[16rem] font-black leading-none pb-6 ${matchToExport.winner === 2 ? 'text-rose-500' : isDark ? 'text-stone-200' : 'text-stone-800'}`}>{matchToExport.t2Score}</span>
-                                  <div className="h-32 flex items-center justify-center mt-6">
-                                      {matchToExport.winner === 2 && <span className="px-10 py-4 bg-rose-500/20 text-rose-500 border-4 border-rose-500 rounded-full text-4xl font-bold uppercase tracking-widest shadow-sm">Winner</span>}
+                                  
+                                  <span className={`text-[16rem] font-black leading-none ${matchToExport.winner === 2 ? 'text-rose-500' : isDark ? 'text-stone-200' : 'text-stone-800'}`}>
+                                      {matchToExport.t2Score}
+                                  </span>
+                                  
+                                  <div className="absolute top-full mt-12 w-[150%] flex justify-center">
+                                      {matchToExport.winner === 2 && (
+                                          <div className="h-24 px-10 flex items-center justify-center pt-2 border-4 border-rose-500 bg-rose-500/20 rounded-full shadow-sm">
+                                              <span className="text-4xl font-bold uppercase tracking-widest text-rose-500 leading-none">Winner</span>
+                                          </div>
+                                      )}
                                   </div>
                               </div>
                           </div>
