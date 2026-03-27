@@ -1560,80 +1560,74 @@
                   </div>
 
                   <main className="flex-1 flex flex-col justify-center relative mt-2">
-                    <div className={`flex justify-center items-center gap-6 md:gap-16 ${isSuddenDeath && !winner ? 'mb-4' : 'mb-6'} mt-4 relative z-10`}>
+                    <div className={`flex justify-center items-center gap-4 md:gap-10 ${isSuddenDeath && !winner ? 'mb-8' : 'mb-14 md:mb-16'} mt-4 relative z-10`}>
                       
                       {/* TEAM 1 SCORE & TIMEOUTS */}
-                      <div className="flex flex-col items-center">
+                      <div className="flex flex-col items-center relative">
                         <span className={`text-xs font-semibold uppercase tracking-widest mb-2 truncate max-w-[100px] ${textSub}`}>{t1Name}</span>
                         <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${servingTeam === 1 && !winner ? accentGreen : textMain}`}>{team1Score}</span>
                         {enableTimeouts && !winner && (
-                          <div className="flex gap-2 mt-3 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t1Timeouts > 0 && setShowTimeoutConfirm(1)} title={getT('callTimeout')}>
+                          <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 flex gap-2 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t1Timeouts > 0 && setShowTimeoutConfirm(1)} title={getT('callTimeout')}>
                             <div className={`w-2.5 h-2.5 rounded-full transition-colors ${t1Timeouts >= 1 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>
                             <div className={`w-2.5 h-2.5 rounded-full transition-colors ${t1Timeouts >= 2 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>
                           </div>
                         )}
                       </div>
                       
-                      <span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span>
+                      {/* MINI COURT INLINE (Replaces the hyphen) */}
+                      <div className="flex flex-col items-center justify-center mx-2">
+                          <div className="w-16 h-28 md:w-20 md:h-32 bg-emerald-600 rounded-[3px] border-[3px] border-white/90 shadow-md relative flex flex-col overflow-hidden pointer-events-none">
+                              
+                              <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+                                  {courtServerPos === 'bottom-right' || courtServerPos === 'top-left' ? (
+                                      <line x1="75%" y1="85%" x2="25%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" />
+                                  ) : (
+                                      <line x1="25%" y1="85%" x2="75%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" />
+                                  )}
+                              </svg>
+
+                              {/* T2 Backcourt */}
+                              <div className="flex-1 relative border-b border-white/50 z-20">
+                                  <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
+                                  <div className="absolute top-1.5 left-0 w-1/2 flex justify-center">
+                                      {courtServerPos === 'top-left' && <div className="w-5 h-5 md:w-6 md:h-6 bg-amber-400 rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-amber-900 leading-none pt-[1px]">{serverLabel}</div>}
+                                      {courtReceiverPos === 'top-left' && <div className="w-5 h-5 md:w-6 md:h-6 bg-white rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-emerald-700 leading-none pt-[1px]">R</div>}
+                                  </div>
+                                  <div className="absolute top-1.5 right-0 w-1/2 flex justify-center">
+                                      {courtServerPos === 'top-right' && <div className="w-5 h-5 md:w-6 md:h-6 bg-amber-400 rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-amber-900 leading-none pt-[1px]">{serverLabel}</div>}
+                                      {courtReceiverPos === 'top-right' && <div className="w-5 h-5 md:w-6 md:h-6 bg-white rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-emerald-700 leading-none pt-[1px]">R</div>}
+                                  </div>
+                              </div>
+                              {/* T2 Kitchen */}
+                              <div className="h-4 md:h-6 border-b-2 border-white/80 bg-emerald-500 z-20"></div>
+                              {/* T1 Kitchen */}
+                              <div className="h-4 md:h-6 border-b border-white/50 bg-emerald-500 z-20"></div>
+                              {/* T1 Backcourt */}
+                              <div className="flex-1 relative z-20">
+                                  <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
+                                  <div className="absolute bottom-1.5 left-0 w-1/2 flex justify-center">
+                                      {courtServerPos === 'bottom-left' && <div className="w-5 h-5 md:w-6 md:h-6 bg-amber-400 rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-amber-900 leading-none pt-[1px]">{serverLabel}</div>}
+                                      {courtReceiverPos === 'bottom-left' && <div className="w-5 h-5 md:w-6 md:h-6 bg-white rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-emerald-700 leading-none pt-[1px]">R</div>}
+                                  </div>
+                                  <div className="absolute bottom-1.5 right-0 w-1/2 flex justify-center">
+                                      {courtServerPos === 'bottom-right' && <div className="w-5 h-5 md:w-6 md:h-6 bg-amber-400 rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-amber-900 leading-none pt-[1px]">{serverLabel}</div>}
+                                      {courtReceiverPos === 'bottom-right' && <div className="w-5 h-5 md:w-6 md:h-6 bg-white rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-emerald-700 leading-none pt-[1px]">R</div>}
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
                       
                       {/* TEAM 2 SCORE & TIMEOUTS */}
-                      <div className="flex flex-col items-center">
+                      <div className="flex flex-col items-center relative">
                         <span className={`text-xs font-semibold uppercase tracking-widest mb-2 truncate max-w-[100px] ${textSub}`}>{t2Name}</span>
                         <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${servingTeam === 2 && !winner ? accentRed : textMain}`}>{team2Score}</span>
                         {enableTimeouts && !winner && (
-                          <div className="flex gap-2 mt-3 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t2Timeouts > 0 && setShowTimeoutConfirm(2)} title={getT('callTimeout')}>
+                          <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 flex gap-2 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t2Timeouts > 0 && setShowTimeoutConfirm(2)} title={getT('callTimeout')}>
                             <div className={`w-2.5 h-2.5 rounded-full transition-colors ${t2Timeouts >= 1 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>
                             <div className={`w-2.5 h-2.5 rounded-full transition-colors ${t2Timeouts >= 2 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>
                           </div>
                         )}
                       </div>
-                      
-                      {showServerNumberUI && <><span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span><div className="flex flex-col items-center"><span className={`text-xs font-semibold uppercase tracking-widest mb-2 ${textSub}`}>{getT('server')}</span><span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${winner ? textMain : 'text-amber-500'}`}>{serverNumber}</span></div></>}
-                    </div>
-
-                    {/* MINI COURT BELOW SCORES */}
-                    <div className={`flex justify-center w-full ${isSuddenDeath && !winner ? 'mb-4' : 'mb-8'} relative z-10 animate-screen-enter`}>
-                        <div className="flex flex-col items-center justify-center">
-                            <div className="w-20 h-32 md:w-24 md:h-40 bg-emerald-600 rounded-[4px] border-[3px] border-white/90 shadow-md relative flex flex-col overflow-hidden pointer-events-none">
-                                
-                                <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
-                                    {courtServerPos === 'bottom-right' || courtServerPos === 'top-left' ? (
-                                        <line x1="75%" y1="85%" x2="25%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" />
-                                    ) : (
-                                        <line x1="25%" y1="85%" x2="75%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" />
-                                    )}
-                                </svg>
-
-                                {/* T2 Backcourt */}
-                                <div className="flex-1 relative border-b border-white/50 z-20">
-                                    <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
-                                    <div className="absolute top-1.5 left-0 w-1/2 flex justify-center">
-                                        {courtServerPos === 'top-left' && <div className="w-5 h-5 md:w-6 md:h-6 bg-amber-400 rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-amber-900 leading-none pt-[1px]">{serverLabel}</div>}
-                                        {courtReceiverPos === 'top-left' && <div className="w-5 h-5 md:w-6 md:h-6 bg-white rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-emerald-700 leading-none pt-[1px]">R</div>}
-                                    </div>
-                                    <div className="absolute top-1.5 right-0 w-1/2 flex justify-center">
-                                        {courtServerPos === 'top-right' && <div className="w-5 h-5 md:w-6 md:h-6 bg-amber-400 rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-amber-900 leading-none pt-[1px]">{serverLabel}</div>}
-                                        {courtReceiverPos === 'top-right' && <div className="w-5 h-5 md:w-6 md:h-6 bg-white rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-emerald-700 leading-none pt-[1px]">R</div>}
-                                    </div>
-                                </div>
-                                {/* T2 Kitchen */}
-                                <div className="h-4 md:h-6 border-b-2 border-white/80 bg-emerald-500 z-20"></div>
-                                {/* T1 Kitchen */}
-                                <div className="h-4 md:h-6 border-b border-white/50 bg-emerald-500 z-20"></div>
-                                {/* T1 Backcourt */}
-                                <div className="flex-1 relative z-20">
-                                    <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
-                                    <div className="absolute bottom-1.5 left-0 w-1/2 flex justify-center">
-                                        {courtServerPos === 'bottom-left' && <div className="w-5 h-5 md:w-6 md:h-6 bg-amber-400 rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-amber-900 leading-none pt-[1px]">{serverLabel}</div>}
-                                        {courtReceiverPos === 'bottom-left' && <div className="w-5 h-5 md:w-6 md:h-6 bg-white rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-emerald-700 leading-none pt-[1px]">R</div>}
-                                    </div>
-                                    <div className="absolute bottom-1.5 right-0 w-1/2 flex justify-center">
-                                        {courtServerPos === 'bottom-right' && <div className="w-5 h-5 md:w-6 md:h-6 bg-amber-400 rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-amber-900 leading-none pt-[1px]">{serverLabel}</div>}
-                                        {courtReceiverPos === 'bottom-right' && <div className="w-5 h-5 md:w-6 md:h-6 bg-white rounded-full shadow-md flex items-center justify-center text-[9px] md:text-xs font-black text-emerald-700 leading-none pt-[1px]">R</div>}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                     {isSuddenDeath && !winner && (
