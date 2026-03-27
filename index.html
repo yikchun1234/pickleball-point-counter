@@ -839,16 +839,6 @@
             }, 50);
           };
 
-          const shareMatch = async (match) => {
-            const text = `🏓 Pickleball Result: ${match.t1Name} (${match.t1Score}) vs ${match.t2Name} (${match.t2Score}). ${match.title !== getT('untitledMatch') ? `[${match.title}]` : ''} - Tracked with Pickleball Point Counter!`;
-            if (navigator.share) {
-              try { await navigator.share({ title: 'Pickleball Result', text }); } catch(e) {}
-            } else {
-              navigator.clipboard.writeText(text);
-              alert('Result copied to clipboard!');
-            }
-          };
-
           const handleSoundClick = () => {
             toggleSound();
           };
