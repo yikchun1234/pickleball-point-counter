@@ -20,26 +20,38 @@
     <!-- Dynamic PWA Manifest & Icon Generator -->
     <script>
         (function() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 512;
-            const ctx = canvas.getContext('2d');
-            
             const img = new Image();
             img.crossOrigin = "Anonymous"; 
             img.onload = function() {
-                ctx.fillStyle = '#ffffff'; 
-                ctx.fillRect(0, 0, 512, 512);
-                const scale = 0.9;
-                const size = 512 * scale;
-                const offset = (512 - size) / 2;
-                ctx.drawImage(img, offset, offset, size, size);
-                
                 try {
-                    const iconUrl = canvas.toDataURL('image/png');
-                    document.getElementById('favicon').href = iconUrl;
+                    // 1. Canvas for Android (Manifest & Favicon) - More padding (0.65) for Maskable Adaptive Icons
+                    const canvasAndroid = document.createElement('canvas');
+                    canvasAndroid.width = 512; canvasAndroid.height = 512;
+                    const ctxAndroid = canvasAndroid.getContext('2d');
+                    ctxAndroid.fillStyle = '#ffffff'; 
+                    ctxAndroid.fillRect(0, 0, 512, 512);
+                    const scaleAndroid = 0.65; 
+                    const sizeAndroid = 512 * scaleAndroid;
+                    const offsetAndroid = (512 - sizeAndroid) / 2;
+                    ctxAndroid.drawImage(img, offsetAndroid, offsetAndroid, sizeAndroid, sizeAndroid);
+                    const androidIconUrl = canvasAndroid.toDataURL('image/png');
+
+                    // 2. Canvas for iOS - Keep the original 0.9 scale that looks perfect
+                    const canvasIOS = document.createElement('canvas');
+                    canvasIOS.width = 512; canvasIOS.height = 512;
+                    const ctxIOS = canvasIOS.getContext('2d');
+                    ctxIOS.fillStyle = '#ffffff'; 
+                    ctxIOS.fillRect(0, 0, 512, 512);
+                    const scaleIOS = 0.9;
+                    const sizeIOS = 512 * scaleIOS;
+                    const offsetIOS = (512 - sizeIOS) / 2;
+                    ctxIOS.drawImage(img, offsetIOS, offsetIOS, sizeIOS, sizeIOS);
+                    const iosIconUrl = canvasIOS.toDataURL('image/png');
+                    
+                    // Apply the respective generated icons
+                    document.getElementById('favicon').href = androidIconUrl;
                     document.getElementById('favicon').type = 'image/png';
-                    document.getElementById('apple-icon').href = iconUrl;
+                    document.getElementById('apple-icon').href = iosIconUrl;
                     
                     const manifest = {
                         name: "Pickleball Point Counter",
@@ -48,7 +60,7 @@
                         display: "standalone",
                         background_color: "#fafaf9",
                         theme_color: "#10b981",
-                        icons: [{ src: iconUrl, sizes: "512x512", type: "image/png", purpose: "any maskable" }]
+                        icons: [{ src: androidIconUrl, sizes: "512x512", type: "image/png", purpose: "any maskable" }]
                     };
                     document.getElementById('manifest-link').href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
                 } catch (e) {
