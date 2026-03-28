@@ -1796,13 +1796,13 @@
                                     <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
                                     <div className="absolute top-1 left-0 w-1/2 flex justify-center">
                                         {(gameMode === 'double' || courtServerPos === 'top-left' || courtReceiverPos === 'top-left') && renderPlayerBadge(
-                                            currentT2Right, // Viewer's top-left is T2's right side
+                                            gameMode === 'single' ? t2PLeft : currentT2Right, // Viewer's top-left is T2's right side
                                             courtServerPos === 'top-left' ? 'server' : courtReceiverPos === 'top-left' ? 'receiver' : 'partner'
                                         )}
                                     </div>
                                     <div className="absolute top-1 right-0 w-1/2 flex justify-center">
                                         {(gameMode === 'double' || courtServerPos === 'top-right' || courtReceiverPos === 'top-right') && renderPlayerBadge(
-                                            currentT2Left, // Viewer's top-right is T2's left side
+                                            gameMode === 'single' ? t2PLeft : currentT2Left, // Viewer's top-right is T2's left side
                                             courtServerPos === 'top-right' ? 'server' : courtReceiverPos === 'top-right' ? 'receiver' : 'partner'
                                         )}
                                     </div>
@@ -1816,13 +1816,13 @@
                                     <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
                                     <div className="absolute bottom-1 left-0 w-1/2 flex justify-center">
                                         {(gameMode === 'double' || courtServerPos === 'bottom-left' || courtReceiverPos === 'bottom-left') && renderPlayerBadge(
-                                            currentT1Left, 
+                                            gameMode === 'single' ? t1PLeft : currentT1Left, 
                                             courtServerPos === 'bottom-left' ? 'server' : courtReceiverPos === 'bottom-left' ? 'receiver' : 'partner'
                                         )}
                                     </div>
                                     <div className="absolute bottom-1 right-0 w-1/2 flex justify-center">
                                         {(gameMode === 'double' || courtServerPos === 'bottom-right' || courtReceiverPos === 'bottom-right') && renderPlayerBadge(
-                                            currentT1Right, 
+                                            gameMode === 'single' ? t1PLeft : currentT1Right, 
                                             courtServerPos === 'bottom-right' ? 'server' : courtReceiverPos === 'bottom-right' ? 'receiver' : 'partner'
                                         )}
                                     </div>
@@ -1842,12 +1842,12 @@
                     <div className="mt-auto relative z-10">
                       <div className="grid grid-cols-2 gap-4 h-40 md:h-48">
                         <button onClick={() => handleRallyWin(1)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${servingTeam === 1 && !winner ? bgAccentGreen : `muji-card ${bgCard} ${winner ? 'opacity-50' : ''}`}`}>
-                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${servingTeam === 1 && !winner ? accentGreen : textMain}`}>{gameMode === 'single' ? t1PLeft : getT('team1')}</span>
+                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${servingTeam === 1 && !winner ? accentGreen : textMain}`}>{t1Name}</span>
                           <span className={`text-sm font-semibold ${servingTeam === 1 && !winner ? accentGreen : textSub}`}>{getT('wonRally')}</span>
                           {servingTeam === 1 && !winner && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentGreen}`}><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>{getT('serving')}</div>}
                         </button>
                         <button onClick={() => handleRallyWin(2)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${servingTeam === 2 && !winner ? bgAccentRed : `muji-card ${bgCard} ${winner ? 'opacity-50' : ''}`}`}>
-                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${servingTeam === 2 && !winner ? accentRed : textMain}`}>{gameMode === 'single' ? t2PLeft : getT('team2')}</span>
+                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${servingTeam === 2 && !winner ? accentRed : textMain}`}>{t2Name}</span>
                           <span className={`text-sm font-semibold ${servingTeam === 2 && !winner ? accentRed : textSub}`}>{getT('wonRally')}</span>
                           {servingTeam === 2 && !winner && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentRed}`}><div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></div>{getT('serving')}</div>}
                         </button>
