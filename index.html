@@ -212,7 +212,6 @@
         const Globe = (props) => <IconWrapper iconObj={lucide.icons.Globe} {...props} />;
         const Download = (props) => <IconWrapper iconObj={lucide.icons.Download} {...props} />;
         const Github = (props) => <IconWrapper iconObj={lucide.icons.Github} {...props} />;
-        const ExternalLink = (props) => <IconWrapper iconObj={lucide.icons.ExternalLink} {...props} />;
         const HistoryIcon = (props) => <IconWrapper iconObj={lucide.icons.History} {...props} />;
         const Trash2 = (props) => <IconWrapper iconObj={lucide.icons.Trash2} {...props} />;
         const X = (props) => <IconWrapper iconObj={lucide.icons.X} {...props} />;
@@ -966,7 +965,6 @@
           const [savedMatches, setSavedMatches] = useState([]);
           
           const [isExporting, setIsExporting] = useState(false);
-          const [matchToExport, setMatchToExport] = useState(null);
           
           const timelineScrollRef = useRef(null);
           const wakeLockRef = useRef(null);
@@ -1101,10 +1099,8 @@
 
           // =========================================================================
           // METHOD #1: NATIVE CANVAS IMAGE GENERATION
-          // This removes HTML2Canvas entirely and precisely draws every pixel via JS
           // =========================================================================
           const shareMatch = async (match) => {
-            setMatchToExport(match);
             setIsExporting(true);
 
             setTimeout(async () => {
@@ -1153,12 +1149,17 @@
                                 DOMURL.revokeObjectURL(url);
                                 resolve();
                             };
+                            img.onerror = (e) => {
+                                console.error("SVG Render Error", e);
+                                DOMURL.revokeObjectURL(url);
+                                resolve();
+                            };
                             img.src = url;
                         });
                     };
 
                     // --- 2. Top Trophy Icon ---
-                    const trophyColor = encodeURIComponent('#10b981'); // URL encoded Hex
+                    const trophyColor = '#10b981'; // Unencoded for Blob usage
                     const trophySvg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="${trophyColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>`;
                     await drawSvg(trophySvg, width/2 - 50, 100, 100, 100);
 
@@ -1219,7 +1220,7 @@
                     // --- 6. Winner Badges ---
                     const drawWinnerBadge = async (color, x, y) => {
                         const hexColor = color === 'green' ? accentGreen : accentRed;
-                        const iconColor = encodeURIComponent(color === 'green' ? '#d1fae5' : '#ffe4e6');
+                        const iconColor = color === 'green' ? '#d1fae5' : '#ffe4e6'; // Unencoded for Blob usage
                         const badgeSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>`;
                         
                         const badgeW = 280;
@@ -1234,14 +1235,14 @@
                         ctx.fill();
 
                         // Icon
-                        await drawSvg(badgeSvg, badgeX + 35, badgeY + 22, 36, 36);
+                        await drawSvg(badgeSvg, badgeX + 40, badgeY + 22, 36, 36);
 
                         // Text
                         ctx.fillStyle = '#ffffff';
-                        ctx.font = '900 28px "Noto Sans", sans-serif';
+                        ctx.font = '700 28px "Noto Sans", sans-serif'; // Adjusted to Bold (700) from Black (900)
                         ctx.letterSpacing = '4px';
                         ctx.textBaseline = 'middle';
-                        ctx.fillText("WINNER", badgeX + 160, badgeY + badgeH/2 + 2);
+                        ctx.fillText("WINNER", badgeX + 165, badgeY + badgeH/2 + 2);
                     };
 
                     if (match.winner === 1) await drawWinnerBadge('green', width/2 - 250, 1050);
@@ -1289,13 +1290,11 @@
                             link.click();
                         }
                         setIsExporting(false);
-                        setMatchToExport(null);
                     }, 'image/png');
 
                 } catch (e) {
                     console.error(e);
                     setIsExporting(false);
-                    setMatchToExport(null);
                     alert("Image generation failed.");
                 }
             }, 50); // tiny delay just to render loading spinner
@@ -2327,12 +2326,12 @@
                     <div className="mt-auto relative z-10">
                       <div className="grid grid-cols-2 gap-4 h-40 md:h-48">
                         <button onClick={() => handleRallyWin(1)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${servingTeam === 1 && !winner ? bgAccentGreen : `muji-card ${bgCard} ${winner ? 'opacity-50' : ''}`}`}>
-                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${servingTeam === 1 && !winner ? accentGreen : textMain}`}>{gameMode === 'single' ? t1PLeft : getT('team1')}</span>
+                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${servingTeam === 1 && !winner ? accentGreen : textMain}`}>{t1Name}</span>
                           <span className={`text-sm font-semibold ${servingTeam === 1 && !winner ? accentGreen : textSub}`}>{getT('wonRally')}</span>
                           {servingTeam === 1 && !winner && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentGreen}`}><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>{getT('serving')}</div>}
                         </button>
                         <button onClick={() => handleRallyWin(2)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${servingTeam === 2 && !winner ? bgAccentRed : `muji-card ${bgCard} ${winner ? 'opacity-50' : ''}`}`}>
-                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${servingTeam === 2 && !winner ? accentRed : textMain}`}>{gameMode === 'single' ? t2PLeft : getT('team2')}</span>
+                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${servingTeam === 2 && !winner ? accentRed : textMain}`}>{t2Name}</span>
                           <span className={`text-sm font-semibold ${servingTeam === 2 && !winner ? accentRed : textSub}`}>{getT('wonRally')}</span>
                           {servingTeam === 2 && !winner && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentRed}`}><div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></div>{getT('serving')}</div>}
                         </button>
