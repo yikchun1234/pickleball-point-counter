@@ -232,6 +232,13 @@
         const ChevronDown = (props) => <IconWrapper iconObj={lucide.icons.ChevronDown} {...props} />;
         const ChevronLeft = (props) => <IconWrapper iconObj={lucide.icons.ChevronLeft} {...props} />;
         const Activity = (props) => <IconWrapper iconObj={lucide.icons.Activity} {...props} />;
+        
+        // New Icons for Arcade
+        const Grid = (props) => <IconWrapper iconObj={lucide.icons.Grid} {...props} />;
+        const ArrowUp = (props) => <IconWrapper iconObj={lucide.icons.ArrowUp} {...props} />;
+        const Target = (props) => <IconWrapper iconObj={lucide.icons.Target} {...props} />;
+        const MousePointer2 = (props) => <IconWrapper iconObj={lucide.icons.MousePointer2} {...props} />;
+        const Gamepad2 = (props) => <IconWrapper iconObj={lucide.icons.Gamepad2} {...props} />;
 
         const dict = {
           en: { appTitle: "Pickleball", appSub: "Point Counter", tapToStart: "Tap to start", newMatch: "Pickleball Point Counter", selectFormat: "Select match format & rules", singles: "Singles", doubles: "Doubles", stdTitle: "Standard (11 Pts)", stdDescSingle: "0-0 Rule • Play to 11 • Win by 2", stdDescDouble: "0-0-2 Rule • Play to 11 • Win by 2", fourteenTitle: "14-Point Rule", fourteenDesc: "Rally Scoring • Play to 15 • No serve needed", customFormat: "Custom Rules", customDesc: "Set your own points and win margin", playTo: "Play To", winBy: "Win By", t1Name: "Player 1", t2Name: "Player 2", team1: "Team 1", team2: "Team 2", server: "Server", wonRally: "Won Rally", serving: "Serving", winner: "Wins the Match!", playAgain: "Play Again", undo: "Undo", reset: "Retreat", timeline: "Rally Timeline", awaiting: "Awaiting first serve...", suddenDeath: "Sudden Death", nextPointWins: "Next point wins", install: "Install App", serveToWinOption: "14-14 Serve to Win", serveToWinDesc: "Must be serving to win at 14-14", suddenDeathServeDesc: "Must serve to win", switchEndsOption: "Switch Ends at Half", switchEndsOptionDesc: "Prompt to switch sides at half points", customServeToWin: "Serve to Score", customServeToWinDesc: "Only serving team scores (0-0-2 rule)", matchPoint: "Match Point", cancel: "Cancel", startMatch: "Start Match", t1Label: "T1", t2Label: "T2", installAsApp: "Install as a native app", designBy: "Designed by Amos © 2026", matchTitlePlaceholder: "Match Title (Optional)", matchHistory: "Match History", clearHistory: "Clear History", reviewMatch: "Review Timeline", noHistory: "No matches saved yet.", untitledMatch: "Friendly Match", confirmClear: "Clear all match history?", yesClear: "Yes, Clear All", showResults: "Show Results", installStepsIOS: 'Tap Share icon at the bottom, then "Add to Home Screen".', installStepsAndroid: 'Tap browser menu and select "Install App".', gotIt: 'Got it!', infoTitle: 'About & Disclaimer', infoHowToTitle: 'How to Use', infoHowTo1: '1. Select format (Standard, 14-Point, Custom).', infoHowTo2: '2. Tap a team to score. Use Undo for mistakes.', infoHowTo3: '3. Turn on volume for voice score announcements.', infoHowTo4: '4. Check History for stats, timelines, and sharing.', infoHowTo5: '5. Rename matches or retreat from active games.', infoData: 'All history is saved locally on your device. No cloud storage. Clearing browser data will delete history.', infoUsage: 'Open-source project. Free to use with credit to creator (Amos).', infoFooter: 'Designed with ❤️ for the Pickleball community.', retreatTitle: 'Who retreated?', t1Retreat: 'Team 1 Retreated', t2Retreat: 'Team 2 Retreated', quitMatch: 'Quit Match', quitConfirm: 'Return to menu? This match will not be saved.', yesQuit: 'Yes, Quit', winByRetreat: 'Wins by Retreat!', loading: 'Loading...', switchEnds: "Switch Ends!", switchEndsDesc: "Players should now switch sides of the court.", resumeMatch: "Resume Match", resumeDesc: "You have an unfinished match. Do you want to resume?", stats: "Statistics", totalMatches: "Total Matches", avgDuration: "Avg Duration", share: "Share", edit: "Edit", winRate: "T1 Win Rate", time: "Time", firstServer: "First Server", sideOut: "Side out", secondServer: "Second server", totalPoints: "Total Points", winDist: "Win Distribution", formatStats: "Format Breakdown", enableTimeouts: "Enable Timeouts", timeoutsDesc: "2 timeouts per team per game", callTimeout: "Call Timeout", courtPosTitle: "Court Guide", courtPosDesc: "Server and receiver starting positions", receiver: "Receiver", generatingImage: "Generating Image", t1P1: "T1 L. Player", t1P2: "T1 R. Player", t2P1: "T2 L. Player", t2P2: "T2 R. Player", oddCourt: "(Odd Court)", evenCourt: "(Even Court)" },
@@ -243,7 +250,7 @@
           ja: { appTitle: "ピックルボール", appSub: "カウンター", tapToStart: "タップして開始", newMatch: "新しい試合", selectFormat: "フォーマットを選択", singles: "シングルス", doubles: "ダブルス", stdTitle: "標準 (11点)", stdDescSingle: "11点先取 • 2点差", stdDescDouble: "11点先取 • 2点差", fourteenTitle: "14点ルール", fourteenDesc: "15点先取 • ラリースコア", customFormat: "カスタム", customDesc: "ルールを作成", playTo: "目標スコア", winBy: "勝利の差", t1Name: "プレイヤー 1", t2Name: "プレイヤー 2", team1: "チーム 1", team2: "チーム 2", server: "サーバー", wonRally: "ポイント", serving: "サーブ中", winner: "勝利！", playAgain: "もう一度", undo: "元に戻す", reset: "棄権", timeline: "タイムライン", awaiting: "待機中...", suddenDeath: "サドンデス", nextPointWins: "次のポイントで勝利", install: "アプリをインストール", serveToWinOption: "14-14 サーブで勝利", serveToWinDesc: "サーブ権が必要", suddenDeathServeDesc: "サーブが必要", switchEndsOption: "コート交代の提示", switchEndsOptionDesc: "半分のポイントでコート交代を通知", customServeToWin: "サーブで得点", customServeToWinDesc: "サーブ側のみ得点可能 (0-0-2)", matchPoint: "マッチポイント", cancel: "キャンセル", startMatch: "開始", t1Label: "T1", t2Label: "T2", installAsApp: "アプリをインストール", designBy: "Amos © 2026", matchTitlePlaceholder: "タイトル (任意)", matchHistory: "履歴", clearHistory: "履歴を消去", reviewMatch: "確認", noHistory: "試合がありません", untitledMatch: "フレンドリー", confirmClear: "すべて消去？", yesClear: "はい", showResults: "結果", installStepsIOS: '共有 -> ホーム画面に追加。', installStepsAndroid: 'メニュー -> インストール。', gotIt: '了解！', infoTitle: '情報', infoHowToTitle: '使い方', infoHowTo1: '1. フォーマットを選択。', infoHowTo2: '2. タップしてスコア。元に戻すを使用。', infoHowTo3: '3. 音量をオンに。', infoHowTo4: '4. 履歴を確認。', infoHowTo5: '5. 名前変更や棄権。', infoData: 'ローカルデータ。クラウドなし。', infoUsage: 'オープンソース。Amosにクレジットを。', infoFooter: '❤️で作られました。', retreatTitle: '棄権？', t1Retreat: 'T1棄権', t2Retreat: 'T2棄権', quitMatch: '終了', quitConfirm: 'メニューに戻る？', yesQuit: 'はい', winByRetreat: '棄権による勝利！', loading: '読み込み中...', switchEnds: "コート交代！", switchEndsDesc: "コートを交代してください。", resumeMatch: "試合を再開", resumeDesc: "中断した試合を再開しますか？", stats: "統計", totalMatches: "合計試合", avgDuration: "平均時間", share: "共有", edit: "編集", winRate: "T1勝率", time: "時間", firstServer: "最初のサーブ", sideOut: "サイドアウト", secondServer: "セカンドサーバー", totalPoints: "合計ポイント", winDist: "勝利の分布", formatStats: "フォーマットの統計", enableTimeouts: "タイムアウトを有効化", timeoutsDesc: "各チーム2回のタイムアウト", callTimeout: "タイムアウト", courtPosTitle: "コートポジション", courtPosDesc: "サーバーとレシーバーの位置", receiver: "レシーバー", generatingImage: "画像を生成中", t1P1: "T1 L. プレイヤー", t1P2: "T1 R. プレイヤー", t2P1: "T2 L. プレイヤー", t2P2: "T2 R. プレイヤー", oddCourt: "(左から)", evenCourt: "(右から)" },
           ko: { appTitle: "피클볼", appSub: "카운터", tapToStart: "탭하여 시작", newMatch: "새 경기", selectFormat: "형식 선택", singles: "단식", doubles: "복식", stdTitle: "표준 (11점)", stdDescSingle: "11점 • 2점차", stdDescDouble: "11점 • 2점차", fourteenTitle: "14점 규칙", fourteenDesc: "15점 • 랠 스코어", customFormat: "사용자 지정", customDesc: "규칙 만들기", playTo: "목표 점수", winBy: "승리 점수차", t1Name: "플레이어 1", t2Name: "플레이어 2", team1: "팀 1", team2: "팀 2", 서버: "서버", wonRally: "포인트", serving: "서브 중", winner: "승리!", playAgain: "다시 하기", undo: "실행 취소", reset: "기권", timeline: "타임라인", awaiting: "대기 중...", suddenDeath: "서든 데스", nextPointWins: "다음 포인트 승리", install: "앱 설치", serveToWinOption: "14-14 서브 득점 승리", serveToWinDesc: "서브권 필요", suddenDeathServeDesc: "서브 필요", switchEndsOption: "코트 변경 알림", switchEndsOptionDesc: "절반 점수에서 코트 변경 알림", customServeToWin: "서브 득점제", customServeToWinDesc: "서브팀만 득점 가능 (0-0-2 규칙)", matchPoint: "매치 포인트", cancel: "취소", startMatch: "시작", t1Label: "T1", t2Label: "T2", installAsApp: "앱 설치", designBy: "Amos © 2026", matchTitlePlaceholder: "제목 (선택)", matchHistory: "기록", clearHistory: "기록 삭제", reviewMatch: "확인", noHistory: "경기가 없습니다", untitledMatch: "친선 경기", confirmClear: "모두 삭제?", yesClear: "네", showResults: "결과", installStepsIOS: '공유 -> 홈 화면에 추가.', installStepsAndroid: '메뉴 -> 설치.', gotIt: '알겠습니다!', infoTitle: '정보', infoHowToTitle: '사용법', infoHowTo1: '1. 형식 선택.', infoHowTo2: '2. 탭하여 득점. 실행 취소 사용.', infoHowTo3: '3. 볼륨 켜기.', infoHowTo4: '4. 기록 확인.', infoHowTo5: '5. 이름 변경 및 기권.', infoData: '로컬 데이터. 클라우드 없음.', infoUsage: '오픈 소스. Amos에게 크레딧.', infoFooter: '❤️로 만들었습니다.', retreatTitle: '기권?', t1Retreat: 'T1 기권', t2Retreat: 'T2 기권', quitMatch: '종료', quitConfirm: '메뉴로?', yesQuit: '네', winByRetreat: '기권 승리!', loading: '로딩 중...', switchEnds: "코트 변경!", switchEndsDesc: "코트를 변경하세요.", resumeMatch: "경기 재개", resumeDesc: "중단된 경기를 재개하시겠습니까?", stats: "통계", totalMatches: "총 경기", avgDuration: "평균 시간", share: "공유", edit: "편집", winRate: "T1 승률", time: "시간", firstServer: "첫 서브", sideOut: "사이드 아웃", secondServer: "세컨드 서브", totalPoints: "총 포인트", winDist: "승리 분포", formatStats: "포맷 통계", enableTimeouts: "타임아웃 사용", timeoutsDesc: "팀당 2회 타임아웃", callTimeout: "타임아웃", courtPosTitle: "코트 위치", courtPosDesc: "서버 및 리시버 위치", receiver: "리시버", generatingImage: "이미지 생성 중", t1P1: "T1 L. 플레이어", t1P2: "T1 R. 플레이어", t2P1: "T2 L. 플레이어", t2P2: "T2 R. 플레이어", oddCourt: "(왼쪽)", evenCourt: "(오른쪽)" },
           de: { appTitle: "Pickleball", appSub: "Zähler", tapToStart: "Tippen zum Starten", newMatch: "Neues Spiel", selectFormat: "Format wählen", singles: "Einzel", doubles: "Doppel", stdTitle: "Standard (11 Pkt)", stdDescSingle: "Bis 11 • Sieg mit 2", stdDescDouble: "Bis 11 • Sieg mit 2", fourteenTitle: "14-Pkt-Regel", fourteenDesc: "Bis 15 • Rallye", customFormat: "Benutzerdefiniert", customDesc: "Eigene Regeln", playTo: "Spielen bis", winBy: "Sieg mit", t1Name: "Spieler 1", t2Name: "Spieler 2", team1: "Team 1", team2: "Team 2", server: "Aufschläger", wonRally: "Punkt", serving: "Aufschlag", winner: "Gewinnt!", playAgain: "Nochmal spielen", undo: "Rückgängig", reset: "Aufgeben", timeline: "Verlauf", awaiting: "Warten...", suddenDeath: "Sudden Death", nextPointWins: "Nächster Punkt", install: "App installieren", serveToWinOption: "14-14 Aufschlag", serveToWinDesc: "Aufschlag nötig", suddenDeathServeDesc: "Aufschlag nötig", switchEndsOption: "Seitenwechsel-Alarm", switchEndsOptionDesc: "Hinweis zum Seitenwechsel zur Halbzeit", customServeToWin: "Aufschlag für Punkte", customServeToWinDesc: "Nur Aufschläger punktet (0-0-2)", matchPoint: "Matchball", cancel: "Abbrechen", startMatch: "Starten", t1Label: "T1", t2Label: "T2", installAsApp: "App installieren", designBy: "Amos © 2026", matchTitlePlaceholder: "Titel (Optional)", matchHistory: "Verlauf", clearHistory: "Verlauf löschen", reviewMatch: "Ansehen", noHistory: "Keine Spiele.", untitledMatch: "Freundschaftsspiel", confirmClear: "Alles löschen?", yesClear: "Ja", showResults: "Ergebnisse", installStepsIOS: 'Teilen -> Zum Home-Bildschirm.', installStepsAndroid: 'Menü -> Installieren.', gotIt: 'Verstanden!', infoTitle: 'Info', infoHowToTitle: 'Anleitung', infoHowTo1: '1. Format wählen.', infoHowTo2: '2. Tippen zum Punkten.', infoHowTo3: '3. Ton für Ansagen.', infoHowTo4: '4. Verlauf prüfen.', infoHowTo5: '5. Umbenennen oder aufgeben.', infoData: 'Lokale Daten. Keine Cloud.', infoUsage: 'Open Source. Credit an Amos.', infoFooter: 'Mit ❤️ gemacht.', retreatTitle: 'Aufgabe?', t1Retreat: 'T1 Aufgabe', t2Retreat: 'T2 Aufgabe', quitMatch: 'Beenden', quitConfirm: 'Zum Menü?', yesQuit: 'Ja', winByRetreat: 'Sieg durch Aufgabe!', loading: 'Laden...', switchEnds: "Seitenwechsel!", switchEndsDesc: "Bitte Seiten wechseln.", resumeMatch: "Spiel fortsetzen", resumeDesc: "Spiel fortsetzen?", stats: "Statistiken", totalMatches: "Spiele Gesamt", avgDuration: "Ø Dauer", share: "Teilen", edit: "Bearbeiten", winRate: "T1 Siegrate", time: "Zeit", firstServer: "Erster Aufschlag", sideOut: "Aufschlagwechsel", secondServer: "Zweiter Aufschlag", totalPoints: "Gesamtpunkte", winDist: "Siegverteilung", formatStats: "Format-Statistiken", enableTimeouts: "Auszeiten aktivieren", timeoutsDesc: "2 Auszeiten pro Team", callTimeout: "Auszeit", courtPosTitle: "Position auf dem Platz", courtPosDesc: "Startpositionen", receiver: "Rückschläger", generatingImage: "Bild wird erstellt", t1P1: "T1 L. Spieler", t1P2: "T1 R. Spieler", t2P1: "T2 L. Spieler", t2P2: "T2 R. Spieler", oddCourt: "(Links)", evenCourt: "(Rechts)" },
-          pt: { appTitle: "Pickleball", appSub: "Contador", tapToStart: "Toque para começar", newMatch: "Nova Partida", selectFormat: "Formato", singles: "Simples", doubles: "Duplas", stdTitle: "Padrão (11 Pts)", stdDescSingle: "Até 11 • Vence por 2", stdDescDouble: "Até 11 • Vence por 2", fourteenTitle: "Regra 14 Pts", fourteenDesc: "Até 15 • Rally", customFormat: "Personalizado", customDesc: "Crie regras", playTo: "Jogar até", winBy: "Vencer por", t1Name: "Jogador 1", t2Name: "Jogador 2", team1: "Equipe 1", team2: "Equipe 2", server: "Sacador", wonRally: "Ponto", serving: "Sacando", winner: "Venceu!", playAgain: "Jogar Novamente", undo: "Desfazer", reset: "Desistir", timeline: "Histórico", awaiting: "Aguardando...", suddenDeath: "Morte Súbita", nextPointWins: "Próximo ponto vence", install: "Instalar App", serveToWinOption: "14-14 Saque para Vencer", serveToWinDesc: "Deve sacar para vencer", suddenDeathServeDesc: "Deve sacar", switchEndsOption: "Troca de Lado", switchEndsOptionDesc: "Avisar na metade dos pontos", customServeToWin: "Saque para Pontuar", customServeToWinDesc: "Apenas o sacador pontua (0-0-2)", matchPoint: "Ponto do Jogo", cancel: "Cancelar", startMatch: "Iniciar", t1Label: "E1", t2Label: "E2", installAsApp: "Instalar App", designBy: "Amos © 2026", matchTitlePlaceholder: "Título (Opcional)", matchHistory: "Histórico", clearHistory: "Limpar Histórico", reviewMatch: "Revisar", noHistory: "Sem partidas.", untitledMatch: "Amistoso", confirmClear: "Apagar tudo?", yesClear: "Sim", showResults: "Resultados", installStepsIOS: 'Compartilhar -> Tela de Início.', installStepsAndroid: 'Menu -> Instalar.', gotIt: 'Entendi!', infoTitle: 'Info', infoHowToTitle: 'Como Usar', infoHowTo1: '1. Escolha formato.', infoHowTo2: '2. Toque para pontuar.', infoHowTo3: '3. Ligue o volume.', infoHowTo4: '4. Veja o histórico.', infoHowTo5: '5. Renomeie ou desista.', infoData: 'Dados locais. Sem nuvem.', infoUsage: 'Open source. Crédito Amos.', infoFooter: 'Feito com ❤️.', retreatTitle: 'Desistência?', t1Retreat: 'E1 Desistiu', t2Retreat: 'E2 Desistiu', quitMatch: 'Sair', quitConfirm: 'Voltar ao menu?', yesQuit: 'Sim', winByRetreat: 'Vence por desistência!', loading: 'Carregando...', switchEnds: "Troca de lado!", switchEndsDesc: "Troquem de lado na quadra.", resumeMatch: "Continuar Partida", resumeDesc: "Continuar partida pendente?", stats: "Estatísticas", totalMatches: "Total Partidas", avgDuration: "Duração Média", share: "Compartilhar", edit: "Editar", winRate: "Taxa Vitória E1", time: "Tempo", firstServer: "Primeiro Saque", sideOut: "Troca de serviço", secondServer: "Segundo saque", totalPoints: "Pontos Totais", winDist: "Distribuição de Vitórias", formatStats: "Estatísticas de Formato", enableTimeouts: "Ativar Pedidos de Tempo", timeoutsDesc: "2 tempos por equipe", callTimeout: "Pedir Tempo", courtPosTitle: "Posição na Quadra", courtPosDesc: "Posições do sacador e receptor", receiver: "Recebedor", generatingImage: "Gerando Imagem", t1P1: "E1 Jogador Esq", t1P2: "E1 Jogador Dir", t2P1: "E2 Jogador Esq", t2P2: "E2 Jogador Dir", oddCourt: "(Esquerda)", evenCourt: "(Direita)" }
+          pt: { appTitle: "Pickleball", appSub: "Contador", tapToStart: "Toque para começar", newMatch: "Nova Partida", selectFormat: "Formato", singles: "Simples", doubles: "Duplas", stdTitle: "Padrão (11 Pts)", stdDescSingle: "Até 11 • Vence por 2", stdDescDouble: "Até 11 • Vence por 2", fourteenTitle: "Regra 14 Pts", fourteenDesc: "Até 15 • Rally", customFormat: "Personalizado", customDesc: "Crie regras", playTo: "Jogar até", winBy: "Vencer por", t1Name: "Jogador 1", t2Name: "Jogador 2", team1: "Equipe 1", team2: "Equipe 2", server: "Sacador", wonRally: "Ponto", serving: "Sacando", winner: "Venceu!", playAgain: "Jogar Novamente", undo: "Desfazer", reset: "Desistir", timeline: "Histórico", awaiting: "Aguardando...", suddenDeath: "Morte Súbita", nextPointWins: "Próximo ponto vence", install: "Instalar App", serveToWinOption: "14-14 Saque para Vencer", serveToWinDesc: "Deve sacar para vencer", suddenDeathServeDesc: "Deve sacar", switchEndsOption: "Troca de Lado", switchEndsOptionDesc: "Avisar na metade dos pontos", customServeToWin: "Saque para Pontuar", customServeToWinDesc: "Apenas o sacador pontua (0-0-2)", matchPoint: "Ponto do Jogo", cancel: "Cancelar", startMatch: "Iniciar", t1Label: "E1", t2Label: "E2", installAsApp: "Instalar App", designBy: "Amos © 2026", matchTitlePlaceholder: "Título (Opcional)", matchHistory: "Histórico", clearHistory: "Limpar Histórico", reviewMatch: "Revisar", noHistory: "Sem partidas.", untitledMatch: "Amistoso", confirmClear: "Apagar tudo?", yesClear: "Sim", showResults: "Resultados", installStepsIOS: 'Compartilhar -> Tela de Início.', installStepsAndroid: 'Menu -> Instalar.', gotIt: 'Entendi!', infoTitle: 'Info', infoHowToTitle: 'Como Usar', infoHowTo1: '1. Escolha formato.', infoHowTo2: '2. Toque para pontuar.', infoHowTo3: '3. Ligue o volume.', infoHowTo4: '4. Veja o histórico.', infoHowTo5: '5. Renomeie ou desista.', infoData: 'Dados locais. Sem nuvem.', infoUsage: 'Open source. Crédito Amos.', infoFooter: 'Feito com ❤️.', retreatTitle: 'Desistência?', t1Retreat: 'E1 Desistiu', t2Retreat: 'E2 Desistiu', quitMatch: 'Sair', quitConfirm: 'Voltar ao menu?', yesQuit: 'Sim', winByRetreat: 'Vence por desistência!', loading: 'Carregando...', switchEnds: "Troca de lado!", switchEndsDesc: "Troquem de lado na quadra.", resumeMatch: "Continuar Partida", resumeDesc: "Continuar partida pendente?", stats: "Estatísticas", totalMatches: "Total Partidas", avgDuration: "Duração Média", share: "Compartilhar", edit: "Editar", winRate: "Taxa Vitória E1", time: "Tempo", firstServer: "Primeiro Saque", sideOut: "Troca de serviço", secondServer: "Segundo saque", totalPoints: "Pontos Totais", winDist: "Distribuição de Vitórias", formatStats: "Estatísticas de Formato", enableTimeouts: "Ativar Pedidos de Tempo", timeoutsDesc: "2 tempos por equipe", callTimeout: "Pedir Tempo", courtPosTitle: "Posição na Quadra", courtPosDesc: "Posições do sacador e receptor", receiver: "Recebedor", generatingImage: "Gerando Imagem", t1P1: "E1 L. Jogador", t1P2: "E1 R. Jogador", t2P1: "E2 L. Jogador", t2P2: "E2 R. Jogador", oddCourt: "(Esquerda)", evenCourt: "(Direita)" }
         };
         const defaultLang = dict.en;
         const availableLanguages = [
@@ -252,7 +259,37 @@
           { code: 'ja', name: '日本語' }, { code: 'ko', name: '한국어' }, { code: 'de', name: 'Deutsch' }, { code: 'pt', name: 'Português' }
         ];
 
-        /* --- HIDDEN MINI-GAMES --- */
+        /* --- HIDDEN MINI-GAMES & ARCADE MENU --- */
+
+        const SecretMenu = ({ onSelect, onClose }) => {
+            const games = [
+                { id: 'snake', name: 'Snake', icon: Zap, color: 'text-emerald-400' },
+                { id: 'jump', name: 'Pickle Jump', icon: Activity, color: 'text-amber-400' },
+                { id: 'memory', name: 'Memory', icon: Trophy, color: 'text-rose-400' },
+                { id: 'tictactoe', name: 'Tic-Tac-Toe', icon: Grid, color: 'text-blue-400' },
+                { id: 'reaction', name: 'Reaction', icon: Timer, color: 'text-purple-400' },
+                { id: 'bounce', name: 'Wall Bounce', icon: ArrowUp, color: 'text-cyan-400' },
+                { id: 'tap', name: 'Tap Challenge', icon: MousePointer2, color: 'text-fuchsia-400' },
+                { id: 'target', name: 'Target Practice', icon: Target, color: 'text-orange-400' }
+            ];
+
+            return (
+                <div className="fixed inset-0 z-[200] bg-stone-900 flex flex-col text-stone-100 animate-screen-enter">
+                    <header className="p-4 flex justify-between items-center bg-stone-950 border-b border-stone-800" style={{paddingTop: 'max(1rem, env(safe-area-inset-top))'}}>
+                        <h2 className="font-bold text-emerald-400 text-lg flex items-center gap-2"><Gamepad2 size={20}/> Arcade Room</h2>
+                        <button onClick={onClose} className="p-2 bg-stone-800 rounded-full hover:bg-stone-700 text-stone-400 transition-colors"><X size={20}/></button>
+                    </header>
+                    <div className="flex-1 p-6 grid grid-cols-2 gap-4 auto-rows-max overflow-y-auto pb-12">
+                        {games.map(g => (
+                            <button key={g.id} onClick={() => onSelect(g.id)} className="bg-stone-800 border border-stone-700 rounded-2xl p-6 flex flex-col items-center justify-center gap-4 active:scale-95 transition-transform hover:bg-stone-700 shadow-md">
+                                <g.icon size={48} className={g.color} />
+                                <span className="font-bold text-xs tracking-widest uppercase text-stone-300 text-center">{g.name}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
         
         // GAME 1: SNAKE
         const SnakeGame = ({ onClose }) => {
@@ -340,7 +377,7 @@
                 <div className="fixed inset-0 z-[200] bg-stone-900 flex flex-col text-stone-100 animate-screen-enter">
                     <header className="p-4 flex justify-between items-center bg-stone-950 border-b border-stone-800" style={{paddingTop: 'max(1rem, env(safe-area-inset-top))'}}>
                         <h2 className="font-bold text-emerald-400 text-lg flex items-center gap-2"><Zap size={20}/> Snake <span className="text-stone-500 font-normal text-sm ml-2">Score: {score}</span></h2>
-                        <button onClick={onClose} className="p-2 bg-stone-800 rounded-full hover:bg-stone-700 text-stone-400 transition-colors"><X size={20}/></button>
+                        <button onClick={onClose} className="p-2 bg-stone-800 rounded-full hover:bg-stone-700 text-stone-400 transition-colors"><ArrowLeft size={20}/></button>
                     </header>
 
                     <div className="flex-1 flex flex-col items-center justify-center p-4 relative">
@@ -437,8 +474,8 @@
             return (
                 <div className="fixed inset-0 z-[200] bg-stone-900 flex flex-col text-stone-100 animate-screen-enter">
                     <header className="p-4 flex justify-between items-center bg-stone-950 border-b border-stone-800 relative z-10" style={{paddingTop: 'max(1rem, env(safe-area-inset-top))'}}>
-                        <h2 className="font-bold text-emerald-400 text-lg flex items-center gap-2"><Activity size={20}/> Jumper <span className="text-stone-500 font-normal text-sm ml-2">Score: {gameState.score}</span></h2>
-                        <button onClick={(e) => { e.stopPropagation(); onClose(); }} className="p-2 bg-stone-800 rounded-full hover:bg-stone-700 text-stone-400 transition-colors"><X size={20}/></button>
+                        <h2 className="font-bold text-amber-400 text-lg flex items-center gap-2"><Activity size={20}/> Jumper <span className="text-stone-500 font-normal text-sm ml-2">Score: {gameState.score}</span></h2>
+                        <button onClick={(e) => { e.stopPropagation(); onClose(); }} className="p-2 bg-stone-800 rounded-full hover:bg-stone-700 text-stone-400 transition-colors"><ArrowLeft size={20}/></button>
                     </header>
 
                     <div className="flex-1 flex flex-col items-center justify-center p-4 relative" onPointerDown={handleJump}>
@@ -516,8 +553,8 @@
             return (
                 <div className="fixed inset-0 z-[200] bg-stone-900 flex flex-col text-stone-100 animate-screen-enter">
                     <header className="p-4 flex justify-between items-center bg-stone-950 border-b border-stone-800 relative z-10" style={{paddingTop: 'max(1rem, env(safe-area-inset-top))'}}>
-                        <h2 className="font-bold text-emerald-400 text-lg flex items-center gap-2"><Trophy size={20}/> Memory <span className="text-stone-500 font-normal text-sm ml-2">Moves: {moves}</span></h2>
-                        <button onClick={onClose} className="p-2 bg-stone-800 rounded-full hover:bg-stone-700 text-stone-400 transition-colors"><X size={20}/></button>
+                        <h2 className="font-bold text-rose-400 text-lg flex items-center gap-2"><Trophy size={20}/> Memory <span className="text-stone-500 font-normal text-sm ml-2">Moves: {moves}</span></h2>
+                        <button onClick={onClose} className="p-2 bg-stone-800 rounded-full hover:bg-stone-700 text-stone-400 transition-colors"><ArrowLeft size={20}/></button>
                     </header>
 
                     <div className="flex-1 flex flex-col items-center justify-center p-4 relative">
@@ -538,6 +575,314 @@
                                 <h2 className="text-5xl font-black mb-2 drop-shadow-lg text-emerald-400">YOU WIN!</h2>
                                 <p className="text-stone-200 mb-8 font-bold text-xl drop-shadow-md">Moves: {moves}</p>
                                 <button onClick={initGame} className="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl shadow-xl active:scale-95 transition-transform flex items-center gap-2"><RotateCcw size={20}/> Play Again</button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // GAME 4: TIC-TAC-TOE
+        const TicTacToeGame = ({ onClose }) => {
+            const [board, setBoard] = useState(Array(9).fill(null));
+            const [xIsNext, setXIsNext] = useState(true);
+            
+            const calculateWinner = (squares) => {
+                const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+                for (let i = 0; i < lines.length; i++) {
+                    const [a, b, c] = lines[i];
+                    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) return squares[a];
+                }
+                return null;
+            };
+
+            const winner = calculateWinner(board);
+            const isDraw = !winner && board.every(s => s !== null);
+
+            const handleClick = (i) => {
+                if (board[i] || winner) return;
+                const newBoard = [...board];
+                newBoard[i] = xIsNext ? 'X' : 'O';
+                setBoard(newBoard);
+                setXIsNext(!xIsNext);
+            };
+
+            const reset = () => { setBoard(Array(9).fill(null)); setXIsNext(true); };
+
+            return (
+                <div className="fixed inset-0 z-[200] bg-stone-900 flex flex-col text-stone-100 animate-screen-enter">
+                    <header className="p-4 flex justify-between items-center bg-stone-950 border-b border-stone-800" style={{paddingTop: 'max(1rem, env(safe-area-inset-top))'}}>
+                        <h2 className="font-bold text-blue-400 text-lg flex items-center gap-2"><Grid size={20}/> Tic-Tac-Toe</h2>
+                        <button onClick={onClose} className="p-2 bg-stone-800 rounded-full hover:bg-stone-700 text-stone-400 transition-colors"><ArrowLeft size={20}/></button>
+                    </header>
+                    <div className="flex-1 flex flex-col items-center justify-center p-4 relative">
+                        <div className="text-center mb-8 text-stone-400 font-bold uppercase tracking-widest">
+                            {winner ? `Winner: ${winner}` : isDraw ? 'Draw' : `Next Player: ${xIsNext ? 'X' : 'O'}`}
+                        </div>
+                        <div className="grid grid-cols-3 gap-3 w-full max-w-[320px]">
+                            {board.map((sq, i) => (
+                                <button key={i} onClick={() => handleClick(i)} className={`aspect-square rounded-2xl bg-stone-800 text-6xl font-black flex items-center justify-center border-b-4 border-stone-900 active:border-b-0 active:translate-y-1 transition-all ${sq === 'X' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                    {sq}
+                                </button>
+                            ))}
+                        </div>
+                        {(winner || isDraw) && (
+                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-20">
+                                <h2 className={`text-5xl font-black mb-8 drop-shadow-lg ${winner === 'X' ? 'text-emerald-400' : winner === 'O' ? 'text-rose-400' : 'text-stone-300'}`}>{winner ? `${winner} WINS!` : 'DRAW!'}</h2>
+                                <button onClick={reset} className="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl shadow-xl active:scale-95 transition-transform flex items-center gap-2"><RotateCcw size={20}/> Play Again</button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // GAME 5: REACTION TIMER
+        const ReactionGame = ({ onClose }) => {
+            const [state, setState] = useState('idle'); 
+            const [time, setTime] = useState(0);
+            const [msg, setMsg] = useState('Tap to Start');
+            const timerRef = useRef(null);
+            const startTimeRef = useRef(0);
+
+            const handleClick = () => {
+                if (state === 'idle' || state === 'result') {
+                    setState('waiting');
+                    setMsg('Wait for Green...');
+                    timerRef.current = setTimeout(() => {
+                        setState('ready');
+                        setMsg('TAP NOW!');
+                        startTimeRef.current = Date.now();
+                    }, Math.random() * 3000 + 1500);
+                } else if (state === 'waiting') {
+                    clearTimeout(timerRef.current);
+                    setState('result');
+                    setMsg('Too Early! Tap to restart.');
+                } else if (state === 'ready') {
+                    const rt = Date.now() - startTimeRef.current;
+                    setTime(rt);
+                    setState('result');
+                    setMsg(`Time: ${rt}ms`);
+                }
+            };
+
+            useEffect(() => { return () => clearTimeout(timerRef.current); }, []);
+
+            let bg = 'bg-stone-800 border-stone-700 text-stone-300';
+            if(state === 'waiting') bg = 'bg-rose-600 border-rose-500 text-white shadow-[0_0_30px_rgba(225,29,72,0.6)]';
+            if(state === 'ready') bg = 'bg-emerald-500 border-emerald-400 text-white shadow-[0_0_40px_rgba(16,185,129,0.8)]';
+
+            return (
+                <div className="fixed inset-0 z-[200] bg-stone-900 flex flex-col text-stone-100 animate-screen-enter">
+                    <header className="p-4 flex justify-between items-center bg-stone-950 border-b border-stone-800 relative z-10" style={{paddingTop: 'max(1rem, env(safe-area-inset-top))'}}>
+                        <h2 className="font-bold text-purple-400 text-lg flex items-center gap-2"><Timer size={20}/> Reaction Test</h2>
+                        <button onClick={onClose} className="p-2 bg-stone-800 rounded-full hover:bg-stone-700 text-stone-400 transition-colors"><ArrowLeft size={20}/></button>
+                    </header>
+                    <div className="flex-1 flex flex-col items-center justify-center p-8">
+                        <button onClick={handleClick} className={`w-full max-w-[300px] aspect-square rounded-full flex flex-col items-center justify-center active:scale-95 transition-all duration-200 border-[12px] ${bg}`}>
+                            <span className="text-3xl font-black tracking-widest drop-shadow-md text-center px-4 leading-tight">{msg}</span>
+                        </button>
+                        <p className="mt-12 text-stone-500 font-bold uppercase tracking-widest text-xs text-center max-w-[250px]">Test your reflexes. Tap the circle as soon as it turns green.</p>
+                    </div>
+                </div>
+            );
+        };
+
+        // GAME 6: WALL BOUNCE (PONG)
+        const WallBounceGame = ({ onClose }) => {
+            const [gameState, setGameState] = useState({ ballX: 140, ballY: 50, vx: 4, vy: 4, paddleX: 110, score: 0, gameOver: false });
+            
+            useEffect(() => {
+                if (gameState.gameOver) return;
+                const loop = setInterval(() => {
+                    setGameState(prev => {
+                        if(prev.gameOver) return prev;
+                        let {ballX, ballY, vx, vy, score, paddleX} = prev;
+                        ballX += vx;
+                        ballY += vy;
+                        
+                        // Walls (Container is 300x300, Ball is 20x20)
+                        if(ballX <= 0 || ballX >= 280) vx = -vx;
+                        if(ballY <= 0) vy = -vy;
+                        
+                        // Paddle Collision (Paddle is at Y=260, height=15, width=80)
+                        if(ballY >= 250 && ballY <= 265 && ballX + 20 >= paddleX && ballX <= paddleX + 80 && vy > 0) {
+                            vy = -vy - 0.3; // Speed up slightly
+                            vx = vx + (Math.random() - 0.5) * 3; // Add random spin
+                            score += 1;
+                            ballY = 249; // push out of paddle
+                        }
+                        
+                        let gameOver = false;
+                        if(ballY > 320) gameOver = true;
+                        
+                        return { ballX, ballY, vx, vy, score, paddleX, gameOver };
+                    });
+                }, 16);
+                return () => clearInterval(loop);
+            }, [gameState.gameOver]);
+
+            const handleMove = (e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                let x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left - 40; // 40 is half paddle width
+                if(x < 0) x = 0;
+                if(x > 220) x = 220; // 300 width - 80 paddle width
+                setGameState(prev => ({...prev, paddleX: x}));
+            };
+
+            const resetGame = () => setGameState({ ballX: 140, ballY: 50, vx: 4, vy: 4, paddleX: 110, score: 0, gameOver: false });
+
+            return (
+                <div className="fixed inset-0 z-[200] bg-stone-900 flex flex-col text-stone-100 animate-screen-enter">
+                    <header className="p-4 flex justify-between items-center bg-stone-950 border-b border-stone-800 relative z-10" style={{paddingTop: 'max(1rem, env(safe-area-inset-top))'}}>
+                        <h2 className="font-bold text-cyan-400 text-lg flex items-center gap-2"><ArrowUp size={20}/> Wall Bounce <span className="text-stone-500 font-normal text-sm ml-2">Score: {gameState.score}</span></h2>
+                        <button onClick={onClose} className="p-2 bg-stone-800 rounded-full hover:bg-stone-700 text-stone-400 transition-colors"><ArrowLeft size={20}/></button>
+                    </header>
+
+                    <div className="flex-1 flex flex-col items-center justify-center p-4 relative touch-none">
+                        <div className="text-center mb-8 text-stone-500 font-bold tracking-widest uppercase text-sm animate-pulse select-none pointer-events-none">Drag paddle to bounce</div>
+                        
+                        <div className="relative w-[300px] h-[300px] bg-stone-950 border-4 border-stone-800 rounded-xl overflow-hidden cursor-crosshair" onPointerMove={handleMove} onTouchMove={handleMove}>
+                            {/* Ball */}
+                            <div className="absolute w-[20px] h-[20px] bg-emerald-400 rounded-full shadow-[0_0_15px_rgba(52,211,153,0.8)]" style={{ left: gameState.ballX, top: gameState.ballY }}></div>
+                            {/* Paddle */}
+                            <div className="absolute h-[15px] w-[80px] bg-white rounded-full top-[260px] shadow-[0_0_10px_rgba(255,255,255,0.5)]" style={{ left: gameState.paddleX }}></div>
+                        </div>
+
+                        {gameState.gameOver && (
+                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-20">
+                                <h2 className="text-5xl font-black mb-2 drop-shadow-lg text-rose-500">DROPPED!</h2>
+                                <p className="text-stone-200 mb-8 font-bold text-xl drop-shadow-md">Score: {gameState.score}</p>
+                                <button onClick={resetGame} className="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl shadow-xl active:scale-95 transition-transform flex items-center gap-2"><RotateCcw size={20}/> Try Again</button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // GAME 7: TAP CHALLENGE
+        const TapGame = ({ onClose }) => {
+            const [score, setScore] = useState(0);
+            const [timeLeft, setTimeLeft] = useState(10);
+            const [isPlaying, setIsPlaying] = useState(false);
+            const [gameOver, setGameOver] = useState(false);
+
+            useEffect(() => {
+                if(!isPlaying || timeLeft <= 0) return;
+                const timer = setInterval(() => {
+                    setTimeLeft(t => {
+                        if (t <= 1) { setGameOver(true); setIsPlaying(false); return 0; }
+                        return t - 1;
+                    });
+                }, 1000);
+                return () => clearInterval(timer);
+            }, [isPlaying, timeLeft]);
+
+            const handleTap = () => {
+                if (gameOver) return;
+                if (!isPlaying) setIsPlaying(true);
+                setScore(s => s + 1);
+            };
+
+            const reset = () => { setScore(0); setTimeLeft(10); setIsPlaying(false); setGameOver(false); };
+
+            return (
+                <div className="fixed inset-0 z-[200] bg-stone-900 flex flex-col text-stone-100 animate-screen-enter">
+                    <header className="p-4 flex justify-between items-center bg-stone-950 border-b border-stone-800" style={{paddingTop: 'max(1rem, env(safe-area-inset-top))'}}>
+                        <h2 className="font-bold text-fuchsia-400 text-lg flex items-center gap-2"><MousePointer2 size={20}/> Tap Challenge <span className="text-stone-500 font-normal text-sm ml-2">{timeLeft}s left</span></h2>
+                        <button onClick={onClose} className="p-2 bg-stone-800 rounded-full hover:bg-stone-700 text-stone-400 transition-colors"><ArrowLeft size={20}/></button>
+                    </header>
+                    <div className="flex-1 flex flex-col items-center justify-center p-8 relative">
+                        <div className="text-8xl font-black text-white mb-12 drop-shadow-lg">{score}</div>
+                        <button onPointerDown={handleTap} className={`w-full max-w-[280px] aspect-square rounded-[3rem] flex flex-col items-center justify-center active:scale-95 transition-transform shadow-[0_20px_0_#064e3b] active:shadow-[0_0px_0_#064e3b] active:translate-y-[20px] ${gameOver ? 'bg-stone-700 shadow-[0_20px_0_#44403c] opacity-50' : 'bg-emerald-500 hover:bg-emerald-400'}`}>
+                            <span className="text-3xl font-black tracking-widest text-white uppercase">{!isPlaying && !gameOver ? 'Start Tapping' : 'TAP!'}</span>
+                        </button>
+
+                        {gameOver && (
+                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-20">
+                                <h2 className="text-5xl font-black mb-2 drop-shadow-lg text-emerald-400">TIME'S UP!</h2>
+                                <p className="text-stone-200 mb-8 font-bold text-xl drop-shadow-md">{score} Taps in 10s</p>
+                                <button onClick={reset} className="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl shadow-xl active:scale-95 transition-transform flex items-center gap-2"><RotateCcw size={20}/> Try Again</button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // GAME 8: TARGET PRACTICE
+        const TargetGame = ({ onClose }) => {
+            const [target, setTarget] = useState(null);
+            const [score, setScore] = useState(0);
+            const [timeLeft, setTimeLeft] = useState(20);
+            const [isPlaying, setIsPlaying] = useState(false);
+            const [gameOver, setGameOver] = useState(false);
+
+            useEffect(() => {
+                if(!isPlaying || timeLeft <= 0) return;
+                const t = setInterval(() => {
+                    setTimeLeft(prev => {
+                        if(prev <= 1) { setGameOver(true); setIsPlaying(false); setTarget(null); return 0; }
+                        return prev - 1;
+                    });
+                }, 1000);
+                return () => clearInterval(t);
+            }, [isPlaying, timeLeft]);
+
+            useEffect(() => {
+                if(!isPlaying) return;
+                const speed = Math.max(400, 1000 - score * 30);
+                const t = setInterval(() => {
+                    let nextTarget;
+                    do { nextTarget = Math.floor(Math.random() * 9); } while (nextTarget === target);
+                    setTarget(nextTarget);
+                }, speed);
+                return () => clearInterval(t);
+            }, [isPlaying, score, target]);
+
+            const hit = (idx) => {
+                if (gameOver) return;
+                if (!isPlaying) {
+                    setIsPlaying(true);
+                    setScore(0);
+                    setTarget(Math.floor(Math.random() * 9));
+                    return;
+                }
+                if (idx === target) {
+                    setScore(s => s + 1);
+                    setTarget(Math.floor(Math.random() * 9));
+                } else {
+                    setScore(s => Math.max(0, s - 1)); // penalty
+                }
+            };
+
+            const reset = () => { setScore(0); setTimeLeft(20); setIsPlaying(false); setGameOver(false); setTarget(null); };
+
+            return (
+                <div className="fixed inset-0 z-[200] bg-stone-900 flex flex-col text-stone-100 animate-screen-enter">
+                    <header className="p-4 flex justify-between items-center bg-stone-950 border-b border-stone-800 relative z-10" style={{paddingTop: 'max(1rem, env(safe-area-inset-top))'}}>
+                        <h2 className="font-bold text-orange-400 text-lg flex items-center gap-2"><Target size={20}/> Target Practice <span className="text-stone-500 font-normal text-sm ml-2">Score: {score}</span></h2>
+                        <button onClick={onClose} className="p-2 bg-stone-800 rounded-full hover:bg-stone-700 text-stone-400 transition-colors"><ArrowLeft size={20}/></button>
+                    </header>
+                    <div className="flex-1 flex flex-col items-center justify-center p-4 relative">
+                        <div className="text-center mb-6 text-stone-400 font-bold uppercase tracking-widest">
+                            Time Left: <span className={timeLeft <= 5 ? 'text-rose-500' : 'text-white'}>{timeLeft}s</span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-3 w-full max-w-[320px]">
+                            {Array.from({length: 9}).map((_, i) => (
+                                <button key={i} onPointerDown={() => hit(i)} className={`aspect-square rounded-2xl flex items-center justify-center transition-all duration-100 ${!isPlaying && i === 4 ? 'bg-emerald-500 animate-pulse border-b-4 border-emerald-700' : target === i ? 'bg-orange-500 border-b-4 border-orange-700 active:translate-y-1 active:border-b-0 scale-105 shadow-[0_0_15px_rgba(249,115,22,0.8)]' : 'bg-stone-800 border-b-4 border-stone-900 active:border-b-0 active:translate-y-1'}`}>
+                                    {!isPlaying && i === 4 && <span className="font-black text-white text-xs uppercase tracking-widest">Start</span>}
+                                    {target === i && <Target size={36} className="text-white" />}
+                                </button>
+                            ))}
+                        </div>
+
+                        {gameOver && (
+                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-20">
+                                <h2 className="text-5xl font-black mb-2 drop-shadow-lg text-orange-400">TIME'S UP!</h2>
+                                <p className="text-stone-200 mb-8 font-bold text-xl drop-shadow-md">Final Score: {score}</p>
+                                <button onClick={reset} className="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl shadow-xl active:scale-95 transition-transform flex items-center gap-2"><RotateCcw size={20}/> Play Again</button>
                             </div>
                         )}
                     </div>
@@ -569,8 +914,8 @@
           const [t2Timeouts, setT2Timeouts] = useState(2);
           const [showTimeoutConfirm, setShowTimeoutConfirm] = useState(null);
           
-          // Secret Game State (null, 'snake', 'jump', or 'memory')
-          const [secretGame, setSecretGame] = useState(null);
+          // Arcade State
+          const [secretGame, setSecretGame] = useState(null); // 'menu', 'snake', 'jump', 'memory', 'tictactoe', 'reaction', 'bounce', 'tap', 'target'
           
           const [lang, setLang] = useState('en');
           const [isDark, setIsDark] = useState(false);
@@ -856,11 +1201,8 @@
           
           const handleSecretClick = () => {
               secretClickCount.current += 1;
-              if (secretClickCount.current >= 10) {
-                  // Randomly pick one of the 3 mini games
-                  const games = ['snake', 'jump', 'memory'];
-                  const randomGame = games[Math.floor(Math.random() * games.length)];
-                  setSecretGame(randomGame);
+              if (secretClickCount.current >= 5) {
+                  setSecretGame('menu');
                   secretClickCount.current = 0;
                   triggerHaptic('win');
               }
@@ -1842,12 +2184,12 @@
                     <div className="mt-auto relative z-10">
                       <div className="grid grid-cols-2 gap-4 h-40 md:h-48">
                         <button onClick={() => handleRallyWin(1)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${servingTeam === 1 && !winner ? bgAccentGreen : `muji-card ${bgCard} ${winner ? 'opacity-50' : ''}`}`}>
-                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${servingTeam === 1 && !winner ? accentGreen : textMain}`}>{t1Name}</span>
+                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${servingTeam === 1 && !winner ? accentGreen : textMain}`}>{gameMode === 'single' ? t1PLeft : getT('team1')}</span>
                           <span className={`text-sm font-semibold ${servingTeam === 1 && !winner ? accentGreen : textSub}`}>{getT('wonRally')}</span>
                           {servingTeam === 1 && !winner && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentGreen}`}><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>{getT('serving')}</div>}
                         </button>
                         <button onClick={() => handleRallyWin(2)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${servingTeam === 2 && !winner ? bgAccentRed : `muji-card ${bgCard} ${winner ? 'opacity-50' : ''}`}`}>
-                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${servingTeam === 2 && !winner ? accentRed : textMain}`}>{t2Name}</span>
+                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${servingTeam === 2 && !winner ? accentRed : textMain}`}>{gameMode === 'single' ? t2PLeft : getT('team2')}</span>
                           <span className={`text-sm font-semibold ${servingTeam === 2 && !winner ? accentRed : textSub}`}>{getT('wonRally')}</span>
                           {servingTeam === 2 && !winner && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentRed}`}><div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></div>{getT('serving')}</div>}
                         </button>
@@ -2011,9 +2353,15 @@
               )}
 
               {/* --- SECRET MINI GAMES --- */}
-              {secretGame === 'snake' && <SnakeGame onClose={() => setSecretGame(null)} />}
-              {secretGame === 'jump' && <PickleJump onClose={() => setSecretGame(null)} />}
-              {secretGame === 'memory' && <MemoryGame onClose={() => setSecretGame(null)} />}
+              {secretGame === 'menu' && <SecretMenu onSelect={setSecretGame} onClose={() => setSecretGame(null)} />}
+              {secretGame === 'snake' && <SnakeGame onClose={() => setSecretGame('menu')} />}
+              {secretGame === 'jump' && <PickleJump onClose={() => setSecretGame('menu')} />}
+              {secretGame === 'memory' && <MemoryGame onClose={() => setSecretGame('menu')} />}
+              {secretGame === 'tictactoe' && <TicTacToeGame onClose={() => setSecretGame('menu')} />}
+              {secretGame === 'reaction' && <ReactionGame onClose={() => setSecretGame('menu')} />}
+              {secretGame === 'bounce' && <WallBounceGame onClose={() => setSecretGame('menu')} />}
+              {secretGame === 'tap' && <TapGame onClose={() => setSecretGame('menu')} />}
+              {secretGame === 'target' && <TargetGame onClose={() => setSecretGame('menu')} />}
 
               {/* --- IMAGE EXPORT RENDER CARD (HIDDEN) --- */}
               {matchToExport && (
@@ -2041,19 +2389,19 @@
                               {/* Team Names Row */}
                               <div className="flex items-end justify-between w-full min-h-[160px] mb-8">
                                   {/* Team 1 Names */}
-                                  <div className="w-[45%] flex flex-col items-center justify-end text-center">
+                                  <div className="w-[45%] flex flex-col items-center justify-end text-center px-4">
                                       {matchToExport.mode === 'double' && matchToExport.t1Name.includes(' & ') ? (
                                           <>
-                                              <span className="text-4xl font-bold uppercase tracking-widest text-stone-500 break-words w-full leading-snug">
+                                              <span className="text-3xl font-bold uppercase tracking-widest text-stone-500 break-words w-full leading-snug">
                                                   {matchToExport.t1Name.split(' & ')[0]}
                                               </span>
                                               <div className="w-4 h-4 bg-stone-300 dark:bg-stone-600 rounded-full my-4"></div>
-                                              <span className="text-4xl font-bold uppercase tracking-widest text-stone-500 break-words w-full leading-snug">
+                                              <span className="text-3xl font-bold uppercase tracking-widest text-stone-500 break-words w-full leading-snug">
                                                   {matchToExport.t1Name.split(' & ')[1]}
                                               </span>
                                           </>
                                       ) : (
-                                          <span className="text-4xl font-bold uppercase tracking-widest text-stone-500 break-words w-full leading-snug">
+                                          <span className="text-3xl font-bold uppercase tracking-widest text-stone-500 break-words w-full leading-snug">
                                               {matchToExport.t1Name}
                                           </span>
                                       )}
@@ -2062,19 +2410,19 @@
                                   <div className="w-[10%]"></div>
 
                                   {/* Team 2 Names */}
-                                  <div className="w-[45%] flex flex-col items-center justify-end text-center">
+                                  <div className="w-[45%] flex flex-col items-center justify-end text-center px-4">
                                       {matchToExport.mode === 'double' && matchToExport.t2Name.includes(' & ') ? (
                                           <>
-                                              <span className="text-4xl font-bold uppercase tracking-widest text-stone-500 break-words w-full leading-snug">
+                                              <span className="text-3xl font-bold uppercase tracking-widest text-stone-500 break-words w-full leading-snug">
                                                   {matchToExport.t2Name.split(' & ')[0]}
                                               </span>
                                               <div className="w-4 h-4 bg-stone-300 dark:bg-stone-600 rounded-full my-4"></div>
-                                              <span className="text-4xl font-bold uppercase tracking-widest text-stone-500 break-words w-full leading-snug">
+                                              <span className="text-3xl font-bold uppercase tracking-widest text-stone-500 break-words w-full leading-snug">
                                                   {matchToExport.t2Name.split(' & ')[1]}
                                               </span>
                                           </>
                                       ) : (
-                                          <span className="text-4xl font-bold uppercase tracking-widest text-stone-500 break-words w-full leading-snug">
+                                          <span className="text-3xl font-bold uppercase tracking-widest text-stone-500 break-words w-full leading-snug">
                                               {matchToExport.t2Name}
                                           </span>
                                       )}
@@ -2082,39 +2430,38 @@
                               </div>
 
                               {/* Scores Row */}
-                              <div className="flex items-center justify-between w-full h-[250px] mb-8">
-                                  <div className="w-[45%] flex justify-center">
+                              <div className="flex items-center justify-between w-full h-[250px] mb-2">
+                                  <div className="w-[42%] flex justify-center">
                                       <span className={`text-[16rem] font-black leading-none ${matchToExport.winner === 1 ? 'text-emerald-500' : isDark ? 'text-stone-200' : 'text-stone-800'}`}>
                                           {matchToExport.t1Score}
                                       </span>
                                   </div>
-                                  <div className="w-[10%] flex items-center justify-center h-full">
-                                      {/* Mathematical Hyphen Block - Lifted slightly to optically align with number baseline */}
-                                      <div className={`w-24 h-5 rounded-full mb-12 ${isDark ? 'bg-stone-600' : 'bg-stone-300'}`}></div>
+                                  <div className="w-[16%] flex items-center justify-center">
+                                      <div className={`w-16 h-4 rounded-full ${isDark ? 'bg-stone-600' : 'bg-stone-300'}`}></div>
                                   </div>
-                                  <div className="w-[45%] flex justify-center">
+                                  <div className="w-[42%] flex justify-center">
                                       <span className={`text-[16rem] font-black leading-none ${matchToExport.winner === 2 ? 'text-rose-500' : isDark ? 'text-stone-200' : 'text-stone-800'}`}>
                                           {matchToExport.t2Score}
                                       </span>
                                   </div>
                               </div>
 
-                              {/* Winners Row - Pushed down by 2 lines using pt-28 and lifted inner text */}
-                              <div className="flex items-start justify-between w-full h-[250px] pt-28">
-                                  <div className="w-[45%] flex justify-center">
+                              {/* Winners Row - Pushed down by 2 lines and centered */}
+                              <div className="flex items-start justify-between w-full min-h-[140px] pt-12">
+                                  <div className="w-[42%] flex justify-center">
                                       {matchToExport.winner === 1 && (
-                                          <div className="h-24 px-10 bg-emerald-500 text-white rounded-[2rem] shadow-xl flex items-center justify-center gap-4">
-                                              <Trophy size={40} className="text-emerald-100" />
-                                              <span className="text-4xl font-black uppercase tracking-widest leading-none pb-2">Winner</span>
+                                          <div className="inline-flex h-16 px-8 bg-emerald-500 text-white rounded-full shadow-xl items-center justify-center gap-3">
+                                              <Trophy size={28} className="text-emerald-100" />
+                                              <span className="text-2xl font-black uppercase tracking-widest leading-none pt-1">Winner</span>
                                           </div>
                                       )}
                                   </div>
-                                  <div className="w-[10%]"></div>
-                                  <div className="w-[45%] flex justify-center">
+                                  <div className="w-[16%]"></div>
+                                  <div className="w-[42%] flex justify-center">
                                       {matchToExport.winner === 2 && (
-                                          <div className="h-24 px-10 bg-rose-500 text-white rounded-[2rem] shadow-xl flex items-center justify-center gap-4">
-                                              <Trophy size={40} className="text-rose-100" />
-                                              <span className="text-4xl font-black uppercase tracking-widest leading-none pb-2">Winner</span>
+                                          <div className="inline-flex h-16 px-8 bg-rose-500 text-white rounded-full shadow-xl items-center justify-center gap-3">
+                                              <Trophy size={28} className="text-rose-100" />
+                                              <span className="text-2xl font-black uppercase tracking-widest leading-none pt-1">Winner</span>
                                           </div>
                                       )}
                                   </div>
