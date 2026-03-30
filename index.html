@@ -84,8 +84,8 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- html2canvas for Image Export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- html-to-image for Image Export (Replaced html2canvas) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
 
     <!-- Disable Context Menu / Long Press Default Behaviors -->
     <script>
@@ -1112,44 +1112,45 @@
                 // Give React a moment to render the hidden card before capturing
                 setTimeout(() => {
                     const exportNode = document.getElementById('match-export-card');
-                    if (exportNode && window.html2canvas) {
-                        window.html2canvas(exportNode, {
-                            scale: 2,
-                            useCORS: true,
+                    if (exportNode && window.htmlToImage) {
+                        
+                        // Use html-to-image for pixel-perfect rendering
+                        window.htmlToImage.toBlob(exportNode, {
+                            pixelRatio: 2,
                             backgroundColor: isDark ? '#1c1917' : '#fafaf9'
-                        }).then(canvas => {
-                            canvas.toBlob(async (blob) => {
-                                if (!blob) {
-                                    setIsExporting(false); setMatchToExport(null); return;
-                                }
-                                const file = new File([blob], `pickleball_${Date.now()}.png`, { type: 'image/png' });
-                                const titleText = `🏓 Pickleball Result: ${matchToExport.t1Name} (${matchToExport.t1Score}) vs ${matchToExport.t2Name} (${matchToExport.t2Score})\nplay and generate from: https://pickleball-point-counter.pages.dev`;
-                                
-                                const shareData = {
-                                    title: 'Pickleball Result',
-                                    text: titleText,
-                                    files: [file]
-                                };
+                        }).then(blob => {
+                            if (!blob) {
+                                setIsExporting(false); setMatchToExport(null); return;
+                            }
+                            
+                            const file = new File([blob], `pickleball_${Date.now()}.png`, { type: 'image/png' });
+                            
+                            // Updated share text formatting
+                            const titleText = `🏓 Pickleball Result: ${matchToExport.t1Name} (${matchToExport.t1Score}) vs ${matchToExport.t2Name} (${matchToExport.t2Score})\nplay and generate from: https://pickleball-point-counter.pages.dev`;
+                            
+                            const shareData = {
+                                title: 'Pickleball Result',
+                                text: titleText,
+                                files: [file]
+                            };
 
-                                if (navigator.canShare && navigator.canShare(shareData)) {
-                                    try { await navigator.share(shareData); } catch (e) { console.log('Share cancelled', e); }
-                                } else {
-                                    // Fallback for desktop/unsupported browsers: Download the image directly
-                                    const link = document.createElement('a');
-                                    link.download = `pickleball_${Date.now()}.png`;
-                                    link.href = canvas.toDataURL('image/png');
-                                    link.click();
-                                }
-                                setIsExporting(false);
-                                setMatchToExport(null);
-                            }, 'image/png');
+                            if (navigator.canShare && navigator.canShare(shareData)) {
+                                navigator.share(shareData).catch(e => console.log('Share cancelled', e));
+                            } else {
+                                // Fallback for desktop/unsupported browsers: Download the image directly
+                                const link = document.createElement('a');
+                                link.download = `pickleball_${Date.now()}.png`;
+                                link.href = URL.createObjectURL(blob);
+                                link.click();
+                            }
+                            setIsExporting(false);
+                            setMatchToExport(null);
                         }).catch(e => {
                             console.error(e);
                             setIsExporting(false);
                             setMatchToExport(null);
                         });
                     } else {
-                        // Fallback if html2canvas fails to load
                         setIsExporting(false);
                         setMatchToExport(null);
                         alert("Image export not supported on this device.");
@@ -2374,7 +2375,7 @@
                           
                           {/* 1. Icon & Title & Date */}
                           <div className="w-full flex flex-col items-center text-center mt-12 mb-16">
-                              <Trophy size={100} className="text-emerald-500 mb-8" />
+                              <Trophy size={100} className="text-emerald-500 mb-8" strokeWidth={2} />
                               <h2 className={`text-5xl font-black tracking-widest uppercase break-words w-full max-w-[900px] mb-6 leading-tight ${isDark ? 'text-stone-200' : 'text-stone-800'}`}>
                                   {matchToExport.title}
                               </h2>
@@ -2437,6 +2438,7 @@
                                       </span>
                                   </div>
                                   <div className="w-[16%] flex items-center justify-center">
+                                      {/* Mathematical Hyphen Block */}
                                       <div className={`w-16 h-4 rounded-full ${isDark ? 'bg-stone-600' : 'bg-stone-300'}`}></div>
                                   </div>
                                   <div className="w-[42%] flex justify-center">
@@ -2451,7 +2453,7 @@
                                   <div className="w-[42%] flex justify-center">
                                       {matchToExport.winner === 1 && (
                                           <div className="inline-flex h-16 px-8 bg-emerald-500 text-white rounded-full shadow-xl items-center justify-center gap-3">
-                                              <Trophy size={28} className="text-emerald-100" />
+                                              <Trophy size={28} className="text-emerald-100" strokeWidth={2} />
                                               <span className="text-2xl font-black uppercase tracking-widest leading-none pt-1">Winner</span>
                                           </div>
                                       )}
@@ -2460,7 +2462,7 @@
                                   <div className="w-[42%] flex justify-center">
                                       {matchToExport.winner === 2 && (
                                           <div className="inline-flex h-16 px-8 bg-rose-500 text-white rounded-full shadow-xl items-center justify-center gap-3">
-                                              <Trophy size={28} className="text-rose-100" />
+                                              <Trophy size={28} className="text-rose-100" strokeWidth={2} />
                                               <span className="text-2xl font-black uppercase tracking-widest leading-none pt-1">Winner</span>
                                           </div>
                                       )}
