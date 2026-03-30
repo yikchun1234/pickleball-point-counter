@@ -778,7 +778,7 @@
                                     setIsExporting(false); setMatchToExport(null); return;
                                 }
                                 const file = new File([blob], `pickleball_${Date.now()}.png`, { type: 'image/png' });
-                                const titleText = `🏓 Pickleball Result: ${matchToExport.t1Name} (${matchToExport.t1Score}) vs ${matchToExport.t2Name} (${matchToExport.t2Score})`;
+                                const titleText = `🏓 Pickleball Result: ${matchToExport.t1Name} (${matchToExport.t1Score}) vs ${matchToExport.t2Name} (${matchToExport.t2Score})\nplay and generate from: https://pickleball-point-counter.pages.dev`;
                                 
                                 const shareData = {
                                     title: 'Pickleball Result',
@@ -2088,9 +2088,9 @@
                                           {matchToExport.t1Score}
                                       </span>
                                   </div>
-                                  <div className="w-[10%] flex items-center justify-center">
-                                      {/* Mathematical Hyphen Block */}
-                                      <div className={`w-24 h-5 rounded-full ${isDark ? 'bg-stone-600' : 'bg-stone-300'}`}></div>
+                                  <div className="w-[10%] flex items-center justify-center h-full">
+                                      {/* Mathematical Hyphen Block - Lifted slightly to optically align with number baseline */}
+                                      <div className={`w-24 h-5 rounded-full mb-12 ${isDark ? 'bg-stone-600' : 'bg-stone-300'}`}></div>
                                   </div>
                                   <div className="w-[45%] flex justify-center">
                                       <span className={`text-[16rem] font-black leading-none ${matchToExport.winner === 2 ? 'text-rose-500' : isDark ? 'text-stone-200' : 'text-stone-800'}`}>
@@ -2099,13 +2099,13 @@
                                   </div>
                               </div>
 
-                              {/* Winners Row - Safely nested and aligned */}
-                              <div className="flex items-start justify-between w-full h-[140px] mt-10">
+                              {/* Winners Row - Pushed down by 2 lines using pt-28 and lifted inner text */}
+                              <div className="flex items-start justify-between w-full h-[250px] pt-28">
                                   <div className="w-[45%] flex justify-center">
                                       {matchToExport.winner === 1 && (
                                           <div className="h-24 px-10 bg-emerald-500 text-white rounded-[2rem] shadow-xl flex items-center justify-center gap-4">
                                               <Trophy size={40} className="text-emerald-100" />
-                                              <span className="text-4xl font-black uppercase tracking-widest leading-none pt-1">Winner</span>
+                                              <span className="text-4xl font-black uppercase tracking-widest leading-none pb-2">Winner</span>
                                           </div>
                                       )}
                                   </div>
@@ -2114,7 +2114,7 @@
                                       {matchToExport.winner === 2 && (
                                           <div className="h-24 px-10 bg-rose-500 text-white rounded-[2rem] shadow-xl flex items-center justify-center gap-4">
                                               <Trophy size={40} className="text-rose-100" />
-                                              <span className="text-4xl font-black uppercase tracking-widest leading-none pt-1">Winner</span>
+                                              <span className="text-4xl font-black uppercase tracking-widest leading-none pb-2">Winner</span>
                                           </div>
                                       )}
                                   </div>
@@ -2123,7 +2123,7 @@
                           </div>
 
                           {/* Spacer to push footer down naturally */}
-                          <div className="flex-1 min-h-[80px]"></div>
+                          <div className="flex-1 min-h-[50px]"></div>
 
                           {/* 3. Footer */}
                           <div className="w-full flex flex-col items-center text-center mt-auto mb-4">
