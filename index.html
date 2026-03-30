@@ -2035,19 +2035,19 @@
                               </p>
                           </div>
 
-                          {/* 2. Main Content Matrix */}
-                          <div className="flex flex-col w-full max-w-[900px] mx-auto mt-4">
+                          {/* 2. Main Content Matrix (Column-Based for Perfect Alignment) */}
+                          <div className="flex w-full max-w-[950px] mx-auto mt-4 px-4">
                               
-                              {/* Team Names Row */}
-                              <div className="flex items-end justify-between w-full min-h-[160px] mb-8">
-                                  {/* Team 1 Names */}
-                                  <div className="w-[45%] flex flex-col items-center justify-end text-center">
+                              {/* Team 1 Column */}
+                              <div className="flex-1 flex flex-col items-center justify-start">
+                                  {/* Team Name */}
+                                  <div className="h-[160px] flex flex-col items-center justify-end text-center mb-8">
                                       {matchToExport.mode === 'double' && matchToExport.t1Name.includes(' & ') ? (
                                           <>
                                               <span className="text-4xl font-bold uppercase tracking-widest text-stone-500 break-words w-full leading-snug">
                                                   {matchToExport.t1Name.split(' & ')[0]}
                                               </span>
-                                              <div className="w-4 h-4 bg-stone-300 dark:bg-stone-600 rounded-full my-4"></div>
+                                              <div className="w-3 h-3 bg-stone-300 dark:bg-stone-600 rounded-full my-4"></div>
                                               <span className="text-4xl font-bold uppercase tracking-widest text-stone-500 break-words w-full leading-snug">
                                                   {matchToExport.t1Name.split(' & ')[1]}
                                               </span>
@@ -2058,17 +2058,42 @@
                                           </span>
                                       )}
                                   </div>
+                                  {/* Score */}
+                                  <div className="h-[250px] flex items-center justify-center">
+                                      <span className={`text-[16rem] font-black leading-none tracking-tighter ${matchToExport.winner === 1 ? 'text-emerald-500' : isDark ? 'text-stone-200' : 'text-stone-800'}`}>
+                                          {matchToExport.t1Score}
+                                      </span>
+                                  </div>
+                                  {/* Winner Badge */}
+                                  <div className="h-[120px] flex items-start justify-center pt-8">
+                                      {matchToExport.winner === 1 && (
+                                          <div className="h-16 px-8 bg-emerald-500 text-white rounded-full shadow-lg flex items-center justify-center gap-3">
+                                              <Trophy size={28} className="text-emerald-100" />
+                                              <span className="text-2xl font-black uppercase tracking-widest leading-none pt-1">Winner</span>
+                                          </div>
+                                      )}
+                                  </div>
+                              </div>
 
-                                  <div className="w-[10%]"></div>
+                              {/* Center Hyphen Column */}
+                              <div className="w-[100px] flex flex-col items-center justify-start">
+                                  <div className="h-[160px] mb-8"></div>
+                                  <div className="h-[250px] flex items-center justify-center">
+                                      <div className={`w-16 h-4 rounded-full ${isDark ? 'bg-stone-600' : 'bg-stone-300'}`}></div>
+                                  </div>
+                                  <div className="h-[120px]"></div>
+                              </div>
 
-                                  {/* Team 2 Names */}
-                                  <div className="w-[45%] flex flex-col items-center justify-end text-center">
+                              {/* Team 2 Column */}
+                              <div className="flex-1 flex flex-col items-center justify-start">
+                                  {/* Team Name */}
+                                  <div className="h-[160px] flex flex-col items-center justify-end text-center mb-8">
                                       {matchToExport.mode === 'double' && matchToExport.t2Name.includes(' & ') ? (
                                           <>
                                               <span className="text-4xl font-bold uppercase tracking-widest text-stone-500 break-words w-full leading-snug">
                                                   {matchToExport.t2Name.split(' & ')[0]}
                                               </span>
-                                              <div className="w-4 h-4 bg-stone-300 dark:bg-stone-600 rounded-full my-4"></div>
+                                              <div className="w-3 h-3 bg-stone-300 dark:bg-stone-600 rounded-full my-4"></div>
                                               <span className="text-4xl font-bold uppercase tracking-widest text-stone-500 break-words w-full leading-snug">
                                                   {matchToExport.t2Name.split(' & ')[1]}
                                               </span>
@@ -2079,42 +2104,18 @@
                                           </span>
                                       )}
                                   </div>
-                              </div>
-
-                              {/* Scores Row */}
-                              <div className="flex items-center justify-between w-full h-[250px] mb-8">
-                                  <div className="w-[45%] flex justify-center">
-                                      <span className={`text-[16rem] font-black leading-none ${matchToExport.winner === 1 ? 'text-emerald-500' : isDark ? 'text-stone-200' : 'text-stone-800'}`}>
-                                          {matchToExport.t1Score}
-                                      </span>
-                                  </div>
-                                  <div className="w-[10%] flex items-center justify-center h-full">
-                                      {/* Mathematical Hyphen Block - Lifted slightly to optically align with number baseline */}
-                                      <div className={`w-24 h-5 rounded-full mb-12 ${isDark ? 'bg-stone-600' : 'bg-stone-300'}`}></div>
-                                  </div>
-                                  <div className="w-[45%] flex justify-center">
-                                      <span className={`text-[16rem] font-black leading-none ${matchToExport.winner === 2 ? 'text-rose-500' : isDark ? 'text-stone-200' : 'text-stone-800'}`}>
+                                  {/* Score */}
+                                  <div className="h-[250px] flex items-center justify-center">
+                                      <span className={`text-[16rem] font-black leading-none tracking-tighter ${matchToExport.winner === 2 ? 'text-rose-500' : isDark ? 'text-stone-200' : 'text-stone-800'}`}>
                                           {matchToExport.t2Score}
                                       </span>
                                   </div>
-                              </div>
-
-                              {/* Winners Row - Pushed down by 2 lines using pt-28 and lifted inner text */}
-                              <div className="flex items-start justify-between w-full h-[250px] pt-28">
-                                  <div className="w-[45%] flex justify-center">
-                                      {matchToExport.winner === 1 && (
-                                          <div className="h-24 px-10 bg-emerald-500 text-white rounded-[2rem] shadow-xl flex items-center justify-center gap-4">
-                                              <Trophy size={40} className="text-emerald-100" />
-                                              <span className="text-4xl font-black uppercase tracking-widest leading-none pb-2">Winner</span>
-                                          </div>
-                                      )}
-                                  </div>
-                                  <div className="w-[10%]"></div>
-                                  <div className="w-[45%] flex justify-center">
+                                  {/* Winner Badge */}
+                                  <div className="h-[120px] flex items-start justify-center pt-8">
                                       {matchToExport.winner === 2 && (
-                                          <div className="h-24 px-10 bg-rose-500 text-white rounded-[2rem] shadow-xl flex items-center justify-center gap-4">
-                                              <Trophy size={40} className="text-rose-100" />
-                                              <span className="text-4xl font-black uppercase tracking-widest leading-none pb-2">Winner</span>
+                                          <div className="h-16 px-8 bg-rose-500 text-white rounded-full shadow-lg flex items-center justify-center gap-3">
+                                              <Trophy size={28} className="text-rose-100" />
+                                              <span className="text-2xl font-black uppercase tracking-widest leading-none pt-1">Winner</span>
                                           </div>
                                       )}
                                   </div>
@@ -2123,7 +2124,7 @@
                           </div>
 
                           {/* Spacer to push footer down naturally */}
-                          <div className="flex-1 min-h-[50px]"></div>
+                          <div className="flex-1 min-h-[60px]"></div>
 
                           {/* 3. Footer */}
                           <div className="w-full flex flex-col items-center text-center mt-auto mb-4">
