@@ -1986,7 +1986,7 @@
                     <div className="p-6 pt-4 flex-shrink-0 border-t border-stone-100 dark:border-stone-800/50">
                       <div className="flex gap-3">
                         <button onClick={() => setPendingGame(null)} className={`flex-1 py-3 rounded-xl font-semibold border ${borderSub} ${textSub} hover:${textMain}`}>{getT('cancel')}</button>
-                        <button onClick={() => { startGame(pendingGame.mode, pendingGame.rules, matchTitleInput, t1PLeftInput, t1PRightInput, t2PLeftInput, t2PRightInput, customPlayTo, customWinBy, enableSwitchEnds, startingServer, enableTimeoutsSetup); setPendingGame(null); }} className={`flex-1 py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-md transition-colors`}>{getT('startMatch')}</button>
+                        <button onClick={() => { startGame(pendingGame.mode, pendingGame.rules, matchTitleInput, pendingGame.mode === 'single' ? t1PLeftInput : t1PLeftInput, pendingGame.mode === 'single' ? '' : t1PRightInput, pendingGame.mode === 'single' ? t2PLeftInput : t2PLeftInput, pendingGame.mode === 'single' ? '' : t2PRightInput, customPlayTo, customWinBy, enableSwitchEnds, startingServer, enableTimeoutsSetup); setPendingGame(null); }} className={`flex-1 py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-md transition-colors`}>{getT('startMatch')}</button>
                       </div>
                     </div>
                   </div>
@@ -2431,15 +2431,15 @@
                               </div>
 
                               {/* Scores Row */}
-                              <div className="flex items-center justify-between w-full h-[250px] mb-2">
+                              <div className="flex items-center justify-between w-full mb-4">
                                   <div className="w-[42%] flex justify-center">
                                       <span className={`text-[16rem] font-black leading-none ${matchToExport.winner === 1 ? 'text-emerald-500' : isDark ? 'text-stone-200' : 'text-stone-800'}`}>
                                           {matchToExport.t1Score}
                                       </span>
                                   </div>
                                   <div className="w-[16%] flex items-center justify-center">
-                                      {/* Mathematical Hyphen Block */}
-                                      <div className={`w-16 h-4 rounded-full ${isDark ? 'bg-stone-600' : 'bg-stone-300'}`}></div>
+                                      {/* Mathematical Hyphen Block - Nudged down to optically center with numbers */}
+                                      <div className={`w-20 h-5 rounded-full mt-10 ${isDark ? 'bg-stone-600' : 'bg-stone-300'}`}></div>
                                   </div>
                                   <div className="w-[42%] flex justify-center">
                                       <span className={`text-[16rem] font-black leading-none ${matchToExport.winner === 2 ? 'text-rose-500' : isDark ? 'text-stone-200' : 'text-stone-800'}`}>
@@ -2448,22 +2448,22 @@
                                   </div>
                               </div>
 
-                              {/* Winners Row - Pushed down by 2 lines and centered */}
-                              <div className="flex items-start justify-between w-full min-h-[140px] pt-12">
+                              {/* Winners Row - Safely pushed down by roughly 2 lines (mt-16) */}
+                              <div className="flex items-start justify-between w-full mt-16">
                                   <div className="w-[42%] flex justify-center">
                                       {matchToExport.winner === 1 && (
-                                          <div className="inline-flex h-16 px-8 bg-emerald-500 text-white rounded-full shadow-xl items-center justify-center gap-3">
-                                              <Trophy size={28} className="text-emerald-100" strokeWidth={2} />
-                                              <span className="text-2xl font-black uppercase tracking-widest leading-none pt-1">Winner</span>
+                                          <div className="inline-flex py-5 px-10 bg-emerald-500 text-white rounded-full shadow-2xl items-center justify-center gap-4">
+                                              <Trophy size={36} className="text-emerald-100" strokeWidth={2} />
+                                              <span className="text-3xl font-black uppercase tracking-widest leading-none pt-1">Winner</span>
                                           </div>
                                       )}
                                   </div>
                                   <div className="w-[16%]"></div>
                                   <div className="w-[42%] flex justify-center">
                                       {matchToExport.winner === 2 && (
-                                          <div className="inline-flex h-16 px-8 bg-rose-500 text-white rounded-full shadow-xl items-center justify-center gap-3">
-                                              <Trophy size={28} className="text-rose-100" strokeWidth={2} />
-                                              <span className="text-2xl font-black uppercase tracking-widest leading-none pt-1">Winner</span>
+                                          <div className="inline-flex py-5 px-10 bg-rose-500 text-white rounded-full shadow-2xl items-center justify-center gap-4">
+                                              <Trophy size={36} className="text-rose-100" strokeWidth={2} />
+                                              <span className="text-3xl font-black uppercase tracking-widest leading-none pt-1">Winner</span>
                                           </div>
                                       )}
                                   </div>
