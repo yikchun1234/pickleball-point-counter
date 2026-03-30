@@ -1278,7 +1278,14 @@
                         if (!blob) { setIsExporting(false); return; }
                         
                         const file = new File([blob], `pickleball_${Date.now()}.png`, { type: 'image/png' });
-                        const titleText = `🏓 Pickleball Result: ${match.t1Name} (${match.t1Score}) vs ${match.t2Name} (${match.t2Score})\nplay and generate from: https://pickleball-point-counter.pages.dev`;
+                        
+                        const winName = match.winner === 1 ? match.t1Name : match.t2Name;
+                        const loseName = match.winner === 1 ? match.t2Name : match.t1Name;
+                        const winScore = match.winner === 1 ? match.t1Score : match.t2Score;
+                        const loseScore = match.winner === 1 ? match.t2Score : match.t1Score;
+                        
+                        const titleText = `🏆 ${winName} wins ${winScore}-${loseScore} against ${loseName}!\nScore tracked via Pickleball Point Counter: https://pickleball-point-counter.pages.dev`;
+                        
                         const shareData = { title: 'Pickleball Result', text: titleText, files: [file] };
 
                         if (navigator.canShare && navigator.canShare(shareData)) {
