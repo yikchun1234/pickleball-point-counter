@@ -41,6 +41,20 @@
         
         // Prevent right-click context menu
         document.addEventListener('contextmenu', event => event.preventDefault());
+
+        // --- 4. Block Developer Keyboard Shortcuts ---
+        document.addEventListener('keydown', function(e) {
+            // Block F12
+            if (e.key === 'F12' || e.keyCode === 123) e.preventDefault();
+            // Block Ctrl+Shift+I (Inspect) and Cmd+Opt+I (Mac)
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) e.preventDefault();
+            // Block Ctrl+Shift+J (Console) and Cmd+Opt+J (Mac)
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) e.preventDefault();
+            // Block Ctrl+U (View Source) and Cmd+Opt+U (Mac)
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) e.preventDefault();
+            // Block Ctrl+S (Save Page) and Cmd+S (Mac)
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'S' || e.key === 's' || e.keyCode === 83)) e.preventDefault();
+        });
     </script>
 
     <meta id="theme-color-meta" name="theme-color" content="#fafaf9">
@@ -253,6 +267,7 @@
           de: { appTitle: "Pickleball", appSub: "Zähler", tapToStart: "Tippen zum Starten", newMatch: "Neues Spiel", selectFormat: "Format wählen", singles: "Einzel", doubles: "Doppel", stdTitle: "Standard (11 Pkt)", stdDescSingle: "Bis 11 • Sieg mit 2", stdDescDouble: "Bis 11 • Sieg mit 2", fourteenTitle: "14-Pkt-Regel", fourteenDesc: "Bis 15 • Rallye", customFormat: "Benutzerdefiniert", customDesc: "Eigene Regeln", playTo: "Spielen bis", winBy: "Sieg mit", t1Name: "Spieler 1", t2Name: "Spieler 2", team1: "Team 1", team2: "Team 2", server: "Aufschläger", wonRally: "Punkt", serving: "Aufschlag", winner: "Gewinnt!", playAgain: "Nochmal spielen", undo: "Rückgängig", reset: "Aufgeben", timeline: "Verlauf", awaiting: "Warten...", suddenDeath: "Sudden Death", nextPointWins: "Nächster Punkt", install: "App installieren", serveToWinOption: "14-14 Aufschlag", serveToWinDesc: "Aufschlag nötig", suddenDeathServeDesc: "Aufschlag nötig", switchEndsOption: "Seitenwechsel-Alarm", switchEndsOptionDesc: "Hinweis zum Seitenwechsel zur Halbzeit", customServeToWin: "Aufschlag für Punkte", customServeToWinDesc: "Nur Aufschläger punktet (0-0-2)", customServeToWinDescSingle: "Nur Aufschläger punktet (0-0)", matchPoint: "Matchball", cancel: "Abbrechen", startMatch: "Starten", t1Label: "T1", t2Label: "T2", installAsApp: "App installieren", designBy: "Amos © 2026", matchTitlePlaceholder: "Titel (Optional)", matchHistory: "Verlauf", clearHistory: "Verlauf löschen", reviewMatch: "Ansehen", noHistory: "Keine Spiele.", untitledMatch: "Freundschaftsspiel", confirmClear: "Alles löschen?", yesClear: "Ja", showResults: "Ergebnisse", installStepsIOS: 'Teilen -> Zum Home-Bildschirm.', installStepsAndroid: 'Menü -> Installieren.', gotIt: 'Verstanden!', infoTitle: 'Info', infoHowToTitle: 'Anleitung', infoHowTo1: '1. Setup: Format, Regeln, Auszeiten und Seitenwechsel wählen.', infoHowTo2: '2. Punkten: Team antippen. Rückgängig machen bei Fehlern.', infoHowTo3: '3. Platz: Positionen prüfen. Platzansicht nach Bedarf drehen.', infoHowTo4: '4. Sprache: Lautsprecher für automatische Ansagen aktivieren.', infoHowTo5: '5. Teilen: Verlauf/Statistiken ansehen und als Bild exportieren.', infoHowTo6: '6. Geheimnis: 5x auf "Irgendwo" tippen für ein "Easter Egg"', infoData: 'Lokale Daten. Keine Cloud.', infoUsage: 'Open Source. Credit an Amos.', infoFooter: 'Mit ❤️ gemacht.', retreatTitle: 'Aufgabe?', t1Retreat: 'T1 Aufgabe', t2Retreat: 'T2 Aufgabe', quitMatch: 'Beenden', quitConfirm: 'Zum Menü?', yesQuit: 'Ja', winByRetreat: 'Sieg durch Aufgabe!', loading: 'Laden...', switchEnds: "Seitenwechsel!", switchEndsDesc: "Bitte Seiten wechseln.", resumeMatch: "Spiel fortsetzen", resumeDesc: "Spiel fortsetzen?", stats: "Statistiken", totalMatches: "Spiele Gesamt", avgDuration: "Ø Dauer", share: "Teilen", edit: "Bearbeiten", winRate: "T1 Siegrate", time: "Zeit", firstServer: "Erster Aufschlag", sideOut: "Aufschlagwechsel", secondServer: "Zweiter Aufschlag", totalPoints: "Gesamtpunkte", winDist: "Siegverteilung", formatStats: "Format-Statistiken", enableTimeouts: "Auszeiten aktivieren", timeoutsDesc: "2 Auszeiten pro Team", callTimeout: "Auszeit", courtPosTitle: "Position auf dem Platz", courtPosDesc: "Startpositionen", receiver: "Rückschläger", generatingImage: "Bild wird erstellt", t1P1: "T1 L. Spieler", t1P2: "T1 R. Spieler", t2P1: "T2 L. Spieler", t2P2: "T2 R. Spieler", oddCourt: "(Links)", evenCourt: "(Rechts)", point: "Punkt" },
           pt: { appTitle: "Pickleball", appSub: "Contador", tapToStart: "Toque para começar", newMatch: "Nova Partida", selectFormat: "Formato", singles: "Simples", doubles: "Duplas", stdTitle: "Padrão (11 Pts)", stdDescSingle: "Até 11 • Vence por 2", stdDescDouble: "Até 11 • Vence por 2", fourteenTitle: "Regra 14 Pts", fourteenDesc: "Até 15 • Rally", customFormat: "Personalizado", customDesc: "Crie regras", playTo: "Jogar até", winBy: "Vencer por", t1Name: "Jogador 1", t2Name: "Jogador 2", team1: "Equipe 1", team2: "Equipe 2", server: "Sacador", wonRally: "Ponto", serving: "Sacando", winner: "Venceu!", playAgain: "Jogar Novamente", undo: "Desfazer", reset: "Desistir", timeline: "Histórico", awaiting: "Aguardando...", suddenDeath: "Morte Súbita", nextPointWins: "Próximo ponto vence", install: "Instalar App", serveToWinOption: "14-14 Saque para Vencer", serveToWinDesc: "Deve sacar para vencer", suddenDeathServeDesc: "Deve sacar", switchEndsOption: "Troca de Lado", switchEndsOptionDesc: "Avisar na metade dos pontos", customServeToWin: "Saque para Pontuar", customServeToWinDesc: "Apenas o sacador pontua (0-0-2)", customServeToWinDescSingle: "Apenas o sacador pontua (0-0)", matchPoint: "Ponto do Jogo", cancel: "Cancelar", startMatch: "Iniciar", t1Label: "E1", t2Label: "E2", installAsApp: "Instalar App", designBy: "Amos © 2026", matchTitlePlaceholder: "Título (Opcional)", matchHistory: "Histórico", clearHistory: "Limpar Histórico", reviewMatch: "Revisar", noHistory: "Sem partidas.", untitledMatch: "Amistoso", confirmClear: "Apagar tudo?", yesClear: "Sim", showResults: "Resultados", installStepsIOS: 'Compartilhar -> Tela de Início.', installStepsAndroid: 'Menu -> Instalar.', gotIt: 'Entendi!', infoTitle: 'Info', infoHowToTitle: 'Como Usar', infoHowTo1: '1. Configuração: Escolha formato, regras, tempos e troca de lado.', infoHowTo2: '2. Placar: Toque para pontuar. Use Desfazer para erros.', infoHowTo3: '3. Quadra: Verifique as posições e gire a quadra conforme sua visão.', infoHowTo4: '4. Voz: Ative o alto-falante para anúncios de pontuação.', infoHowTo5: '5. Compartilhar: Veja o histórico, estatísticas e exporte imagens.', infoHowTo6: '6. Segredo: Toque "Em algum lugar" 5 vezes para um "Easter Egg"', infoData: 'Dados locais. Sem nuvem.', infoUsage: 'Open source. Crédito Amos.', infoFooter: 'Feito com ❤️.', retreatTitle: 'Desistência?', t1Retreat: 'E1 Desistiu', t2Retreat: 'E2 Desistiu', quitMatch: 'Sair', quitConfirm: 'Voltar ao menu?', yesQuit: 'Sim', winByRetreat: 'Vence por desistência!', loading: 'Carregando...', switchEnds: "Troca de lado!", switchEndsDesc: "Troquem de lado na quadra.", resumeMatch: "Continuar Partida", resumeDesc: "Continuar partida pendente?", stats: "Estatísticas", totalMatches: "Total Partidas", avgDuration: "Duração Média", share: "Compartilhar", edit: "Editar", winRate: "Taxa Vitória E1", time: "Tempo", firstServer: "Primeiro Saque", sideOut: "Troca de serviço", secondServer: "Segundo saque", totalPoints: "Pontos Totais", winDist: "Distribuição de Vitórias", formatStats: "Estatísticas de Formato", enableTimeouts: "Ativar Pedidos de Tempo", timeoutsDesc: "2 tempos por equipe", callTimeout: "Pedir Tempo", courtPosTitle: "Posição na Quadra", courtPosDesc: "Posições do sacador e receptor", receiver: "Recebedor", generatingImage: "Gerando Imagem", t1P1: "E1 L. Jogador", t1P2: "E1 R. Jogador", t2P1: "E2 L. Jogador", t2P2: "E2 R. Jogador", oddCourt: "(Esquerda)", evenCourt: "(Direita)", point: "Ponto" }
         };
+
         const defaultLang = dict.en;
         const availableLanguages = [
           { code: 'en', name: 'English' }, { code: 'zh_CN', name: '简体中文' }, { code: 'zh_TW', name: '繁體中文' },
@@ -702,16 +717,14 @@
                         ballX += vx;
                         ballY += vy;
                         
-                        // Walls (Container is 300x300, Ball is 20x20)
                         if(ballX <= 0 || ballX >= 280) vx = -vx;
                         if(ballY <= 0) vy = -vy;
                         
-                        // Paddle Collision (Paddle is at Y=260, height=15, width=80)
                         if(ballY >= 250 && ballY <= 265 && ballX + 20 >= paddleX && ballX <= paddleX + 80 && vy > 0) {
-                            vy = -vy - 0.3; // Speed up slightly
-                            vx = vx + (Math.random() - 0.5) * 3; // Add random spin
+                            vy = -vy - 0.3; 
+                            vx = vx + (Math.random() - 0.5) * 3; 
                             score += 1;
-                            ballY = 249; // push out of paddle
+                            ballY = 249; 
                         }
                         
                         let gameOver = false;
@@ -725,9 +738,9 @@
 
             const handleMove = (e) => {
                 const rect = e.currentTarget.getBoundingClientRect();
-                let x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left - 40; // 40 is half paddle width
+                let x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left - 40; 
                 if(x < 0) x = 0;
-                if(x > 220) x = 220; // 300 width - 80 paddle width
+                if(x > 220) x = 220; 
                 setGameState(prev => ({...prev, paddleX: x}));
             };
 
@@ -744,9 +757,7 @@
                         <div className="text-center mb-8 text-stone-500 font-bold tracking-widest uppercase text-sm animate-pulse select-none pointer-events-none">Drag paddle to bounce</div>
                         
                         <div className="relative w-[300px] h-[300px] bg-stone-950 border-4 border-stone-800 rounded-xl overflow-hidden cursor-crosshair" onPointerMove={handleMove} onTouchMove={handleMove}>
-                            {/* Ball */}
                             <div className="absolute w-[20px] h-[20px] bg-emerald-400 rounded-full shadow-[0_0_15px_rgba(52,211,153,0.8)]" style={{ left: gameState.ballX, top: gameState.ballY }}></div>
-                            {/* Paddle */}
                             <div className="absolute h-[15px] w-[80px] bg-white rounded-full top-[260px] shadow-[0_0_10px_rgba(255,255,255,0.5)]" style={{ left: gameState.paddleX }}></div>
                         </div>
 
@@ -1466,7 +1477,7 @@
           };
 
           const saveStateForUndo = () => {
-            setStateHistory(prev => [...prev, { team1Score, team2Score, servingTeam, serverNumber, winner, winReason, hasSwitchedEnds, history: [...history], t1Timeouts, t2Timeouts }]);
+            setStateHistory(prev => [...prev, { team1Score, team2Score, servingTeam, serverNumber, winner, winReason, hasSwitchedEnds, history: [...history], t1Timeouts, t2Timeouts, courtRotation }]);
           };
 
           const handleUndo = () => {
@@ -1476,6 +1487,7 @@
             setServerNumber(prev.serverNumber); setWinner(prev.winner); setWinReason(prev.winReason || 'score');
             if (prev.t1Timeouts !== undefined) setT1Timeouts(prev.t1Timeouts);
             if (prev.t2Timeouts !== undefined) setT2Timeouts(prev.t2Timeouts);
+            if (prev.courtRotation !== undefined) setCourtRotation(prev.courtRotation);
             setHistory(prev.history); setHasSwitchedEnds(prev.hasSwitchedEnds || false);
             setStateHistory(s => s.slice(0, -1));
           };
@@ -1820,8 +1832,8 @@
             </div>
           );
 
+          const checkStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
           useEffect(() => {
-            const checkStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
             setIsInstalled(checkStandalone());
             const mediaQuery = window.matchMedia('(display-mode: standalone)');
             const handleDisplayModeChange = (e) => setIsInstalled(e.matches);
@@ -2303,8 +2315,8 @@
                     </div>
 
                     {/* MINI COURT BELOW SCORES */}
-                    <div className={`flex justify-center w-full mt-10 md:mt-12 ${isSuddenDeath && !winner ? 'mb-8' : 'mb-12 md:mb-16'} relative z-10`}>
-                        <div className="relative flex items-center justify-center w-[280px] h-[280px] md:w-[320px] md:h-[320px]">
+                    <div className={`flex justify-center w-full mt-6 md:mt-8 ${isSuddenDeath && !winner ? 'mb-4' : 'mb-6 md:mb-8'} relative z-10`}>
+                        <div className="relative flex items-center justify-center w-[240px] h-[240px] md:w-[280px] md:h-[280px]">
                             
                             {/* ROTATING COURT CONTAINER */}
                             <div 
@@ -2360,11 +2372,13 @@
                             </div>
                             
                             {/* ROTATION CONTROLS */}
-                            <div className="absolute -bottom-8 md:-bottom-8 -left-4 -right-4 md:-left-12 md:-right-12 flex justify-between pointer-events-auto">
-                                <button onClick={() => setCourtRotation(r => r - 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md z-20`}>
+                            <div className="absolute top-1/2 -translate-y-1/2 -left-[50px] md:-left-[60px] pointer-events-auto z-20">
+                                <button onClick={() => setCourtRotation(r => r - 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md`}>
                                     <RotateCcw size={18} />
                                 </button>
-                                <button onClick={() => setCourtRotation(r => r + 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md z-20`}>
+                            </div>
+                            <div className="absolute top-1/2 -translate-y-1/2 -right-[50px] md:-right-[60px] pointer-events-auto z-20">
+                                <button onClick={() => setCourtRotation(r => r + 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md`}>
                                     <RotateCw size={18} />
                                 </button>
                             </div>
