@@ -5,26 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Pickleball Point Counter</title>
     
-    <!-- PWA Meta Tags -->
     <meta id="theme-color-meta" name="theme-color" content="#fafaf9">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Pickleball Point Counter">
     <meta name="mobile-web-app-capable" content="yes">
 
-    <!-- App Icons -->
     <link id="favicon" rel="icon" type="image/jpeg" sizes="512x512" href="https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg">
     <link id="apple-icon" rel="apple-touch-icon" sizes="512x512" href="https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg">
     <link id="manifest-link" rel="manifest" href="">
 
-    <!-- Dynamic PWA Manifest & Icon Generator -->
     <script>
         (function() {
             const img = new Image();
             img.crossOrigin = "Anonymous"; 
             img.onload = function() {
                 try {
-                    // 1. Canvas for Android (Manifest & Favicon) - More padding (0.65) for Maskable Adaptive Icons
+                    // 1. Canvas for Android (Manifest & Favicon)
                     const canvasAndroid = document.createElement('canvas');
                     canvasAndroid.width = 512; canvasAndroid.height = 512;
                     const ctxAndroid = canvasAndroid.getContext('2d');
@@ -36,7 +33,7 @@
                     ctxAndroid.drawImage(img, offsetAndroid, offsetAndroid, sizeAndroid, sizeAndroid);
                     const androidIconUrl = canvasAndroid.toDataURL('image/png');
 
-                    // 2. Canvas for iOS - Keep the original 0.9 scale that looks perfect
+                    // 2. Canvas for iOS
                     const canvasIOS = document.createElement('canvas');
                     canvasIOS.width = 512; canvasIOS.height = 512;
                     const ctxIOS = canvasIOS.getContext('2d');
@@ -71,20 +68,15 @@
         })();
     </script>
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    <!-- Babel -->
     <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Disable Context Menu / Long Press Default Behaviors -->
     <script>
         document.addEventListener('contextmenu', event => event.preventDefault());
     </script>
@@ -100,8 +92,8 @@
             -webkit-tap-highlight-color: transparent; 
             background-color: var(--app-bg, #fafaf9) !important; 
             transition: background-color 0.3s ease;
-            -webkit-touch-callout: none; /* Disable iOS long press popup */
-            -webkit-user-select: none;   /* Disable text selection */
+            -webkit-touch-callout: none; 
+            -webkit-user-select: none;   
             -khtml-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
@@ -115,7 +107,6 @@
             overscroll-behavior-y: none; 
         }
 
-        /* Ensure input fields remain selectable and editable */
         input, select, textarea {
             -webkit-user-select: auto !important;
             -khtml-user-select: auto !important;
@@ -133,47 +124,28 @@
             0% { opacity: 1; transform: scale(1) translateY(0); }
             100% { opacity: 0; transform: scale(0.96) translateY(20px); }
         }
-        .animate-screen-enter {
-            animation: scaleFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        .animate-screen-exit {
-            animation: scaleFadeOut 0.28s cubic-bezier(0.4, 0, 1, 1) forwards;
-        }
+        .animate-screen-enter { animation: scaleFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-screen-exit { animation: scaleFadeOut 0.28s cubic-bezier(0.4, 0, 1, 1) forwards; }
 
-        /* * Button Pop Animations */
         @keyframes popInButton {
             0% { opacity: 0; transform: scale(0.8) translateY(-10px); }
             100% { opacity: 1; transform: scale(1) translateY(0); }
         }
-        .animate-pop-btn-1 {
-            animation: popInButton 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards;
-            opacity: 0;
-        }
-        .animate-pop-btn-2 {
-            animation: popInButton 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
-            opacity: 0;
-        }
+        .animate-pop-btn-1 { animation: popInButton 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards; opacity: 0; }
+        .animate-pop-btn-2 { animation: popInButton 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards; opacity: 0; }
 
         @keyframes popOutButton {
             0% { opacity: 1; transform: scale(1) translateY(0); }
             100% { opacity: 0; transform: scale(0.8) translateY(-10px); }
         }
-        .animate-pop-out-btn-1 {
-            animation: popOutButton 0.25s cubic-bezier(0.4, 0, 1, 1) forwards;
-        }
-        .animate-pop-out-btn-2 {
-            animation: popOutButton 0.25s cubic-bezier(0.4, 0, 1, 1) 0.05s forwards;
-        }
+        .animate-pop-out-btn-1 { animation: popOutButton 0.25s cubic-bezier(0.4, 0, 1, 1) forwards; }
+        .animate-pop-out-btn-2 { animation: popOutButton 0.25s cubic-bezier(0.4, 0, 1, 1) 0.05s forwards; }
 
         @keyframes secretHintBounce {
             0%, 90%, 100% { transform: scale(1) translateY(0); }
             95% { transform: scale(1.02) translateY(-4px); }
         }
-        .animate-secret-hint {
-            animation: secretHintBounce 5s infinite ease-in-out;
-            cursor: pointer;
-            display: inline-block;
-        }
+        .animate-secret-hint { animation: secretHintBounce 5s infinite ease-in-out; cursor: pointer; display: inline-block; }
     </style>
 </head>
 <body>
@@ -229,8 +201,6 @@
         const ChevronDown = (props) => <IconWrapper iconObj={lucide.icons.ChevronDown} {...props} />;
         const ChevronLeft = (props) => <IconWrapper iconObj={lucide.icons.ChevronLeft} {...props} />;
         const Activity = (props) => <IconWrapper iconObj={lucide.icons.Activity} {...props} />;
-        
-        // New Icons for Arcade
         const Grid = (props) => <IconWrapper iconObj={lucide.icons.Grid} {...props} />;
         const ArrowUp = (props) => <IconWrapper iconObj={lucide.icons.ArrowUp} {...props} />;
         const Target = (props) => <IconWrapper iconObj={lucide.icons.Target} {...props} />;
@@ -439,8 +409,6 @@
                         if (obsX < -30) { obsX = 360; score += 1; }
                         
                         let gameOver = false;
-                        // Collision logic based on fixed container size
-                        // Dino is roughly at X: 40 to 70
                         if (obsX < 70 && obsX + 24 > 40) {
                             if (dinoY < 45) gameOver = true;
                         }
@@ -478,15 +446,10 @@
                     <div className="flex-1 flex flex-col items-center justify-center p-4 relative" onPointerDown={handleJump}>
                         <div className="text-center mb-8 text-stone-500 font-bold tracking-widest uppercase text-sm animate-pulse select-none pointer-events-none">Tap anywhere to jump</div>
                         <div className="relative w-full max-w-[360px] h-[250px] bg-stone-950 border-4 border-stone-800 rounded-xl overflow-hidden pointer-events-none">
-                            {/* Ground */}
                             <div className="absolute bottom-0 w-full h-[10px] bg-stone-800"></div>
-                            
-                            {/* Player / Dino */}
                             <div className="absolute left-[40px] w-[30px] h-[30px] bg-emerald-400 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(52,211,153,0.5)]" style={{ bottom: `${gameState.dinoY + 10}px` }}>
                                 <User size={20} className="text-stone-900" />
                             </div>
-                            
-                            {/* Obstacle */}
                             <div className="absolute bottom-[10px] w-[24px] h-[45px] bg-rose-500 rounded-t-lg shadow-[0_0_15px_rgba(244,63,94,0.5)]" style={{ left: `${gameState.obsX}px` }}></div>
                         </div>
 
@@ -698,16 +661,14 @@
                         ballX += vx;
                         ballY += vy;
                         
-                        // Walls (Container is 300x300, Ball is 20x20)
                         if(ballX <= 0 || ballX >= 280) vx = -vx;
                         if(ballY <= 0) vy = -vy;
                         
-                        // Paddle Collision (Paddle is at Y=260, height=15, width=80)
                         if(ballY >= 250 && ballY <= 265 && ballX + 20 >= paddleX && ballX <= paddleX + 80 && vy > 0) {
-                            vy = -vy - 0.3; // Speed up slightly
-                            vx = vx + (Math.random() - 0.5) * 3; // Add random spin
+                            vy = -vy - 0.3; 
+                            vx = vx + (Math.random() - 0.5) * 3; 
                             score += 1;
-                            ballY = 249; // push out of paddle
+                            ballY = 249; 
                         }
                         
                         let gameOver = false;
@@ -721,9 +682,9 @@
 
             const handleMove = (e) => {
                 const rect = e.currentTarget.getBoundingClientRect();
-                let x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left - 40; // 40 is half paddle width
+                let x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left - 40; 
                 if(x < 0) x = 0;
-                if(x > 220) x = 220; // 300 width - 80 paddle width
+                if(x > 220) x = 220; 
                 setGameState(prev => ({...prev, paddleX: x}));
             };
 
@@ -740,9 +701,7 @@
                         <div className="text-center mb-8 text-stone-500 font-bold tracking-widest uppercase text-sm animate-pulse select-none pointer-events-none">Drag paddle to bounce</div>
                         
                         <div className="relative w-[300px] h-[300px] bg-stone-950 border-4 border-stone-800 rounded-xl overflow-hidden cursor-crosshair" onPointerMove={handleMove} onTouchMove={handleMove}>
-                            {/* Ball */}
                             <div className="absolute w-[20px] h-[20px] bg-emerald-400 rounded-full shadow-[0_0_15px_rgba(52,211,153,0.8)]" style={{ left: gameState.ballX, top: gameState.ballY }}></div>
-                            {/* Paddle */}
                             <div className="absolute h-[15px] w-[80px] bg-white rounded-full top-[260px] shadow-[0_0_10px_rgba(255,255,255,0.5)]" style={{ left: gameState.paddleX }}></div>
                         </div>
 
@@ -974,10 +933,12 @@
           const t = dict[lang] || dict.en;
           const getT = (key) => t[key] || defaultLang[key];
 
-          // Check if any overlay modal is currently open
+          useEffect(() => {
+              window.scrollTo(0, 0);
+          }, [appState]);
+
           const isModalOpen = !!(pendingGame || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || (recoverGameData && appState !== 'splash') || showWinnerOverlay || secretGame || showTimeoutConfirm || isExporting);
 
-          // Lock body scrolling when a modal is open
           useEffect(() => {
               if (isModalOpen) {
                   document.body.style.overflow = 'hidden';
@@ -1084,7 +1045,6 @@
 
           useEffect(() => {
             const baseColor = isDark ? '#1c1917' : '#fafaf9'; 
-            // Blended modal overlay color for OS status bar:
             const modalColor = isDark ? '#110f0e' : '#969695'; 
             const themeColor = isModalOpen ? modalColor : baseColor;
             
@@ -1109,12 +1069,12 @@
                 try {
                     const canvas = document.createElement('canvas');
                     const width = 1080;
-                    const height = 1350; // Instagram Portrait Aspect Ratio 4:5
+                    const height = 1350; // Instagram Portrait
                     canvas.width = width;
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
 
-                    // --- 1. Backgrounds ---
+                    // 1. Backgrounds
                     const bg = isDark ? '#1c1917' : '#fafaf9';
                     const textMain = isDark ? '#e7e5e4' : '#292524';
                     const textSub = isDark ? '#78716c' : '#a8a29e';
@@ -1139,7 +1099,6 @@
                     ctx.fillStyle = gradient;
                     ctx.fillRect(0, 0, width, height);
 
-                    // Utility to draw SVG Strings onto Canvas
                     const drawSvg = (svgString, x, y, w, h) => {
                         return new Promise((resolve) => {
                             const img = new Image();
@@ -1160,12 +1119,12 @@
                         });
                     };
 
-                    // --- 2. Top Trophy Icon ---
-                    const trophyColor = '#10b981'; // Unencoded for Blob usage
+                    // 2. Top Trophy Icon
+                    const trophyColor = '#10b981'; 
                     const trophySvg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="${trophyColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>`;
                     await drawSvg(trophySvg, width/2 - 50, 100, 100, 100);
 
-                    // --- 3. Match Title & Date ---
+                    // 3. Match Title & Date
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'top';
                     ctx.fillStyle = textMain;
@@ -1178,7 +1137,7 @@
                     ctx.letterSpacing = '0px';
                     ctx.fillText(match.date, width/2, 320);
 
-                    // --- 4. Team Names ---
+                    // 4. Team Names
                     const drawNames = (nameStr, x, y) => {
                         ctx.fillStyle = textSub;
                         ctx.font = '900 34px "Noto Sans", sans-serif';
@@ -1187,7 +1146,6 @@
                             const parts = nameStr.split(' & ');
                             ctx.fillText(parts[0].toUpperCase(), x, y - 45);
                             
-                            // Center Dot
                             ctx.beginPath();
                             ctx.arc(x, y + 15, 6, 0, Math.PI*2);
                             ctx.fillStyle = isDark ? '#57534e' : '#d6d3d1';
@@ -1202,7 +1160,7 @@
                     drawNames(match.t1Name, width/2 - 250, 500);
                     drawNames(match.t2Name, width/2 + 250, 500);
 
-                    // --- 5. Massive Scores ---
+                    // 5. Massive Scores
                     ctx.font = '900 280px "Noto Sans", sans-serif';
                     ctx.letterSpacing = '0px';
                     ctx.textBaseline = 'middle';
@@ -1213,16 +1171,15 @@
                     ctx.fillStyle = match.winner === 2 ? accentRed : textMain;
                     ctx.fillText(match.t2Score, width/2 + 250, 800);
 
-                    // Center Hyphen (Visually aligned to the center of the numbers)
                     ctx.fillStyle = isDark ? '#57534e' : '#d6d3d1';
                     ctx.beginPath();
                     ctx.roundRect(width/2 - 40, 800 - 10, 80, 20, 10);
                     ctx.fill();
 
-                    // --- 6. Winner Badges ---
+                    // 6. Winner Badges
                     const drawWinnerBadge = async (color, x, y) => {
                         const hexColor = color === 'green' ? accentGreen : accentRed;
-                        const iconColor = color === 'green' ? '#d1fae5' : '#ffe4e6'; // Unencoded for Blob usage
+                        const iconColor = color === 'green' ? '#d1fae5' : '#ffe4e6'; 
                         const badgeSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>`;
                         
                         const badgeW = 280;
@@ -1230,18 +1187,15 @@
                         const badgeX = x - badgeW/2;
                         const badgeY = y - badgeH/2;
 
-                        // Pill background
                         ctx.fillStyle = hexColor;
                         ctx.beginPath();
                         ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 40);
                         ctx.fill();
 
-                        // Icon
                         await drawSvg(badgeSvg, badgeX + 40, badgeY + 22, 36, 36);
 
-                        // Text
                         ctx.fillStyle = '#ffffff';
-                        ctx.font = '700 28px "Noto Sans", sans-serif'; // Adjusted to Bold (700) from Black (900)
+                        ctx.font = '700 28px "Noto Sans", sans-serif';
                         ctx.letterSpacing = '4px';
                         ctx.textBaseline = 'middle';
                         ctx.fillText("WINNER", badgeX + 165, badgeY + badgeH/2 + 2);
@@ -1250,7 +1204,7 @@
                     if (match.winner === 1) await drawWinnerBadge('green', width/2 - 250, 1050);
                     if (match.winner === 2) await drawWinnerBadge('red', width/2 + 250, 1050);
 
-                    // --- 7. Footer Pill ---
+                    // 7. Footer Pill
                     const modeText = match.mode === 'single' ? getT('singles') : getT('doubles');
                     const rulesText = match.rules === 'standard' ? getT('stdTitle') : match.rules === '14-point' ? getT('fourteenTitle') : getT('customFormat');
                     const timeText = formatTime(match.elapsedTime || 0);
@@ -1269,13 +1223,12 @@
                     ctx.textBaseline = 'middle';
                     ctx.fillText(footerText, width/2, 1180);
 
-                    // URL
                     ctx.font = '800 20px "Noto Sans", sans-serif';
                     ctx.letterSpacing = '3px';
                     ctx.fillStyle = isDark ? '#57534e' : '#a8a29e';
                     ctx.fillText("HTTPS://PICKLEBALL-POINT-COUNTER.PAGES.DEV", width/2, 1280);
 
-                    // --- 8. Generate File and Share ---
+                    // 8. Generate File and Share
                     canvas.toBlob(async (blob) => {
                         if (!blob) { setIsExporting(false); return; }
                         
@@ -1306,7 +1259,7 @@
                     setIsExporting(false);
                     alert("Image generation failed.");
                 }
-            }, 50); // tiny delay just to render loading spinner
+            }, 50); 
           };
 
           const announceText = (text1, text2) => {
@@ -1450,7 +1403,7 @@
           };
 
           const saveStateForUndo = () => {
-            setStateHistory(prev => [...prev, { team1Score, team2Score, servingTeam, serverNumber, winner, winReason, hasSwitchedEnds, history: [...history], t1Timeouts, t2Timeouts }]);
+            setStateHistory(prev => [...prev, { team1Score, team2Score, servingTeam, serverNumber, winner, winReason, hasSwitchedEnds, history: [...history], t1Timeouts, t2Timeouts, courtRotation }]);
           };
 
           const handleUndo = () => {
@@ -1460,6 +1413,7 @@
             setServerNumber(prev.serverNumber); setWinner(prev.winner); setWinReason(prev.winReason || 'score');
             if (prev.t1Timeouts !== undefined) setT1Timeouts(prev.t1Timeouts);
             if (prev.t2Timeouts !== undefined) setT2Timeouts(prev.t2Timeouts);
+            if (prev.courtRotation !== undefined) setCourtRotation(prev.courtRotation);
             setHistory(prev.history); setHasSwitchedEnds(prev.hasSwitchedEnds || false);
             setStateHistory(s => s.slice(0, -1));
           };
@@ -1717,7 +1671,7 @@
 
           const renderPlayerBadge = (name, role) => {
               if (!name) return null;
-              let bg = 'bg-stone-500/20 text-stone-400 dark:text-stone-300 border border-stone-400/20'; // Faded partner
+              let bg = 'bg-stone-500/20 text-stone-400 dark:text-stone-300 border border-stone-400/20';
               let scale = 1;
               let zIndex = 0;
               
@@ -1804,8 +1758,8 @@
             </div>
           );
 
+          const checkStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
           useEffect(() => {
-            const checkStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
             setIsInstalled(checkStandalone());
             const mediaQuery = window.matchMedia('(display-mode: standalone)');
             const handleDisplayModeChange = (e) => setIsInstalled(e.matches);
@@ -1871,7 +1825,6 @@
                     {appState === 'game' && <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${bgCard} ${borderSub} border shadow-sm text-xs font-bold ${textSub}`}><Timer size={14}/> {formatTime(elapsedTime)}</div>}
                   </div>
                   
-                  {/* --- ALWAYS VISIBLE GLOBAL MENU --- */}
                   <div className={`flex items-center gap-2 pointer-events-auto`}>
                     <button onClick={handleSoundClick} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform relative z-10`}>
                       {soundEnabled ? <Volume2 size={18} className={accentGreen} /> : <VolumeX size={18} className={textSub} />}
@@ -2099,7 +2052,6 @@
                       <div className="space-y-4">
                         <div><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('matchTitlePlaceholder')}</label><input type="text" placeholder={getT('untitledMatch')} value={matchTitleInput} onChange={(e) => setMatchTitleInput(e.target.value)} className={`w-full px-4 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} focus:outline-none focus:ring-2 focus:ring-emerald-500/50`} /></div>
                         
-                        {/* Player Inputs for Singles vs Doubles */}
                         {pendingGame.mode === 'single' ? (
                             <div className="flex gap-3">
                               <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('t1Name')}</label><input type="text" placeholder={getT('t1Name')} value={t1PLeftInput} onChange={(e) => setT1PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
@@ -2244,7 +2196,6 @@
 
                   <main className="flex-1 flex flex-col justify-center relative mt-2">
                     
-                    {/* --- PERFECT SCOREBOARD ALIGNMENT --- */}
                     <div className={`flex justify-center items-center gap-4 md:gap-8 mt-10 mb-8 relative z-10`}>
                       
                       {/* TEAM 1 */}
@@ -2259,7 +2210,6 @@
                         )}
                       </div>
                       
-                      {/* HYPHEN */}
                       <span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span>
                       
                       {/* TEAM 2 */}
@@ -2287,8 +2237,8 @@
                     </div>
 
                     {/* MINI COURT BELOW SCORES */}
-                    <div className={`flex justify-center w-full mt-10 md:mt-12 ${isSuddenDeath && !winner ? 'mb-8' : 'mb-12 md:mb-16'} relative z-10`}>
-                        <div className="relative flex items-center justify-center w-[280px] h-[280px] md:w-[320px] md:h-[320px]">
+                    <div className={`flex justify-center w-full mt-6 md:mt-8 ${isSuddenDeath && !winner ? 'mb-4' : 'mb-6 md:mb-8'} relative z-10`}>
+                        <div className="relative flex items-center justify-center w-[240px] h-[240px] md:w-[280px] md:h-[280px]">
                             
                             {/* ROTATING COURT CONTAINER */}
                             <div 
@@ -2310,13 +2260,13 @@
                                     <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
                                     <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">
                                         {(gameMode === 'double' || courtServerPos === 'top-left' || courtReceiverPos === 'top-left') && renderPlayerBadge(
-                                            gameMode === 'single' ? t2PLeft : currentT2Right, // Viewer's top-left is T2's right side
+                                            gameMode === 'single' ? t2PLeft : currentT2Right, 
                                             courtServerPos === 'top-left' ? 'server' : courtReceiverPos === 'top-left' ? 'receiver' : 'partner'
                                         )}
                                     </div>
                                     <div className="absolute top-1 right-0 w-1/2 flex justify-center items-center h-full">
                                         {(gameMode === 'double' || courtServerPos === 'top-right' || courtReceiverPos === 'top-right') && renderPlayerBadge(
-                                            gameMode === 'single' ? t2PLeft : currentT2Left, // Viewer's top-right is T2's left side
+                                            gameMode === 'single' ? t2PLeft : currentT2Left, 
                                             courtServerPos === 'top-right' ? 'server' : courtReceiverPos === 'top-right' ? 'receiver' : 'partner'
                                         )}
                                     </div>
@@ -2344,11 +2294,13 @@
                             </div>
                             
                             {/* ROTATION CONTROLS */}
-                            <div className="absolute -bottom-8 md:-bottom-8 -left-4 -right-4 md:-left-12 md:-right-12 flex justify-between pointer-events-auto">
-                                <button onClick={() => setCourtRotation(r => r - 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md z-20`}>
+                            <div className="absolute top-1/2 -translate-y-1/2 left-0 pointer-events-auto z-20">
+                                <button onClick={() => setCourtRotation(r => r - 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md`}>
                                     <RotateCcw size={18} />
                                 </button>
-                                <button onClick={() => setCourtRotation(r => r + 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md z-20`}>
+                            </div>
+                            <div className="absolute top-1/2 -translate-y-1/2 right-0 pointer-events-auto z-20">
+                                <button onClick={() => setCourtRotation(r => r + 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md`}>
                                     <RotateCw size={18} />
                                 </button>
                             </div>
