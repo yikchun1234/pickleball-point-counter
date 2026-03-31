@@ -201,6 +201,7 @@
         const Users = (props) => <IconWrapper iconObj={lucide.icons.Users} {...props} />;
         const User = (props) => <IconWrapper iconObj={lucide.icons.User} {...props} />;
         const RotateCcw = (props) => <IconWrapper iconObj={lucide.icons.RotateCcw} {...props} />;
+        const RotateCw = (props) => <IconWrapper iconObj={lucide.icons.RotateCw} {...props} />;
         const Trophy = (props) => <IconWrapper iconObj={lucide.icons.Trophy} {...props} />;
         const ArrowLeft = (props) => <IconWrapper iconObj={lucide.icons.ArrowLeft} {...props} />;
         const Undo2 = (props) => <IconWrapper iconObj={lucide.icons.Undo2} {...props} />;
@@ -958,6 +959,7 @@
           const [enableSwitchEnds, setEnableSwitchEnds] = useState(false);
           const [hasSwitchedEnds, setHasSwitchedEnds] = useState(false);
           const [elapsedTime, setElapsedTime] = useState(0);
+          const [courtRotation, setCourtRotation] = useState(0);
           
           const [showHistory, setShowHistory] = useState(false);
           const [history, setHistory] = useState([]); 
@@ -1030,12 +1032,12 @@
                 currentMatchId, matchTitle, gameMode, ruleSet, playTo, winByMargin, 
                 t1PLeft, t1PRight, t2PLeft, t2PRight,
                 team1Score, team2Score, servingTeam, serverNumber, serveToWinAt14, enableSwitchEnds, hasSwitchedEnds,
-                elapsedTime, history, stateHistory, enableTimeouts, t1Timeouts, t2Timeouts
+                elapsedTime, history, stateHistory, enableTimeouts, t1Timeouts, t2Timeouts, courtRotation
               }));
             } else if (winner) {
               localStorage.removeItem('pb_active_game');
             }
-          }, [team1Score, team2Score, servingTeam, serverNumber, history, appState, winner, elapsedTime, t1Timeouts, t2Timeouts]);
+          }, [team1Score, team2Score, servingTeam, serverNumber, history, appState, winner, elapsedTime, t1Timeouts, t2Timeouts, courtRotation]);
 
           useEffect(() => {
             let timer;
@@ -1410,6 +1412,7 @@
             setTeam2Score(data.team2Score); setServingTeam(data.servingTeam); setServerNumber(data.serverNumber);
             setServeToWinAt14(data.serveToWinAt14); setEnableSwitchEnds(data.enableSwitchEnds || false); setHasSwitchedEnds(data.hasSwitchedEnds);
             setEnableTimeouts(data.enableTimeouts || false); setT1Timeouts(data.t1Timeouts ?? 2); setT2Timeouts(data.t2Timeouts ?? 2);
+            setCourtRotation(data.courtRotation || 0);
             setElapsedTime(data.elapsedTime); setHistory(data.history); setStateHistory(data.stateHistory);
             setWinner(null); setWinReason('score'); setShowWinnerOverlay(false);
             setAppState('game'); setRecoverGameData(null);
@@ -1434,7 +1437,7 @@
             setTeam1Score(0); setTeam2Score(0); setServingTeam(startServ); setServerNumber(mode === 'double' ? 2 : 1);
             setEnableTimeouts(useTimeouts); setT1Timeouts(2); setT2Timeouts(2);
             setWinner(null); setWinReason('score'); setShowWinnerOverlay(false);
-            setHistory([]); setStateHistory([]); setHasSwitchedEnds(false); setElapsedTime(0);
+            setHistory([]); setStateHistory([]); setHasSwitchedEnds(false); setElapsedTime(0); setCourtRotation(0);
             
             setAppState('game');
 
@@ -1715,11 +1718,24 @@
           const renderPlayerBadge = (name, role) => {
               if (!name) return null;
               let bg = 'bg-stone-500/20 text-stone-400 dark:text-stone-300 border border-stone-400/20'; // Faded partner
-              if (role === 'server') bg = 'bg-amber-400 text-amber-950 shadow-lg ring-2 ring-white scale-110 z-10'; // Glowing server
-              else if (role === 'receiver') bg = 'bg-white text-emerald-800 shadow-md ring-2 ring-emerald-400/50 scale-105 z-10'; // Highlighted receiver
+              let scale = 1;
+              let zIndex = 0;
+              
+              if (role === 'server') {
+                  bg = 'bg-amber-400 text-amber-950 shadow-lg ring-2 ring-white';
+                  scale = 1.1;
+                  zIndex = 10;
+              } else if (role === 'receiver') {
+                  bg = 'bg-white text-emerald-800 shadow-md ring-2 ring-emerald-400/50';
+                  scale = 1.05;
+                  zIndex = 10;
+              }
 
               return (
-                  <div className={`px-2 py-1 rounded shadow-sm max-w-[90%] truncate text-[8px] md:text-[9px] font-black tracking-wider uppercase ${bg}`}>
+                  <div 
+                      className={`px-2 py-1 rounded shadow-sm max-w-[90%] truncate text-[8px] md:text-[9px] font-black tracking-wider uppercase transition-all duration-500 ease-in-out ${bg}`}
+                      style={{ transform: `rotate(${-courtRotation}deg) scale(${scale})`, zIndex }}
+                  >
                       {name}
                   </div>
               );
@@ -2271,9 +2287,14 @@
                     </div>
 
                     {/* MINI COURT BELOW SCORES */}
-                    <div className={`flex justify-center w-full mt-10 md:mt-12 ${isSuddenDeath && !winner ? 'mb-4' : 'mb-8 md:mb-12'} relative z-10`}>
-                        <div className="flex flex-col items-center justify-center">
-                            <div className="w-[180px] h-[240px] md:w-[220px] md:h-[280px] bg-emerald-600 rounded-[3px] border-[3px] border-white/90 shadow-md relative flex flex-col overflow-hidden pointer-events-none">
+                    <div className={`flex justify-center w-full mt-10 md:mt-12 ${isSuddenDeath && !winner ? 'mb-8' : 'mb-12 md:mb-16'} relative z-10`}>
+                        <div className="relative flex items-center justify-center w-[280px] h-[280px] md:w-[320px] md:h-[320px]">
+                            
+                            {/* ROTATING COURT CONTAINER */}
+                            <div 
+                                className="w-[180px] h-[240px] md:w-[220px] md:h-[280px] bg-emerald-600 rounded-[3px] border-[3px] border-white/90 shadow-md relative flex flex-col overflow-hidden pointer-events-none transition-transform duration-500 ease-in-out"
+                                style={{ transform: `rotate(${courtRotation}deg)` }}
+                            >
                                 
                                 {/* Dashed Cross-Court Laser */}
                                 <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
@@ -2287,13 +2308,13 @@
                                 {/* T2 Backcourt */}
                                 <div className="flex-1 relative border-b border-white/50 z-20">
                                     <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
-                                    <div className="absolute top-1 left-0 w-1/2 flex justify-center">
+                                    <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">
                                         {(gameMode === 'double' || courtServerPos === 'top-left' || courtReceiverPos === 'top-left') && renderPlayerBadge(
                                             gameMode === 'single' ? t2PLeft : currentT2Right, // Viewer's top-left is T2's right side
                                             courtServerPos === 'top-left' ? 'server' : courtReceiverPos === 'top-left' ? 'receiver' : 'partner'
                                         )}
                                     </div>
-                                    <div className="absolute top-1 right-0 w-1/2 flex justify-center">
+                                    <div className="absolute top-1 right-0 w-1/2 flex justify-center items-center h-full">
                                         {(gameMode === 'double' || courtServerPos === 'top-right' || courtReceiverPos === 'top-right') && renderPlayerBadge(
                                             gameMode === 'single' ? t2PLeft : currentT2Left, // Viewer's top-right is T2's left side
                                             courtServerPos === 'top-right' ? 'server' : courtReceiverPos === 'top-right' ? 'receiver' : 'partner'
@@ -2307,13 +2328,13 @@
                                 {/* T1 Backcourt */}
                                 <div className="flex-1 relative z-20">
                                     <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
-                                    <div className="absolute bottom-1 left-0 w-1/2 flex justify-center">
+                                    <div className="absolute bottom-1 left-0 w-1/2 flex justify-center items-center h-full">
                                         {(gameMode === 'double' || courtServerPos === 'bottom-left' || courtReceiverPos === 'bottom-left') && renderPlayerBadge(
                                             gameMode === 'single' ? t1PLeft : currentT1Left, 
                                             courtServerPos === 'bottom-left' ? 'server' : courtReceiverPos === 'bottom-left' ? 'receiver' : 'partner'
                                         )}
                                     </div>
-                                    <div className="absolute bottom-1 right-0 w-1/2 flex justify-center">
+                                    <div className="absolute bottom-1 right-0 w-1/2 flex justify-center items-center h-full">
                                         {(gameMode === 'double' || courtServerPos === 'bottom-right' || courtReceiverPos === 'bottom-right') && renderPlayerBadge(
                                             gameMode === 'single' ? t1PLeft : currentT1Right, 
                                             courtServerPos === 'bottom-right' ? 'server' : courtReceiverPos === 'bottom-right' ? 'receiver' : 'partner'
@@ -2321,6 +2342,17 @@
                                     </div>
                                 </div>
                             </div>
+                            
+                            {/* ROTATION CONTROLS */}
+                            <div className="absolute -bottom-8 md:-bottom-8 -left-4 -right-4 md:-left-12 md:-right-12 flex justify-between pointer-events-auto">
+                                <button onClick={() => setCourtRotation(r => r - 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md z-20`}>
+                                    <RotateCcw size={18} />
+                                </button>
+                                <button onClick={() => setCourtRotation(r => r + 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md z-20`}>
+                                    <RotateCw size={18} />
+                                </button>
+                            </div>
+
                         </div>
                     </div>
 
