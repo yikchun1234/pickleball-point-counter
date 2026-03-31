@@ -5,26 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Pickleball Point Counter</title>
     
-    <!-- PWA Meta Tags -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self'; 
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com; 
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
+        font-src 'self' https://fonts.gstatic.com data:; 
+        img-src 'self' data: blob: https://i.ibb.co; 
+        object-src 'none'; 
+        worker-src 'self' blob:;
+    ">
+
+    <script>
+        // --- 2. Domain Lock ---
+        // Only allow execution on authorized domains or local dev
+        const allowedDomains = ["pickleball-point-counter.pages.dev", "yikchun1234.github.io", "localhost", "127.0.0.1", ""];
+        const currentDomain = window.location.hostname;
+
+        if (!allowedDomains.includes(currentDomain)) {
+            document.documentElement.innerHTML = `
+                <div style="display:flex; height:100vh; width:100%; align-items:center; justify-content:center; background:#1c1917; color:#e7e5e4; font-family:sans-serif; text-align:center;">
+                    <div>
+                        <h1 style="color:#f43f5e; font-size:2rem; margin-bottom:10px;">Unauthorized Access</h1>
+                        <p>This application is strictly licensed and cannot be run on this domain.</p>
+                        <p style="font-size:0.8rem; color:#78716c; margin-top:20px;">Domain recorded: ${currentDomain || 'Unknown'}</p>
+                    </div>
+                </div>`;
+            throw new Error("Execution halted: Unauthorized domain theft detected.");
+        }
+
+        // --- 3. Anti-Debugger Loop ---
+        // Freezes developer tools to prevent easy code inspection
+        setInterval(function() {
+            debugger;
+        }, 100);
+        
+        // Prevent right-click context menu
+        document.addEventListener('contextmenu', event => event.preventDefault());
+    </script>
+
     <meta id="theme-color-meta" name="theme-color" content="#fafaf9">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Pickleball Point Counter">
     <meta name="mobile-web-app-capable" content="yes">
 
-    <!-- App Icons -->
     <link id="favicon" rel="icon" type="image/jpeg" sizes="512x512" href="https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg">
     <link id="apple-icon" rel="apple-touch-icon" sizes="512x512" href="https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg">
     <link id="manifest-link" rel="manifest" href="">
 
-    <!-- Dynamic PWA Manifest & Icon Generator -->
     <script>
         (function() {
             const img = new Image();
             img.crossOrigin = "Anonymous"; 
             img.onload = function() {
                 try {
-                    // 1. Canvas for Android (Manifest & Favicon) - More padding (0.65) for Maskable Adaptive Icons
+                    // 1. Canvas for Android (Manifest & Favicon)
                     const canvasAndroid = document.createElement('canvas');
                     canvasAndroid.width = 512; canvasAndroid.height = 512;
                     const ctxAndroid = canvasAndroid.getContext('2d');
@@ -36,7 +71,7 @@
                     ctxAndroid.drawImage(img, offsetAndroid, offsetAndroid, sizeAndroid, sizeAndroid);
                     const androidIconUrl = canvasAndroid.toDataURL('image/png');
 
-                    // 2. Canvas for iOS - Keep the original 0.9 scale that looks perfect
+                    // 2. Canvas for iOS
                     const canvasIOS = document.createElement('canvas');
                     canvasIOS.width = 512; canvasIOS.height = 512;
                     const ctxIOS = canvasIOS.getContext('2d');
@@ -71,23 +106,14 @@
         })();
     </script>
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    <!-- Babel -->
     <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-
-    <!-- Disable Context Menu / Long Press Default Behaviors -->
-    <script>
-        document.addEventListener('contextmenu', event => event.preventDefault());
-    </script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;600;700;900&display=swap');
@@ -100,8 +126,8 @@
             -webkit-tap-highlight-color: transparent; 
             background-color: var(--app-bg, #fafaf9) !important; 
             transition: background-color 0.3s ease;
-            -webkit-touch-callout: none; /* Disable iOS long press popup */
-            -webkit-user-select: none;   /* Disable text selection */
+            -webkit-touch-callout: none; 
+            -webkit-user-select: none;   
             -khtml-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
@@ -115,7 +141,6 @@
             overscroll-behavior-y: none; 
         }
 
-        /* Ensure input fields remain selectable and editable */
         input, select, textarea {
             -webkit-user-select: auto !important;
             -khtml-user-select: auto !important;
@@ -133,47 +158,28 @@
             0% { opacity: 1; transform: scale(1) translateY(0); }
             100% { opacity: 0; transform: scale(0.96) translateY(20px); }
         }
-        .animate-screen-enter {
-            animation: scaleFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        .animate-screen-exit {
-            animation: scaleFadeOut 0.28s cubic-bezier(0.4, 0, 1, 1) forwards;
-        }
+        .animate-screen-enter { animation: scaleFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-screen-exit { animation: scaleFadeOut 0.28s cubic-bezier(0.4, 0, 1, 1) forwards; }
 
-        /* * Button Pop Animations */
         @keyframes popInButton {
             0% { opacity: 0; transform: scale(0.8) translateY(-10px); }
             100% { opacity: 1; transform: scale(1) translateY(0); }
         }
-        .animate-pop-btn-1 {
-            animation: popInButton 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards;
-            opacity: 0;
-        }
-        .animate-pop-btn-2 {
-            animation: popInButton 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
-            opacity: 0;
-        }
+        .animate-pop-btn-1 { animation: popInButton 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards; opacity: 0; }
+        .animate-pop-btn-2 { animation: popInButton 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards; opacity: 0; }
 
         @keyframes popOutButton {
             0% { opacity: 1; transform: scale(1) translateY(0); }
             100% { opacity: 0; transform: scale(0.8) translateY(-10px); }
         }
-        .animate-pop-out-btn-1 {
-            animation: popOutButton 0.25s cubic-bezier(0.4, 0, 1, 1) forwards;
-        }
-        .animate-pop-out-btn-2 {
-            animation: popOutButton 0.25s cubic-bezier(0.4, 0, 1, 1) 0.05s forwards;
-        }
+        .animate-pop-out-btn-1 { animation: popOutButton 0.25s cubic-bezier(0.4, 0, 1, 1) forwards; }
+        .animate-pop-out-btn-2 { animation: popOutButton 0.25s cubic-bezier(0.4, 0, 1, 1) 0.05s forwards; }
 
         @keyframes secretHintBounce {
             0%, 90%, 100% { transform: scale(1) translateY(0); }
             95% { transform: scale(1.02) translateY(-4px); }
         }
-        .animate-secret-hint {
-            animation: secretHintBounce 5s infinite ease-in-out;
-            cursor: pointer;
-            display: inline-block;
-        }
+        .animate-secret-hint { animation: secretHintBounce 5s infinite ease-in-out; cursor: pointer; display: inline-block; }
     </style>
 </head>
 <body>
@@ -229,8 +235,6 @@
         const ChevronDown = (props) => <IconWrapper iconObj={lucide.icons.ChevronDown} {...props} />;
         const ChevronLeft = (props) => <IconWrapper iconObj={lucide.icons.ChevronLeft} {...props} />;
         const Activity = (props) => <IconWrapper iconObj={lucide.icons.Activity} {...props} />;
-        
-        // New Icons for Arcade
         const Grid = (props) => <IconWrapper iconObj={lucide.icons.Grid} {...props} />;
         const ArrowUp = (props) => <IconWrapper iconObj={lucide.icons.ArrowUp} {...props} />;
         const Target = (props) => <IconWrapper iconObj={lucide.icons.Target} {...props} />;
