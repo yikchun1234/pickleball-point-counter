@@ -54,18 +54,6 @@ Android / Chrome: Scroll to the bottom of the main menu and click "Install as a 
 
 iOS / Safari: Tap the "Share" icon at the bottom of your Safari screen and select "Add to Home Screen".
 
-💻 How to Host / Deploy (For Developers)
-
-Because this project is built entirely into a single file, deploying it is incredibly easy:
-
-Download or fork this repository.
-
-You only need the index.html file.
-
-Local Testing: Just double-click index.html to open it in Chrome or Safari.
-
-Deploying to Web: Drag and drop the index.html file into GitHub Pages, Cloudflare Pages, or Vercel. It will work instantly with zero build steps required.
-
 👨‍💻 Credits & License
 
 Designed and Built by Amos © 2026
