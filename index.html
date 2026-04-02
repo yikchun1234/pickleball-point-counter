@@ -255,6 +255,7 @@
         const MousePointer2 = (props) => <IconWrapper iconObj={lucide.icons.MousePointer2} {...props} />;
         const Gamepad2 = (props) => <IconWrapper iconObj={lucide.icons.Gamepad2} {...props} />;
         const RefreshCw = (props) => <IconWrapper iconObj={lucide.icons.RefreshCw} {...props} />;
+        const Home = (props) => <IconWrapper iconObj={lucide.icons.Home} {...props} />;
 
         const dict = {
           en: { appTitle: "Pickleball", appSub: "Point Counter", tapToStart: "Tap to start", newMatch: "Pickleball Point Counter", selectFormat: "Select match format & rules", singles: "Singles", doubles: "Doubles", stdTitle: "Standard (11 Pts)", stdDescSingle: "0-0 Rule • Play to 11 • Win by 2", stdDescDouble: "0-0-2 Rule • Play to 11 • Win by 2", fourteenTitle: "14-Point Rule", fourteenDesc: "Rally Scoring • Play to 15 • No serve needed", customFormat: "Custom Rules", customDesc: "Set your own points and win margin", playTo: "Play To", winBy: "Win By", t1Name: "Player 1", t2Name: "Player 2", team1: "Team 1", team2: "Team 2", server: "Serve", wonRally: "Won Rally", serving: "Serving", winner: "Wins the Match!", playAgain: "Play Again", undo: "Undo", reset: "Retreat", timeline: "Rally Timeline", awaiting: "Awaiting first serve...", suddenDeath: "Sudden Death", nextPointWins: "Next point wins", install: "Install App", serveToWinOption: "14-14 Serve to Win", serveToWinDesc: "Must be serving to win at 14-14", suddenDeathServeDesc: "Must serve to win", switchEndsOption: "Switch Ends at Half", switchEndsOptionDesc: "Prompt to switch sides at half points", customServeToWin: "Serve to Score", customServeToWinDesc: "Only serving team scores (0-0-2 rule)", customServeToWinDescSingle: "Only serving team scores (0-0 rule)", matchPoint: "Match Point", cancel: "Cancel", startMatch: "Start Match", t1Label: "T1", t2Label: "T2", installAsApp: "Install as a native app", designBy: "Designed by Amos © 2026", matchTitlePlaceholder: "Match Title (Optional)", matchHistory: "Match History", clearHistory: "Clear History", reviewMatch: "Review Timeline", noHistory: "No matches saved yet.", untitledMatch: "Friendly Match", confirmClear: "Clear all match history?", yesClear: "Yes, Clear All", showResults: "Show Results", installStepsIOS: 'Tap Share icon at the bottom, then "Add to Home Screen".', installStepsAndroid: 'Tap browser menu and select "Install App".', gotIt: 'Got it!', infoTitle: 'About & Disclaimer', infoHowToTitle: 'How to Use', infoHowTo1: '1. Setup: Choose format, rules, and toggle Timeouts or Switch Ends.', infoHowTo2: '2. Score: Tap a team to add points. Use Undo for mistakes.', infoHowTo3: '3. Court Map: Check player positions. Rotate the court to match your view.', infoHowTo4: '4. Voice: Turn on the speaker icon for audio announcements.', infoHowTo5: '5. Share: Save matches to History, view stats, and export images.', infoHowTo6: '6. Secret: Tap "Somewhere" 5 times to unlock "Easter Egg"', infoData: 'All history is saved locally on your device. No cloud storage. Clearing browser data will delete history.', infoUsage: 'Open-source project. Free to use with credit to creator (Amos).', infoFooter: 'Designed with ❤️ for the Pickleball community.', retreatTitle: 'Who retreated?', t1Retreat: 'Team 1 Retreated', t2Retreat: 'Team 2 Retreated', quitMatch: 'Quit Match', quitConfirm: 'Return to menu? This match will not be saved.', yesQuit: 'Yes, Quit', winByRetreat: 'Wins by Retreat!', loading: 'Loading...', switchEnds: "Switch Ends!", switchEndsDesc: "Players should now switch sides of the court.", resumeMatch: "Resume Match", resumeDesc: "You have an unfinished match. Do you want to resume?", stats: "Statistics", totalMatches: "Total Matches", avgDuration: "Avg Duration", share: "Share", edit: "Edit", winRate: "T1 Win Rate", time: "Time", firstServer: "First Serve", sideOut: "Side out", secondServer: "Second serve", totalPoints: "Total Points", winDist: "Win Distribution", formatStats: "Format Breakdown", enableTimeouts: "Enable Timeouts", timeoutsDesc: "2 timeouts per team per game", callTimeout: "Call Timeout", courtPosTitle: "Court Guide", courtPosDesc: "Server and receiver starting positions", receiver: "Receiver", generatingImage: "Generating Image", t1P1: "T1 L. Player", t1P2: "T1 R. Player", t2P1: "T2 L. Player", t2P2: "T2 R. Player", oddCourt: "(Odd Court)", evenCourt: "(Even Court)", point: "Point", resetMatch: "Reset", resetTitle: "Reset Match?", resetWarning: "Current progress will not be saved.", resetSettings: "Change Players/Settings", resetPoints: "Reset Points Only", menu: "Menu" },
@@ -1766,12 +1767,24 @@
                   }}
                 >
                   <header className={`flex items-center justify-between mb-4 pb-4 border-b ${borderSub}`}>
-                    <button onClick={() => { if (!winner && history.length > 0) setShowBackConfirm(true); else setAppState('menu'); }} className={`p-2 -ml-2 rounded-lg ${textSub} hover:${textMain}`}><ArrowLeft size={20} /></button>
-                    <div className="text-center flex-1">
+                    <div className="flex-1 flex justify-start">
+                      <button 
+                        onClick={() => { if (!winner && history.length > 0) setShowBackConfirm(true); else setAppState('menu'); }} 
+                        className={`transition-all duration-300 flex items-center gap-1.5 -ml-2 rounded-lg active:scale-95 ${
+                          winner !== null 
+                            ? `px-3 py-1.5 bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900 font-bold shadow-md` 
+                            : `p-2 ${textSub} hover:${textMain}`
+                        }`}
+                      >
+                        <ArrowLeft size={20} />
+                        {winner !== null && <span className="text-xs uppercase tracking-widest">{getT('menu')}</span>}
+                      </button>
+                    </div>
+                    <div className="text-center flex-[2]">
                       <h1 className={`text-sm font-bold ${textMain}`}>{matchTitle || getT('untitledMatch')}</h1>
                       <p className={`text-xs ${textSub} mt-1`}>{gameMode === 'single' ? getT('singles') : getT('doubles')} • {ruleSet === 'standard' ? getT('stdTitle') : ruleSet === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</p>
                     </div>
-                    <div className="w-8"></div>
+                    <div className="flex-1"></div>
                   </header>
 
                   <div className="flex justify-between items-center mb-2 relative z-20">
@@ -1989,9 +2002,9 @@
                           mode: gameMode, rules: ruleSet, t1Score: team1Score, t2Score: team2Score,
                           t1Name, t2Name, winner, winReason, elapsedTime, history
                       })} className={`w-full py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors flex items-center justify-center gap-2 shadow-md`}><Share2 size={18}/> {getT('share')}</button>
-                      <button onClick={() => { setShowWinnerOverlay(false); setMatchTitleInput(matchTitle); setT1PLeftInput(t1PLeft); setT1PRightInput(t1PRight); setT2PLeftInput(t2PLeft); setT2PRightInput(t2PRight); setPendingGame({ mode: gameMode, rules: ruleSet }); }} className={`w-full py-4 rounded-xl font-bold text-white bg-stone-800 dark:bg-stone-200 dark:text-stone-900 shadow-md`}>{getT('playAgain')}</button>
-                      <button onClick={() => setShowWinnerOverlay(false)} className={`w-full py-3 rounded-xl font-semibold border ${borderSub} ${textSub} hover:${textMain}`}>{getT('reviewMatch')}</button>
-                      <button onClick={() => { setShowWinnerOverlay(false); setAppState('menu'); }} className={`w-full py-3 rounded-xl font-semibold border ${borderSub} ${textSub} hover:${textMain}`}>{getT('menu')}</button>
+                      <button onClick={() => { setShowWinnerOverlay(false); setMatchTitleInput(matchTitle); setT1PLeftInput(t1PLeft); setT1PRightInput(t1PRight); setT2PLeftInput(t2PLeft); setT2PRightInput(t2PRight); setPendingGame({ mode: gameMode, rules: ruleSet }); }} className={`w-full py-4 rounded-xl font-bold text-white bg-stone-800 dark:bg-stone-200 dark:text-stone-900 shadow-md flex items-center justify-center gap-2`}><RotateCcw size={18}/> {getT('playAgain')}</button>
+                      <button onClick={() => setShowWinnerOverlay(false)} className={`w-full py-3 rounded-xl font-semibold border ${borderSub} ${textSub} hover:${textMain} flex items-center justify-center gap-2`}><Activity size={18}/> {getT('reviewMatch')}</button>
+                      <button onClick={() => { setShowWinnerOverlay(false); setAppState('menu'); }} className={`w-full py-3 rounded-xl font-semibold border ${borderSub} ${textSub} hover:${textMain} flex items-center justify-center gap-2`}><Home size={18}/> {getT('menu')}</button>
                     </div>
                   </div>
                 </div>
