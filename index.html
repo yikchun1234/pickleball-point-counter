@@ -7,10 +7,11 @@
     
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self'; 
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com; 
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://static.cloudflareinsights.com; 
         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
         font-src 'self' https://fonts.gstatic.com data:; 
         img-src 'self' data: blob: https://i.ibb.co; 
+        connect-src 'self' https://cloudflareinsights.com;
         object-src 'none'; 
         worker-src 'self' blob:;
     ">
@@ -1965,12 +1966,29 @@
 
               {showTimeoutConfirm && (
                 <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowTimeoutConfirm(null)}></div>
+                  <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl text-center animate-screen-enter`}>
+                    <div className="w-16 h-16 mx-auto bg-amber-100 dark:bg-amber-900/30 text-amber-500 rounded-full flex items-center justify-center mb-4">
+                        <Timer size={32} />
+                    </div>
+                    <h2 className={`text-lg font-bold mb-2 ${textMain}`}>{getT('callTimeout')}</h2>
+                    <p className={`text-sm mb-6 ${textSub}`}>{showTimeoutConfirm === 1 ? t1Name : t2Name}</p>
+                    <div className="flex gap-3">
+                      <button onClick={() => setShowTimeoutConfirm(null)} className={`flex-1 py-3 rounded-xl font-semibold border ${borderSub} ${textSub} hover:${textMain}`}>{getT('cancel')}</button>
+                      <button onClick={() => handleTimeout(showTimeoutConfirm)} className={`flex-1 py-3 rounded-xl font-bold text-white bg-amber-500 hover:bg-amber-600 shadow-md`}>Confirm</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {showSwitchModal && (
+                <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
                   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowSwitchModal(false)}></div>
-                  <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl text-center`}>
+                  <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl text-center animate-screen-enter`}>
                     <RotateCcw size={48} className="mx-auto text-amber-500 mb-4 animate-spin" style={{animationIterationCount: 1}}/>
                     <h2 className={`text-xl font-bold mb-2 ${textMain}`}>{getT('switchEnds')}</h2>
                     <p className={`text-sm mb-6 ${textSub}`}>{getT('switchEndsDesc')}</p>
-                    <button onClick={() => setShowSwitchModal(false)} className={`w-full py-3 rounded-xl font-bold text-white bg-amber-500 hover:bg-amber-600 shadow-md`}><Check className="inline mr-2" size={18}/>{getT('gotIt')}</button>
+                    <button onClick={() => setShowSwitchModal(false)} className={`w-full py-3 rounded-xl font-bold text-white bg-amber-500 hover:bg-amber-600 shadow-md flex items-center justify-center`}><Check className="inline mr-2" size={18}/>{getT('gotIt')}</button>
                   </div>
                 </div>
               )}
@@ -2118,7 +2136,9 @@
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<PickleballApp />);
     </script>
-</body>
+
     <!-- Cloudflare Web Analytics -->
-    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "5fd8a324f87a433fa80d77d57da97860"}'></script><!-- End Cloudflare Web Analytics -->
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "5fd8a324f87a433fa80d77d57da97860"}'></script>
+    <!-- End Cloudflare Web Analytics -->
+</body>
 </html>
