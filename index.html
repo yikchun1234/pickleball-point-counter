@@ -309,6 +309,282 @@
         const RefreshCw = (props) => <IconWrapper iconObj={lucide.icons.RefreshCw} {...props} />;
         const Home = (props) => <IconWrapper iconObj={lucide.icons.Home} {...props} />;
 
+        // --- ARCADE ENGINE COMPONENTS ---
+        const ArcadeWrapper = ({ title, onBack, children }) => (
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                <div className="absolute inset-0 bg-black/80 backdrop-blur-md" style={{touchAction: 'none'}} onClick={onBack}></div>
+                <div className={`relative w-full max-w-sm flex flex-col bg-stone-800 border-stone-700 border rounded-2xl shadow-2xl overflow-hidden animate-screen-enter`}>
+                    <div className={`p-4 flex-shrink-0 border-b border-stone-700 flex justify-between items-center`}>
+                        <h2 className={`text-lg font-black uppercase tracking-widest text-emerald-500 flex items-center gap-2`}><Gamepad2 size={20} /> {title}</h2>
+                        <button onClick={onBack} className={`p-2 -mr-2 rounded-full text-stone-400 hover:text-white transition-colors`}><X size={20} /></button>
+                    </div>
+                    <div className="p-4 flex flex-col items-center justify-center bg-stone-900 min-h-[400px] relative overflow-hidden select-none">
+                        {children}
+                    </div>
+                </div>
+            </div>
+        );
+
+        const ArcadeTapChallenge = ({ onBack }) => {
+            const [score, setScore] = useState(0);
+            const [timeLeft, setTimeLeft] = useState(10);
+            const [playing, setPlaying] = useState(false);
+            useEffect(() => {
+                if (playing && timeLeft > 0) { const timer = setTimeout(() => setTimeLeft(t => t - 1), 1000); return () => clearTimeout(timer); }
+                else if (timeLeft === 0) setPlaying(false);
+            }, [playing, timeLeft]);
+            return (
+                <ArcadeWrapper title="Tap Challenge" onBack={onBack}>
+                    <div className="text-white text-center">
+                        <div className="text-2xl mb-4 font-bold text-stone-400">Time: <span className="text-white">{timeLeft}s</span></div>
+                        <div className="text-7xl font-black mb-10 text-emerald-400 drop-shadow-lg">{score}</div>
+                        {!playing && timeLeft === 10 ? ( <button onClick={() => setPlaying(true)} className="px-8 py-3 bg-emerald-500 rounded-xl font-bold shadow-lg active:scale-95 transition-transform">Start</button> ) 
+                        : !playing && timeLeft === 0 ? ( <button onClick={() => { setScore(0); setTimeLeft(10); setPlaying(true); }} className="px-8 py-3 bg-emerald-500 rounded-xl font-bold shadow-lg active:scale-95 transition-transform">Play Again</button> ) 
+                        : ( <button onPointerDown={() => setScore(s => s + 1)} className="w-32 h-32 rounded-full bg-emerald-500 flex items-center justify-center text-3xl font-bold active:scale-90 transition-transform shadow-[0_0_30px_rgba(16,185,129,0.5)]">TAP!</button> )}
+                    </div>
+                </ArcadeWrapper>
+            );
+        };
+
+        const ArcadeReaction = ({ onBack }) => {
+            const [state, setState] = useState('idle'); // idle, waiting, ready, done
+            const [msg, setMsg] = useState('Tap to Start');
+            const [bg, setBg] = useState('bg-stone-800');
+            const timerRef = useRef(null); const startRef = useRef(0);
+            const handleClick = () => {
+                if (state === 'idle' || state === 'done') {
+                    setState('waiting'); setMsg('Wait for Green...'); setBg('bg-rose-500');
+                    timerRef.current = setTimeout(() => { setState('ready'); setMsg('TAP NOW!'); setBg('bg-emerald-500'); startRef.current = performance.now(); }, 2000 + Math.random() * 3000);
+                } else if (state === 'waiting') {
+                    clearTimeout(timerRef.current); setState('done'); setMsg('Too Early! Tap to restart.'); setBg('bg-stone-800');
+                } else if (state === 'ready') {
+                    setState('done'); setMsg(`${Math.round(performance.now() - startRef.current)} ms! Tap to restart.`); setBg('bg-stone-800');
+                }
+            };
+            return (
+                <ArcadeWrapper title="Reaction Test" onBack={onBack}>
+                    <div onPointerDown={handleClick} className={`absolute inset-0 flex flex-col items-center justify-center cursor-pointer transition-colors duration-100 ${bg}`}>
+                        <div className="text-white text-3xl font-bold text-center px-6 leading-snug">{msg}</div>
+                    </div>
+                </ArcadeWrapper>
+            );
+        };
+
+        const ArcadeTicTacToe = ({ onBack }) => {
+            const [board, setBoard] = useState(Array(9).fill(null));
+            const [xIsNext, setXIsNext] = useState(true);
+            const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+            let winner = null;
+            for(let l of lines) { if(board[l[0]] && board[l[0]]===board[l[1]] && board[l[0]]===board[l[2]]) winner = board[l[0]]; }
+            const isDraw = !winner && board.every(Boolean);
+            const handleClick = (i) => {
+                if (board[i] || winner) return;
+                const newBoard = [...board]; newBoard[i] = xIsNext ? 'X' : 'O';
+                setBoard(newBoard); setXIsNext(!xIsNext);
+            };
+            return (
+                <ArcadeWrapper title="Tic-Tac-Toe" onBack={onBack}>
+                    <div className="text-white flex flex-col items-center w-full">
+                        <div className={`text-2xl mb-6 font-bold ${winner==='X'?'text-emerald-400':winner==='O'?'text-rose-400':'text-stone-300'}`}>{winner ? `${winner} Wins!` : isDraw ? 'Draw!' : `Player ${xIsNext ? 'X' : 'O'}`}</div>
+                        <div className="grid grid-cols-3 gap-2 bg-stone-700 p-2 rounded-2xl w-full max-w-[280px]">
+                            {board.map((cell, i) => (
+                                <button key={i} onClick={() => handleClick(i)} className={`aspect-square bg-stone-800 rounded-xl text-5xl font-black flex items-center justify-center transition-colors active:scale-95 ${cell==='X'?'text-emerald-400':'text-rose-400'}`}>{cell}</button>
+                            ))}
+                        </div>
+                        {(winner || isDraw) && <button onClick={() => {setBoard(Array(9).fill(null)); setXIsNext(true);}} className="mt-8 px-8 py-3 bg-emerald-500 rounded-xl font-bold shadow-lg active:scale-95">Restart</button>}
+                    </div>
+                </ArcadeWrapper>
+            );
+        };
+
+        const ArcadeMemory = ({ onBack }) => {
+            const [cards, setCards] = useState([]);
+            const [flipped, setFlipped] = useState([]);
+            const [solved, setSolved] = useState([]);
+            const [moves, setMoves] = useState(0);
+            const init = () => {
+                const EMOJIS = ['🎾','🏆','🔥','⭐','⚡','🎯','👟','🧊'];
+                setCards([...EMOJIS, ...EMOJIS].sort(() => Math.random() - 0.5).map((e,i)=>({id:i, emoji:e})));
+                setFlipped([]); setSolved([]); setMoves(0);
+            };
+            useEffect(() => { init(); }, []);
+            const handleClick = (id, emoji) => {
+                if (flipped.length === 2 || flipped.some(f => f.id === id) || solved.includes(emoji)) return;
+                const newFlipped = [...flipped, {id, emoji}]; setFlipped(newFlipped);
+                if (newFlipped.length === 2) {
+                    setMoves(m => m + 1);
+                    if (newFlipped[0].emoji === newFlipped[1].emoji) { setSolved(s => [...s, emoji]); setFlipped([]); } 
+                    else { setTimeout(() => setFlipped([]), 700); }
+                }
+            };
+            return (
+                <ArcadeWrapper title="Memory" onBack={onBack}>
+                    <div className="text-white flex flex-col items-center w-full">
+                        <div className="mb-6 font-bold flex justify-between w-full px-6 text-stone-400"><span>Moves: <span className="text-white">{moves}</span></span><span>Pairs: <span className="text-emerald-400">{solved.length}/8</span></span></div>
+                        <div className="grid grid-cols-4 gap-3">
+                            {cards.map(c => {
+                                const isFlipped = flipped.some(f=>f.id===c.id) || solved.includes(c.emoji);
+                                return (
+                                    <button key={c.id} onClick={() => handleClick(c.id, c.emoji)} className={`w-14 h-14 md:w-16 md:h-16 text-3xl flex items-center justify-center rounded-xl shadow-md transition-all duration-300 transform ${isFlipped ? 'bg-stone-700' : 'bg-emerald-600 active:scale-90'}`}>{isFlipped ? c.emoji : ''}</button>
+                                );
+                            })}
+                        </div>
+                        {solved.length === 8 && <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-10"><div className="text-4xl font-black text-emerald-400 mb-6 drop-shadow-md">You Win!</div><button onClick={init} className="px-8 py-3 bg-emerald-500 rounded-xl font-bold shadow-lg">Play Again</button></div>}
+                    </div>
+                </ArcadeWrapper>
+            );
+        };
+
+        const ArcadeTargetPractice = ({ onBack }) => {
+            const [targets, setTargets] = useState([]);
+            const [score, setScore] = useState(0);
+            const [timeLeft, setTimeLeft] = useState(20);
+            const [playing, setPlaying] = useState(false);
+            useEffect(() => {
+                let timer, spawner;
+                if (playing && timeLeft > 0) {
+                    timer = setTimeout(() => setTimeLeft(t => t - 1), 1000);
+                    spawner = setInterval(() => { setTargets(p => p.length > 5 ? p : [...p, { id: Date.now(), x: 15 + Math.random()*70, y: 20 + Math.random()*60, size: 25 + Math.random()*30 }]); }, 600);
+                } else if (timeLeft === 0) setPlaying(false);
+                return () => { clearTimeout(timer); clearInterval(spawner); };
+            }, [playing, timeLeft]);
+            const hit = (id) => { if (playing) { setScore(s => s + 1); setTargets(p => p.filter(t => t.id !== id)); } };
+            return (
+                <ArcadeWrapper title="Target Practice" onBack={onBack}>
+                    <div className="absolute inset-0 bg-stone-900 overflow-hidden select-none touch-none">
+                        <div className="absolute top-4 w-full flex justify-between px-6 text-stone-400 font-bold pointer-events-none z-10 text-sm tracking-wider"><span>TIME: <span className="text-white">{timeLeft}</span></span><span>SCORE: <span className="text-emerald-400">{score}</span></span></div>
+                        {!playing && ( <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-20 backdrop-blur-sm"><button onClick={() => { setScore(0); setTimeLeft(20); setTargets([]); setPlaying(true); }} className="px-8 py-3 bg-emerald-500 text-white rounded-xl font-bold shadow-lg active:scale-95">{timeLeft === 0 ? 'Play Again' : 'Start Game'}</button></div> )}
+                        {targets.map(t => ( <div key={t.id} onPointerDown={(e) => {e.stopPropagation(); hit(t.id);}} className="absolute rounded-full bg-rose-500 border-4 border-rose-300 shadow-[0_0_15px_rgba(244,63,94,0.6)] transform -translate-x-1/2 -translate-y-1/2 active:scale-75 transition-transform" style={{ left: `${t.x}%`, top: `${t.y}%`, width: `${t.size}px`, height: `${t.size}px` }}></div> ))}
+                    </div>
+                </ArcadeWrapper>
+            );
+        };
+
+        const ArcadeSnake = ({ onBack }) => {
+            const [snake, setSnake] = useState([{x:10, y:10}]);
+            const [food, setFood] = useState({x:15, y:15});
+            const [dir, setDir] = useState({x:0, y:-1});
+            const [gameOver, setGameOver] = useState(false);
+            const [playing, setPlaying] = useState(false);
+            const dirRef = useRef(dir);
+            useEffect(() => { dirRef.current = dir; }, [dir]);
+            useEffect(() => {
+                if (!playing || gameOver) return;
+                const interval = setInterval(() => {
+                    setSnake(prev => {
+                        const next = { x: prev[0].x + dirRef.current.x, y: prev[0].y + dirRef.current.y };
+                        if (next.x < 0 || next.x >= 20 || next.y < 0 || next.y >= 20 || prev.some(s => s.x === next.x && s.y === next.y)) { setGameOver(true); return prev; }
+                        const newSnake = [next, ...prev];
+                        if (next.x === food.x && next.y === food.y) { setFood({ x: Math.floor(Math.random()*20), y: Math.floor(Math.random()*20) }); } 
+                        else { newSnake.pop(); }
+                        return newSnake;
+                    });
+                }, 150);
+                return () => clearInterval(interval);
+            }, [playing, gameOver, food]);
+            const changeDir = (d) => { if ((dirRef.current.x !== 0 && d.x !== 0) || (dirRef.current.y !== 0 && d.y !== 0)) return; setDir(d); };
+            return (
+                <ArcadeWrapper title="Snake" onBack={onBack}>
+                    <div className="flex flex-col items-center w-full touch-none select-none">
+                        <div className="text-stone-400 font-bold mb-4 tracking-widest text-sm">SCORE: <span className="text-emerald-400">{snake.length - 1}</span></div>
+                        <div className="w-[260px] h-[260px] bg-stone-950 border-2 border-stone-700 relative rounded-md shadow-inner overflow-hidden">
+                            {snake.map((s, i) => ( <div key={i} className={`absolute ${i===0?'bg-emerald-400':'bg-emerald-600'} rounded-sm border border-stone-950`} style={{left:`${s.x*5}%`, top:`${s.y*5}%`, width:'5%', height:'5%'}}></div> ))}
+                            <div className="absolute bg-rose-500 rounded-full animate-pulse" style={{left:`${food.x*5}%`, top:`${food.y*5}%`, width:'5%', height:'5%'}}></div>
+                            {(!playing || gameOver) && ( <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px] flex flex-col justify-center items-center z-10">{gameOver && <div className="text-rose-400 font-black mb-4 text-3xl">Game Over</div>}<button onClick={() => {setSnake([{x:10,y:10}]); setDir({x:0,y:-1}); setGameOver(false); setPlaying(true);}} className="px-6 py-3 bg-emerald-500 text-white rounded-xl font-bold shadow-lg active:scale-95">{gameOver ? 'Try Again' : 'Start Game'}</button></div> )}
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 mt-6">
+                            <div></div><button onPointerDown={()=>changeDir({x:0,y:-1})} className="w-14 h-14 bg-stone-700 text-white rounded-xl flex justify-center items-center active:bg-stone-600 shadow-md"><ArrowUp size={28}/></button><div></div>
+                            <button onPointerDown={()=>changeDir({x:-1,y:0})} className="w-14 h-14 bg-stone-700 text-white rounded-xl flex justify-center items-center active:bg-stone-600 shadow-md"><ChevronLeft size={28}/></button>
+                            <button onPointerDown={()=>changeDir({x:0,y:1})} className="w-14 h-14 bg-stone-700 text-white rounded-xl flex justify-center items-center active:bg-stone-600 shadow-md"><ChevronDown size={28}/></button>
+                            <button onPointerDown={()=>changeDir({x:1,y:0})} className="w-14 h-14 bg-stone-700 text-white rounded-xl flex justify-center items-center active:bg-stone-600 shadow-md"><ChevronRight size={28}/></button>
+                        </div>
+                    </div>
+                </ArcadeWrapper>
+            );
+        };
+
+        const ArcadePickleJump = ({ onBack }) => {
+            const [y, setY] = useState(150);
+            const [vel, setVel] = useState(0);
+            const [obs, setObs] = useState([{x:300, w:40, gapY:100, gapH:120}]);
+            const [playing, setPlaying] = useState(false);
+            const [gameOver, setGameOver] = useState(false);
+            const [score, setScore] = useState(0);
+            useEffect(() => {
+                if (!playing || gameOver) return;
+                const timer = setInterval(() => {
+                    setY(prev => { const newY = prev + vel; if (newY > 400 || newY < 0) setGameOver(true); return newY; });
+                    setVel(v => v + 0.6); // Gravity
+                    setObs(prev => {
+                        let newObs = prev.map(o => ({...o, x: o.x - 5})); // Speed
+                        if (newObs[0].x < -40) { newObs.shift(); setScore(s => s + 1); }
+                        if (newObs[newObs.length-1].x < 120) { newObs.push({ x: 300, w:40, gapY: 40 + Math.random()*180, gapH: 120 }); }
+                        // Collision Check
+                        const player = {x: 50, y: y, w: 24, h: 24};
+                        for (let o of newObs) { if (player.x < o.x + o.w && player.x + player.w > o.x) { if (player.y < o.gapY || player.y + player.h > o.gapY + o.gapH) setGameOver(true); } }
+                        return newObs;
+                    });
+                }, 30);
+                return () => clearInterval(timer);
+            }, [playing, gameOver, vel, y]);
+            return (
+                <ArcadeWrapper title="Pickle Jump" onBack={onBack}>
+                    <div onPointerDown={() => { if(playing && !gameOver) setVel(-7); }} className="absolute inset-0 flex justify-center items-center overflow-hidden bg-sky-900 select-none touch-none">
+                        <div className="absolute top-4 w-full text-center text-white font-black z-10 text-4xl opacity-50 drop-shadow-md">{score}</div>
+                        <div className="absolute bg-emerald-400 rounded-full shadow-[0_0_10px_rgba(52,211,153,0.8)] border-2 border-white z-20" style={{left: '50px', top: `${y}px`, width: '24px', height: '24px'}}></div>
+                        {obs.map((o,i) => (
+                            <React.Fragment key={i}>
+                                <div className="absolute bg-emerald-800 border-x-4 border-b-4 border-emerald-950 rounded-b-md" style={{left: `${o.x}px`, top: 0, width: `${o.w}px`, height: `${o.gapY}px`}}></div>
+                                <div className="absolute bg-emerald-800 border-x-4 border-t-4 border-emerald-950 rounded-t-md" style={{left: `${o.x}px`, top: `${o.gapY + o.gapH}px`, width: `${o.w}px`, bottom: 0}}></div>
+                            </React.Fragment>
+                        ))}
+                        {(!playing || gameOver) && ( <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col justify-center items-center z-30">{gameOver && <div className="text-white font-black mb-6 text-3xl">Game Over</div>}<button onPointerDown={(e) => {e.stopPropagation(); setY(150); setVel(0); setObs([{x:300, w:40, gapY:100, gapH:120}]); setScore(0); setGameOver(false); setPlaying(true);}} className="px-8 py-3 bg-emerald-500 text-white rounded-xl font-bold shadow-lg active:scale-95">{gameOver ? 'Try Again' : 'Tap to Jump'}</button></div> )}
+                    </div>
+                </ArcadeWrapper>
+            );
+        };
+
+        const ArcadeWallBounce = ({ onBack }) => {
+            const [ball, setBall] = useState({x: 150, y: 150, dx: 4, dy: -4});
+            const [paddleX, setPaddleX] = useState(110);
+            const [playing, setPlaying] = useState(false);
+            const [gameOver, setGameOver] = useState(false);
+            const [score, setScore] = useState(0);
+            const containerRef = useRef(null);
+            useEffect(() => {
+                if (!playing || gameOver) return;
+                const timer = setInterval(() => {
+                    setBall(prev => {
+                        let {x, y, dx, dy} = prev;
+                        x += dx; y += dy;
+                        if (x <= 6 || x >= 294) dx = -dx;
+                        if (y <= 6) dy = -dy;
+                        if (y >= 350 && y <= 365 && x >= paddleX - 10 && x <= paddleX + 90) { dy = -Math.abs(dy); dx = dx + ((x - (paddleX + 40)) / 40) * 2; setScore(s => s + 1); }
+                        if (y > 400) setGameOver(true);
+                        return {x, y, dx, dy};
+                    });
+                }, 20);
+                return () => clearInterval(timer);
+            }, [playing, gameOver, paddleX]);
+            const handleMove = (e) => {
+                if (!containerRef.current) return;
+                const rect = containerRef.current.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                let newX = clientX - rect.left - 40;
+                setPaddleX(Math.max(0, Math.min(newX, 220)));
+            };
+            return (
+                <ArcadeWrapper title="Wall Bounce" onBack={onBack}>
+                    <div ref={containerRef} onPointerMove={handleMove} onTouchMove={handleMove} className="absolute inset-0 bg-stone-950 overflow-hidden touch-none select-none">
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white font-black opacity-10 text-[8rem] pointer-events-none">{score}</div>
+                        <div className="absolute bg-emerald-400 rounded-full shadow-[0_0_10px_rgba(52,211,153,0.8)]" style={{left: `${ball.x-6}px`, top: `${ball.y-6}px`, width: '12px', height: '12px'}}></div>
+                        <div className="absolute bg-rose-500 rounded-full shadow-[0_0_10px_rgba(244,63,94,0.5)]" style={{left: `${paddleX}px`, top: '360px', width: '80px', height: '12px'}}></div>
+                        {(!playing || gameOver) && ( <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col justify-center items-center z-20">{gameOver && <div className="text-rose-400 font-black mb-6 text-3xl">Game Over</div>}<button onClick={() => {setBall({x: 150, y: 150, dx: 4, dy: -4}); setPaddleX(110); setScore(0); setGameOver(false); setPlaying(true);}} className="px-8 py-3 bg-emerald-500 text-white rounded-xl font-bold shadow-lg active:scale-95">{gameOver ? 'Try Again' : 'Drag to Start'}</button></div> )}
+                    </div>
+                </ArcadeWrapper>
+            );
+        };
+
         const dict = {
           en: { appTitle: "Pickleball", appSub: "Point Counter", tapToStart: "Tap to start", newMatch: "Pickleball Point Counter", selectFormat: "Select match format & rules", singles: "Singles", doubles: "Doubles", stdTitle: "Standard (11 Pts)", stdDescSingle: "0-0 Rule • Play to 11 • Win by 2", stdDescDouble: "0-0-2 Rule • Play to 11 • Win by 2", fourteenTitle: "14-Point Rule", fourteenDesc: "Rally Scoring • Play to 15 • No serve needed", customFormat: "Custom Rules", customDesc: "Set your own points and win margin", playTo: "Play To", winBy: "Win By", t1Name: "Player 1", t2Name: "Player 2", team1: "Team 1", team2: "Team 2", server: "Serve", wonRally: "Won Rally", serving: "Serving", winner: "Wins the Match!", playAgain: "Play Again", undo: "Undo", reset: "Retreat", timeline: "Rally Timeline", awaiting: "Awaiting first serve...", suddenDeath: "Sudden Death", nextPointWins: "Next point wins", install: "Install App", serveToWinOption: "14-14 Serve to Win", serveToWinDesc: "Must be serving to win at 14-14", suddenDeathServeDesc: "Must serve to win", switchEndsOption: "Switch Ends at Half", switchEndsOptionDesc: "Prompt to switch sides at half points", customServeToWin: "Serve to Score", customServeToWinDesc: "Only serving team scores (0-0-2 rule)", customServeToWinDescSingle: "Only serving team scores (0-0 rule)", matchPoint: "Match Point", cancel: "Cancel", startMatch: "Start Match", t1Label: "T1", t2Label: "T2", installAsApp: "Install as a native app", designBy: "Designed by Amos © 2026", matchTitlePlaceholder: "Match Title (Optional)", matchHistory: "Match History", clearHistory: "Clear History", reviewMatch: "Review Timeline", noHistory: "No matches saved yet.", untitledMatch: "Friendly Match", confirmClear: "Clear all match history?", yesClear: "Yes, Clear All", showResults: "Show Results", installStepsIOS: 'Tap Share icon at the bottom, then "Add to Home Screen".', installStepsAndroid: 'Tap browser menu and select "Install App".', gotIt: 'Got it!', infoTitle: 'About & Disclaimer', infoHowToTitle: 'How to Use', infoHowTo1: '1. Setup: Choose format, rules, and toggle Timeouts or Switch Ends.', infoHowTo2: '2. Score: Tap a team to add points. Use Undo for mistakes.', infoHowTo3: '3. Court Map: Check player positions. Rotate the court to match your view.', infoHowTo4: '4. Voice: Turn on the speaker icon for audio announcements.', infoHowTo5: '5. Share: Save matches to History, view stats, and export images.', infoHowTo6: '6. Secret: Tap "Somewhere" 5 times to unlock "Easter Egg"', infoData: 'All history is saved locally on your device. No cloud storage. Clearing browser data will delete history.', infoUsage: 'Open-source project. Free to use with credit to creator (Amos).', infoFooter: 'Designed with ❤️ for the Pickleball community.', retreatTitle: 'Who retreated?', t1Retreat: 'Team 1 Retreated', t2Retreat: 'Team 2 Retreated', quitMatch: 'Quit Match', quitConfirm: 'Return to menu? This match will not be saved.', yesQuit: 'Yes, Quit', winByRetreat: 'Wins by Retreat!', loading: 'Loading...', switchEnds: "Switch Ends!", switchEndsDesc: "Players should now switch sides of the court.", resumeMatch: "Resume Match", resumeDesc: "You have an unfinished match. Do you want to resume?", stats: "Statistics", totalMatches: "Total Matches", avgDuration: "Avg Duration", share: "Share", edit: "Edit", winRate: "T1 Win Rate", time: "Time", firstServer: "First Serve", sideOut: "Side out", secondServer: "Second serve", totalPoints: "Total Points", winDist: "Win Distribution", formatStats: "Format Breakdown", enableTimeouts: "Enable Timeouts", timeoutsDesc: "2 timeouts per team per game", callTimeout: "Call Timeout", courtPosTitle: "Court Guide", courtPosDesc: "Server and receiver starting positions", receiver: "Receiver", generatingImage: "Generating Image", t1P1: "T1 L. Player", t1P2: "T1 R. Player", t2P1: "T2 L. Player", t2P2: "T2 R. Player", oddCourt: "(Odd Court)", evenCourt: "(Even Court)", point: "Point", resetMatch: "Reset", resetTitle: "Reset Match?", resetWarning: "Current progress will not be saved.", resetSettings: "Change Players/Settings", resetPoints: "Reset Points Only", menu: "Menu" },
           zh_CN: { appTitle: "匹克球", appSub: "计分器", tapToStart: "点击开始", newMatch: "匹克球计分器", selectFormat: "选择比赛模式与规则", singles: "单打", doubles: "双打", stdTitle: "标准规则 (11分)", stdDescSingle: "0-0规则 • 11分制 • 赢2分", stdDescDouble: "0-0-2规则 • 11分制 • 赢2分", fourteenTitle: "14分制 (每球得分)", fourteenDesc: "15分制 • 接发球方也可直接得分获胜", customFormat: "自定义规则", customDesc: "设置目标分数和获胜分差", playTo: "目标分数", winBy: "获胜分差", t1Name: "队伍 1 名称", t2Name: "队伍 2 名称", team1: "队伍 1", team2: "队伍 2", server: "发球", wonRally: "得分", serving: "发球方", winner: "获得胜利！", playAgain: "再来一局", undo: "撤销", reset: "退赛", timeline: "对局记录", awaiting: "比赛尚未开始...", suddenDeath: "决胜局", nextPointWins: "一球定胜负", install: "安装应用", serveToWinOption: "14平必须发球得分", serveToWinDesc: "在14-14平时，必须是发球方赢下回合才能获得第15分", suddenDeathServeDesc: "发球方得分制胜", switchEndsOption: "半场交换场地", switchEndsOptionDesc: "分数过半时提示交换场地", customServeToWin: "发球得分制", customServeToWinDesc: "仅发球方可得分 (0-0-2规则)", customServeToWinDescSingle: "仅发球方可得分 (0-0规则)", matchPoint: "赛点", cancel: "取消", startMatch: "开始比赛", t1Label: "T1", t2Label: "T2", installAsApp: "安装为原生应用", designBy: "设计者 Amos © 2026", matchTitlePlaceholder: "比赛名称 (选填)", matchHistory: "历史记录", clearHistory: "清空记录", reviewMatch: "查看对局过程", noHistory: "暂无历史记录", untitledMatch: "友谊赛", confirmClear: "确定要清空所有比赛历史记录吗？", yesClear: "确定清空", showResults: "查看结果", installStepsIOS: '点击底部的“分享”图标，然后选择“添加到主屏幕”。', installStepsAndroid: '点击浏览器菜单（三个点），然后选择“安装应用”。', gotIt: '知道了！', infoTitle: '关于与免责声明', infoHowToTitle: '使用说明', infoHowTo1: '1. 设置: 选择模式、规则，并可开启暂停或交换场地功能。', infoHowTo2: '2. 记分: 点击队伍即可得分，使用撤销按钮纠正错误。', infoHowTo3: '3. 站位图: 查看球员站位。可旋转球场以匹配您的视角。', infoHowTo4: '4. 语音: 开启音量图标即可启用自动语音报分。', infoHowTo5: '5. 分享: 自动保存历史记录，查看统计数据并导出对局图片。', infoHowTo6: '6. 秘密: 连续点击“某处” 5 次解锁“彩蛋”', infoData: '所有比赛记录均保存在本地。清除浏览器数据将删除记录。', infoUsage: '开源项目。可免费使用，请鸣谢原作者 (Amos)。', infoFooter: '为匹克球社区用心设计 ❤️', retreatTitle: '谁退赛了？', t1Retreat: '队伍 1 退赛', t2Retreat: '队伍 2 退赛', quitMatch: '退出比赛', quitConfirm: '确定返回菜单吗？比赛记录不会保存。', yesQuit: '确定退出', winByRetreat: '对方退赛，获得胜利！', loading: '加载中...', switchEnds: "交换场地！", switchEndsDesc: "双方球员现在应交换场地。", resumeMatch: "恢复比赛", resumeDesc: "您有一场未完成的比赛。是否恢复？", stats: "统计数据", totalMatches: "总场数", avgDuration: "平均时长", share: "分享", edit: "编辑", winRate: "队1胜率", time: "时间", firstServer: "先发球", sideOut: "换发球", secondServer: "第二发球", totalPoints: "总分数", winDist: "胜率分布", formatStats: "比赛模式统计", enableTimeouts: "启用暂停", timeoutsDesc: "每队每局2次暂停", callTimeout: "请求暂停", courtPosTitle: "站位图", courtPosDesc: "发球与接发球站位指导", receiver: "接发球", generatingImage: "正在生成图片", t1P1: "队1 左侧球员", t1P2: "队1 右侧球员", t2P1: "队2 左侧球员", t2P2: "队2 右侧球员", oddCourt: "(奇数区)", evenCourt: "(偶数区)", point: "得分", resetMatch: "重置", resetTitle: "重置比赛？", resetWarning: "当前进度将不会被保存。", resetSettings: "更改球员/设置", resetPoints: "仅重置分数", menu: "菜单" },
@@ -1999,22 +2275,21 @@
               )}
 
               {/* --- IN-GAME OVERLAYS & MODALS --- */}
-              {secretGame && (
+              {secretGame === 'menu' && (
                 <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
                   <div className="absolute inset-0 bg-black/80 backdrop-blur-md" style={{touchAction: 'none'}} onClick={() => setSecretGame(null)}></div>
-                  <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden animate-screen-enter`}>
-                    <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50 flex justify-between items-center">
+                  <div className={`relative w-full max-w-sm flex flex-col bg-stone-800 border border-stone-700 rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden animate-screen-enter`}>
+                    <div className="p-5 flex-shrink-0 border-b border-stone-700 flex justify-between items-center">
                       <h2 className={`text-xl font-black uppercase tracking-widest text-emerald-500 flex items-center gap-2`}><Gamepad2 size={24} /> Arcade</h2>
-                      <button onClick={() => setSecretGame(null)} className={`p-2 -mr-2 rounded-full ${textSub} hover:${textMain} transition-colors`}><X size={20} /></button>
+                      <button onClick={() => setSecretGame(null)} className={`p-2 -mr-2 rounded-full text-stone-400 hover:text-white transition-colors`}><X size={20} /></button>
                     </div>
-                    <div className="px-6 py-6 overflow-y-auto muji-scrollbar flex-1 overscroll-contain">
-                       <p className={`text-sm mb-6 ${textSub} text-center`}>Welcome to the secret Pickleball Arcade! Mini-games are currently in development.</p>
+                    <div className="px-5 py-6 overflow-y-auto muji-scrollbar flex-1 overscroll-contain bg-stone-900">
+                       <p className={`text-sm mb-6 text-stone-400 text-center font-medium`}>Choose a mini-game to play!</p>
                        <div className="grid grid-cols-2 gap-4">
                          {['Snake', 'Pickle Jump', 'Memory', 'Tic-Tac-Toe', 'Reaction Test', 'Wall Bounce', 'Tap Challenge', 'Target Practice'].map(name => (
-                           <div key={name} className={`p-4 rounded-xl border ${borderSub} ${bgMain} flex flex-col items-center text-center opacity-60 cursor-not-allowed grayscale`}>
-                             <Gamepad2 size={24} className={`mb-2 ${textSub}`} />
-                             <span className={`text-xs font-bold ${textMain}`}>{name}</span>
-                             <span className="text-[8px] uppercase tracking-widest text-emerald-500 font-bold mt-2">Coming Soon</span>
+                           <div key={name} onClick={() => setSecretGame(name)} className={`p-4 rounded-xl border border-stone-700 bg-stone-800 flex flex-col items-center text-center cursor-pointer active:scale-95 transition-transform hover:bg-stone-700 hover:border-stone-500 shadow-md`}>
+                             <Gamepad2 size={24} className={`mb-3 text-emerald-500`} />
+                             <span className={`text-xs font-bold text-stone-200 tracking-wide uppercase`}>{name}</span>
                            </div>
                          ))}
                        </div>
@@ -2022,6 +2297,15 @@
                   </div>
                 </div>
               )}
+
+              {secretGame === 'Snake' && <ArcadeSnake onBack={() => setSecretGame('menu')} />}
+              {secretGame === 'Pickle Jump' && <ArcadePickleJump onBack={() => setSecretGame('menu')} />}
+              {secretGame === 'Memory' && <ArcadeMemory onBack={() => setSecretGame('menu')} />}
+              {secretGame === 'Tic-Tac-Toe' && <ArcadeTicTacToe onBack={() => setSecretGame('menu')} />}
+              {secretGame === 'Reaction Test' && <ArcadeReaction onBack={() => setSecretGame('menu')} />}
+              {secretGame === 'Wall Bounce' && <ArcadeWallBounce onBack={() => setSecretGame('menu')} />}
+              {secretGame === 'Tap Challenge' && <ArcadeTapChallenge onBack={() => setSecretGame('menu')} />}
+              {secretGame === 'Target Practice' && <ArcadeTargetPractice onBack={() => setSecretGame('menu')} />}
 
               {showResetModal && (
                 <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
