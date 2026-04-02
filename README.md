@@ -26,7 +26,7 @@ A minimalist, Muji-inspired Pickleball Point Counter built with React & Tailwind
 
 * Multi-Language Support: Fully translated into 12 languages: English, 简体中文, 繁體中文, Bahasa Melayu, Español, Français, Tiếng Việt, ไทย, 日本語, 한국어, Deutsch, and Português.
 
-* Hidden Arcade Room: Tap the "New Match" title 5 times to unlock a secret retro arcade featuring 8 mini-games (Snake, Pickle Jump, Memory, Tic-Tac-Toe, Reaction Test, Wall Bounce, Tap Challenge, and Target Practice)!
+* Hidden Arcade Room: Tap the "SOMEWHERE" 5 times to unlock a secret retro arcade featuring 8 mini-games (Snake, Pickle Jump, Memory, Tic-Tac-Toe, Reaction Test, Wall Bounce, Tap Challenge, and Target Practice)!
 
 * PWA Ready: Install it directly to your iOS or Android home screen to use it offline like a native mobile app.
 
