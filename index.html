@@ -1999,6 +1999,30 @@
               )}
 
               {/* --- IN-GAME OVERLAYS & MODALS --- */}
+              {secretGame && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                  <div className="absolute inset-0 bg-black/80 backdrop-blur-md" style={{touchAction: 'none'}} onClick={() => setSecretGame(null)}></div>
+                  <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden animate-screen-enter`}>
+                    <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50 flex justify-between items-center">
+                      <h2 className={`text-xl font-black uppercase tracking-widest text-emerald-500 flex items-center gap-2`}><Gamepad2 size={24} /> Arcade</h2>
+                      <button onClick={() => setSecretGame(null)} className={`p-2 -mr-2 rounded-full ${textSub} hover:${textMain} transition-colors`}><X size={20} /></button>
+                    </div>
+                    <div className="px-6 py-6 overflow-y-auto muji-scrollbar flex-1 overscroll-contain">
+                       <p className={`text-sm mb-6 ${textSub} text-center`}>Welcome to the secret Pickleball Arcade! Mini-games are currently in development.</p>
+                       <div className="grid grid-cols-2 gap-4">
+                         {['Snake', 'Pickle Jump', 'Memory', 'Tic-Tac-Toe', 'Reaction Test', 'Wall Bounce', 'Tap Challenge', 'Target Practice'].map(name => (
+                           <div key={name} className={`p-4 rounded-xl border ${borderSub} ${bgMain} flex flex-col items-center text-center opacity-60 cursor-not-allowed grayscale`}>
+                             <Gamepad2 size={24} className={`mb-2 ${textSub}`} />
+                             <span className={`text-xs font-bold ${textMain}`}>{name}</span>
+                             <span className="text-[8px] uppercase tracking-widest text-emerald-500 font-bold mt-2">Coming Soon</span>
+                           </div>
+                         ))}
+                       </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {showResetModal && (
                 <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
                   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowResetModal(false)}></div>
