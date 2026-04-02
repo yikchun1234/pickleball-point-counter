@@ -64,6 +64,11 @@
     <meta name="apple-mobile-web-app-title" content="Pickleball Point Counter">
     <meta name="mobile-web-app-capable" content="yes">
 
+    <!-- 1. OPTIMIZE FONT LOADING (Fixes render-blocking) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
     <link id="favicon" rel="icon" type="image/jpeg" sizes="512x512" href="https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg">
     <link id="apple-icon" rel="apple-touch-icon" sizes="512x512" href="https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg">
     <link id="manifest-link" rel="manifest" href="">
@@ -130,9 +135,21 @@
     
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- 2. INLINE THEME DETECTOR (Prevents white-flash on dark mode) -->
+    <script>
+        (function() {
+            try {
+                var isDark = localStorage.getItem('pb_theme_pref') === 'dark';
+                document.documentElement.style.setProperty('--app-bg', isDark ? '#1c1917' : '#fafaf9');
+                document.documentElement.style.setProperty('--app-text', isDark ? '#e7e5e4' : '#292524');
+                document.documentElement.style.setProperty('--app-sub', isDark ? '#78716c' : '#a8a29e');
+                document.documentElement.style.setProperty('--ball-base', isDark ? '#4ade80' : '#86efac');
+                document.documentElement.style.setProperty('--ball-dots', isDark ? '#064e3b' : '#14532d');
+            } catch(e) {}
+        })();
+    </script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;600;700;900&display=swap');
-        
         /* * Stable Background & Body Rendering */
         html, body { 
             width: 100%; 
@@ -195,10 +212,44 @@
             95% { transform: scale(1.02) translateY(-4px); }
         }
         .animate-secret-hint { animation: secretHintBounce 5s infinite ease-in-out; cursor: pointer; display: inline-block; }
+        
+        @keyframes pulse-static { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
     </style>
 </head>
-<body>
-    <div id="root"></div>
+<body style="background-color: var(--app-bg); color: var(--app-text);">
+    
+    <!-- 3. STATIC PRELOADER (Fixes 10-second LCP blank screen) -->
+    <div id="root">
+        <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:50;">
+            <div style="text-align:center; z-index:10; margin-bottom:3rem;">
+                <h1 style="font-size:3rem; font-weight:700; letter-spacing:-0.025em; margin:0; color:var(--app-text);">Pickleball</h1>
+                <p style="font-size:1.5rem; margin-top:0.5rem; letter-spacing:0.1em; text-transform:uppercase; font-weight:500; color:#10b981; margin-bottom:0;">Point Counter</p>
+                <p style="margin-top:2.5rem; font-size:1.125rem; font-weight:500; text-transform:uppercase; letter-spacing:0.1em; color:var(--app-sub); animation: pulse-static 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;">Loading...</p>
+            </div>
+            <div style="position:relative; width:10rem; height:10rem; margin:0 auto; animation: subtle-bounce 4s infinite ease-in-out;">
+                <svg viewBox="0 0 100 100" style="width:100%; height:100%; filter: drop-shadow(0 20px 13px rgba(0, 0, 0, 0.03)) drop-shadow(0 8px 5px rgba(0, 0, 0, 0.08));">
+                    <circle cx="50" cy="50" r="48" fill="var(--ball-base)" />
+                    <circle cx="50" cy="50" r="48" fill="url(#ballGradientStatic)" opacity="0.6" />
+                    <circle cx="30" cy="30" r="5" fill="var(--ball-dots)" opacity="0.8" />
+                    <circle cx="50" cy="20" r="5" fill="var(--ball-dots)" opacity="0.8" />
+                    <circle cx="70" cy="30" r="5" fill="var(--ball-dots)" opacity="0.8" />
+                    <circle cx="20" cy="50" r="5" fill="var(--ball-dots)" opacity="0.8" />
+                    <circle cx="40" cy="45" r="5" fill="var(--ball-dots)" opacity="0.8" />
+                    <circle cx="60" cy="45" r="5" fill="var(--ball-dots)" opacity="0.8" />
+                    <circle cx="80" cy="50" r="5" fill="var(--ball-dots)" opacity="0.8" />
+                    <circle cx="30" cy="70" r="5" fill="var(--ball-dots)" opacity="0.8" />
+                    <circle cx="50" cy="80" r="5" fill="var(--ball-dots)" opacity="0.8" />
+                    <circle cx="70" cy="70" r="5" fill="var(--ball-dots)" opacity="0.8" />
+                    <defs>
+                        <radialGradient id="ballGradientStatic" cx="30%" cy="30%" r="70%">
+                            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.8" />
+                            <stop offset="100%" stopColor="#000000" stopOpacity="0.3" />
+                        </radialGradient>
+                    </defs>
+                </svg>
+            </div>
+        </div>
+    </div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
