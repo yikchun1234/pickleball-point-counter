@@ -74,12 +74,29 @@
     <link id="manifest-link" rel="manifest" href="">
 
     <script>
+        // 1. INJECT MANIFEST IMMEDIATELY (So Chrome sees it instantly, no waiting!)
+        const appUrl = window.location.pathname || "/";
+        const manifest = {
+            name: "Pickleball Point Counter",
+            short_name: "Pickleball",
+            start_url: appUrl,
+            id: appUrl,
+            display: "standalone",
+            background_color: "#fafaf9",
+            theme_color: "#10b981",
+            icons: [
+                { src: "https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg", sizes: "192x192", type: "image/jpeg", purpose: "any maskable" },
+                { src: "https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg", sizes: "512x512", type: "image/jpeg", purpose: "any maskable" }
+            ]
+        };
+        document.getElementById('manifest-link').href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
+
+        // 2. Generate Padded Icons for iOS/Favicon in the background
         (function() {
             const img = new Image();
             img.crossOrigin = "Anonymous"; 
             img.onload = function() {
                 try {
-                    // 1. Canvas for Android (Manifest & Favicon)
                     const canvasAndroid = document.createElement('canvas');
                     canvasAndroid.width = 512; canvasAndroid.height = 512;
                     const ctxAndroid = canvasAndroid.getContext('2d');
@@ -89,9 +106,7 @@
                     const sizeAndroid = 512 * scaleAndroid;
                     const offsetAndroid = (512 - sizeAndroid) / 2;
                     ctxAndroid.drawImage(img, offsetAndroid, offsetAndroid, sizeAndroid, sizeAndroid);
-                    const androidIconUrl = canvasAndroid.toDataURL('image/png');
-
-                    // 2. Canvas for iOS
+                    
                     const canvasIOS = document.createElement('canvas');
                     canvasIOS.width = 512; canvasIOS.height = 512;
                     const ctxIOS = canvasIOS.getContext('2d');
@@ -101,51 +116,16 @@
                     const sizeIOS = 512 * scaleIOS;
                     const offsetIOS = (512 - sizeIOS) / 2;
                     ctxIOS.drawImage(img, offsetIOS, offsetIOS, sizeIOS, sizeIOS);
-                    const iosIconUrl = canvasIOS.toDataURL('image/png');
                     
-                    // Apply the respective generated icons
-                    document.getElementById('favicon').href = androidIconUrl;
+                    document.getElementById('favicon').href = canvasAndroid.toDataURL('image/png');
                     document.getElementById('favicon').type = 'image/png';
-                    document.getElementById('apple-icon').href = iosIconUrl;
-                    
-                    const appUrl = window.location.origin + window.location.pathname;
-                    const manifest = {
-                        name: "Pickleball Point Counter",
-                        short_name: "Pickleball",
-                        start_url: appUrl,
-                        id: appUrl,
-                        display: "standalone",
-                        background_color: "#fafaf9",
-                        theme_color: "#10b981",
-                        icons: [
-                            { src: androidIconUrl, sizes: "192x192", type: "image/png", purpose: "any maskable" },
-                            { src: androidIconUrl, sizes: "512x512", type: "image/png", purpose: "any maskable" }
-                        ]
-                    };
-                    const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/manifest+json'});
-                    document.getElementById('manifest-link').href = URL.createObjectURL(manifestBlob);
-                    
+                    document.getElementById('apple-icon').href = canvasIOS.toDataURL('image/png');
                 } catch (e) {
                     console.warn("Could not generate padded icon due to CORS.");
                 }
             };
             img.src = 'https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg';
         })();
-    </script>
-    
-    <!-- ADDED: Dummy Service Worker for Chrome App Install Popup -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                const swCode = `
-                    self.addEventListener('install', (e) => { self.skipWaiting(); });
-                    self.addEventListener('activate', (e) => { self.clients.claim(); });
-                    self.addEventListener('fetch', (e) => { }); // Required by Chrome to trigger install prompt
-                `;
-                const blob = new Blob([swCode], { type: 'application/javascript' });
-                navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
-            });
-        }
     </script>
     
     <script src="https://cdn.tailwindcss.com"></script>
