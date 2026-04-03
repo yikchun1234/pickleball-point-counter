@@ -1,6 +1,6 @@
 {
   "name": "Pickleball Point Counter",
-  "short_name": "Pickleball",
+  "short_name": "PPC",
   "start_url": "/",
   "id": "/",
   "display": "standalone",
@@ -8,7 +8,7 @@
   "theme_color": "#10b981",
   "icons": [
     {
-      "src": "/icon.png",
+      "src": "/img/icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
