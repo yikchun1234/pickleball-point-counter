@@ -77,7 +77,7 @@
     <!-- 1. STANDARD PWA MANIFEST (Points to real file) -->
     <link rel="manifest" href="manifest.json">
 
-    <!-- PWA Event Catcher & Icon Generator -->
+    <!-- PWA Event Catcher & Service Worker -->
     <script>
         // 2. Catch the install prompt INSTANTLY before React loads
         window.globalInstallPrompt = null;
@@ -86,7 +86,16 @@
             window.globalInstallPrompt = e;
         });
 
-        // 3. Generate Padded Icons for iOS/Favicon in the background
+        // 3. Register the real Service Worker (Required by Desktop Chrome)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch((err) => {
+                    console.log('Service Worker failed:', err);
+                });
+            });
+        }
+
+        // 4. Generate Padded Icons for iOS/Favicon in the background
         (function() {
             const img = new Image();
             img.crossOrigin = "Anonymous"; 
