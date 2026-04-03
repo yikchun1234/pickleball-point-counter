@@ -71,7 +71,38 @@
 
     <link id="favicon" rel="icon" type="image/jpeg" sizes="512x512" href="https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg">
     <link id="apple-icon" rel="apple-touch-icon" sizes="512x512" href="https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg">
-    <link id="manifest-link" rel="manifest" href="">
+    
+    <!-- HARDCODED MANIFEST: Chrome sees this instantly! -->
+    <link id="manifest-link" rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Pickleball%20Point%20Counter%22%2C%22short_name%22%3A%22Pickleball%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23fafaf9%22%2C%22theme_color%22%3A%22%2310b981%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fi.ibb.co%2FBHpkXPhP%2Fpickleballpointcounter.jpg%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fjpeg%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Fi.ibb.co%2FBHpkXPhP%2Fpickleballpointcounter.jpg%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fjpeg%22%7D%5D%7D">
+
+    <script>
+        // Generate Padded Icons for iOS/Favicon in the background
+        (function() {
+            const img = new Image();
+            img.crossOrigin = "Anonymous"; 
+            img.onload = function() {
+                try {
+                    const canvasAndroid = document.createElement('canvas');
+                    canvasAndroid.width = 512; canvasAndroid.height = 512;
+                    const ctxAndroid = canvasAndroid.getContext('2d');
+                    ctxAndroid.fillStyle = '#ffffff'; ctxAndroid.fillRect(0, 0, 512, 512);
+                    const scaleAndroid = 0.65; const sizeAndroid = 512 * scaleAndroid;
+                    ctxAndroid.drawImage(img, (512 - sizeAndroid) / 2, (512 - sizeAndroid) / 2, sizeAndroid, sizeAndroid);
+                    
+                    const canvasIOS = document.createElement('canvas');
+                    canvasIOS.width = 512; canvasIOS.height = 512;
+                    const ctxIOS = canvasIOS.getContext('2d');
+                    ctxIOS.fillStyle = '#ffffff'; ctxIOS.fillRect(0, 0, 512, 512);
+                    const scaleIOS = 0.9; const sizeIOS = 512 * scaleIOS;
+                    ctxIOS.drawImage(img, (512 - sizeIOS) / 2, (512 - sizeIOS) / 2, sizeIOS, sizeIOS);
+                    
+                    document.getElementById('favicon').href = canvasAndroid.toDataURL('image/png');
+                    document.getElementById('apple-icon').href = canvasIOS.toDataURL('image/png');
+                } catch (e) { }
+            };
+            img.src = 'https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg';
+        })();
+    </script>
 
     <script>
         // 1. INJECT MANIFEST IMMEDIATELY (So Chrome sees it instantly, no waiting!)
@@ -127,24 +158,16 @@
             img.src = 'https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg';
         })();
     </script>
-    <!-- Catch Install Prompt Early & Add Service Worker -->
+    
+    <!-- Catch Install Prompt Early -->
     <script>
-        // 1. Catch the install prompt instantly before React loads!
         window.globalInstallPrompt = null;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             window.globalInstallPrompt = e;
         });
-
-        // 2. Tiny Service Worker (Strictly required by Google Chrome for PWA)
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                const sw = `self.addEventListener('fetch', (e) => {});`;
-                const blob = new Blob([sw], { type: 'application/javascript' });
-                navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
-            });
-        }
     </script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
