@@ -71,8 +71,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    <link id="favicon" rel="icon" type="image/png" sizes="512x512" href="/icon.png">
-    <link id="apple-icon" rel="apple-touch-icon" sizes="512x512" href="/icon.png">
+    <link id="favicon" rel="icon" type="image/png" sizes="512x512" href="/img/icon.png">
+    <link id="apple-icon" rel="apple-touch-icon" sizes="512x512" href="/img/icon.png">
     
     <!-- 1. STANDARD PWA MANIFEST (Points to real file) -->
     <link rel="manifest" href="manifest.json">
@@ -117,7 +117,7 @@
                     document.getElementById('apple-icon').href = canvasIOS.toDataURL('image/png');
                 } catch (e) { }
             };
-            img.src = '/icon.jpg';
+            img.src = '/img/icon.png';
         })();
     </script>
 
@@ -133,8 +133,8 @@
             background_color: "#fafaf9",
             theme_color: "#10b981",
             icons: [
-                { src: "/icon.jpg", sizes: "192x192", type: "image/jpeg", purpose: "any maskable" },
-                { src: "/icon.jpg", sizes: "512x512", type: "image/jpeg", purpose: "any maskable" }
+                { src: "/img/icon.png", sizes: "192x192", type: "image/jpeg", purpose: "any maskable" },
+                { src: "/img/icon.png", sizes: "512x512", type: "image/jpeg", purpose: "any maskable" }
             ]
         };
         document.getElementById('manifest-link').href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
@@ -172,7 +172,7 @@
                     console.warn("Could not generate padded icon due to CORS.");
                 }
             };
-            img.src = '/icon.jpg';
+            img.src = '/img/icon.png';
         })();
     </script>
     
