@@ -108,14 +108,14 @@
                     document.getElementById('favicon').type = 'image/png';
                     document.getElementById('apple-icon').href = iosIconUrl;
                     
-                    const manifest = {
+                   const manifest = {
                         name: "Pickleball Point Counter",
                         short_name: "Pickleball",
                         start_url: ".",
                         display: "standalone",
                         background_color: "#fafaf9",
                         theme_color: "#10b981",
-                        icons: [{ src: androidIconUrl, sizes: "512x512", type: "image/png", purpose: "any maskable" }]
+                        icons: [{ src: androidIconUrl, sizes: "192x192 512x512", type: "image/png", purpose: "any maskable" }]
                     };
                     document.getElementById('manifest-link').href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
                 } catch (e) {
@@ -125,7 +125,22 @@
             img.src = 'https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg';
         })();
     </script>
-
+    
+    <!-- ADDED: Dummy Service Worker for Chrome App Install Popup -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swCode = `
+                    self.addEventListener('install', (e) => { self.skipWaiting(); });
+                    self.addEventListener('activate', (e) => { self.clients.claim(); });
+                    self.addEventListener('fetch', (e) => { }); // Required by Chrome to trigger install prompt
+                `;
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+            });
+        }
+    </script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
