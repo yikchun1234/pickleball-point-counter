@@ -1,0 +1,23 @@
+{
+  "name": "Pickleball Point Counter",
+  "short_name": "Pickleball",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "background_color": "#fafaf9",
+  "theme_color": "#10b981",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
