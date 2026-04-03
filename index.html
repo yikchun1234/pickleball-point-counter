@@ -89,9 +89,7 @@
         // 3. Register the real Service Worker (Required by Desktop Chrome)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch((err) => {
-                    console.log('Service Worker failed:', err);
-                });
+                navigator.serviceWorker.register('/sw.js').catch(()=>{});
             });
         }
 
