@@ -108,16 +108,23 @@
                     document.getElementById('favicon').type = 'image/png';
                     document.getElementById('apple-icon').href = iosIconUrl;
                     
-                   const manifest = {
+                    const appUrl = window.location.origin + window.location.pathname;
+                    const manifest = {
                         name: "Pickleball Point Counter",
                         short_name: "Pickleball",
-                        start_url: ".",
+                        start_url: appUrl,
+                        id: appUrl,
                         display: "standalone",
                         background_color: "#fafaf9",
                         theme_color: "#10b981",
-                        icons: [{ src: androidIconUrl, sizes: "192x192 512x512", type: "image/png", purpose: "any maskable" }]
+                        icons: [
+                            { src: androidIconUrl, sizes: "192x192", type: "image/png", purpose: "any maskable" },
+                            { src: androidIconUrl, sizes: "512x512", type: "image/png", purpose: "any maskable" }
+                        ]
                     };
-                    document.getElementById('manifest-link').href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
+                    const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/manifest+json'});
+                    document.getElementById('manifest-link').href = URL.createObjectURL(manifestBlob);
+                    
                 } catch (e) {
                     console.warn("Could not generate padded icon due to CORS.");
                 }
