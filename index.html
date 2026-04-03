@@ -74,31 +74,11 @@
     <link id="favicon" rel="icon" type="image/jpeg" sizes="512x512" href="https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg">
     <link id="apple-icon" rel="apple-touch-icon" sizes="512x512" href="https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg">
     
-    <!-- PWA CORE SYSTEM: Dynamic Manifest & Event Catcher -->
-    <script>
-        // 1. DYNAMIC MANIFEST: Desktop Chrome strictly requires an absolute start_url!
-        (function() {
-            const appUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-            const manifest = {
-                name: "Pickleball Point Counter",
-                short_name: "Pickleball",
-                start_url: appUrl,
-                id: appUrl,
-                display: "standalone",
-                background_color: "#fafaf9",
-                theme_color: "#10b981",
-                icons: [
-                    { src: "https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg", sizes: "192x192", type: "image/jpeg", purpose: "any maskable" },
-                    { src: "https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg", sizes: "512x512", type: "image/jpeg", purpose: "any maskable" }
-                ]
-            };
-            const link = document.createElement('link');
-            link.id = 'manifest-link';
-            link.rel = 'manifest';
-            link.href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
-            document.head.appendChild(link);
-        })();
+    <!-- 1. STANDARD PWA MANIFEST (Points to real file) -->
+    <link rel="manifest" href="manifest.json">
 
+    <!-- PWA Event Catcher & Icon Generator -->
+    <script>
         // 2. Catch the install prompt INSTANTLY before React loads
         window.globalInstallPrompt = null;
         window.addEventListener('beforeinstallprompt', (e) => {
