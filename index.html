@@ -127,7 +127,24 @@
             img.src = 'https://i.ibb.co/BHpkXPhP/pickleballpointcounter.jpg';
         })();
     </script>
-    
+    <!-- Catch Install Prompt Early & Add Service Worker -->
+    <script>
+        // 1. Catch the install prompt instantly before React loads!
+        window.globalInstallPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            window.globalInstallPrompt = e;
+        });
+
+        // 2. Tiny Service Worker (Strictly required by Google Chrome for PWA)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const sw = `self.addEventListener('fetch', (e) => {});`;
+                const blob = new Blob([sw], { type: 'application/javascript' });
+                navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+            });
+        }
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -1731,14 +1748,30 @@
           );
 
           const checkStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
+          
           useEffect(() => {
             setIsInstalled(checkStandalone());
             const mediaQuery = window.matchMedia('(display-mode: standalone)');
             const handleDisplayModeChange = (e) => setIsInstalled(e.matches);
             mediaQuery.addEventListener('change', handleDisplayModeChange);
-            const handleBeforeInstall = (e) => { e.preventDefault(); setInstallPrompt(e); };
+            
+            // 1. Check if the event was already caught by our early listener!
+            if (window.globalInstallPrompt) {
+                setInstallPrompt(window.globalInstallPrompt);
+            }
+
+            // 2. Also listen just in case it fires late
+            const handleBeforeInstall = (e) => { 
+                e.preventDefault(); 
+                window.globalInstallPrompt = e;
+                setInstallPrompt(e); 
+            };
             window.addEventListener('beforeinstallprompt', handleBeforeInstall);
-            return () => { mediaQuery.removeEventListener('change', handleDisplayModeChange); window.removeEventListener('beforeinstallprompt', handleBeforeInstall); };
+            
+            return () => { 
+                mediaQuery.removeEventListener('change', handleDisplayModeChange); 
+                window.removeEventListener('beforeinstallprompt', handleBeforeInstall); 
+            };
           }, []);
 
           useEffect(() => {
