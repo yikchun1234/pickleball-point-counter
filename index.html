@@ -2010,38 +2010,6 @@
               )}
 
               {/* --- IN-GAME OVERLAYS & MODALS --- */}
-              {secretGame === 'menu' && (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-                  <div className="absolute inset-0 bg-black/80 backdrop-blur-md" style={{touchAction: 'none'}} onClick={() => setSecretGame(null)}></div>
-                  <div className={`relative w-full max-w-sm flex flex-col bg-stone-800 border border-stone-700 rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden animate-screen-enter`}>
-                    <div className="p-5 flex-shrink-0 border-b border-stone-700 flex justify-between items-center">
-                      <h2 className={`text-xl font-black uppercase tracking-widest text-emerald-500 flex items-center gap-2`}><Gamepad2 size={24} /> Arcade</h2>
-                      <button onClick={() => setSecretGame(null)} className={`p-2 -mr-2 rounded-full text-stone-400 hover:text-white transition-colors`}><X size={20} /></button>
-                    </div>
-                    <div className="px-5 py-6 overflow-y-auto muji-scrollbar flex-1 overscroll-contain bg-stone-900">
-                       <p className={`text-sm mb-6 text-stone-400 text-center font-medium`}>Choose a mini-game to play!</p>
-                       <div className="grid grid-cols-2 gap-4">
-                         {['Snake', 'Pickle Jump', 'Memory', 'Tic-Tac-Toe', 'Reaction Test', 'Wall Bounce', 'Tap Challenge', 'Target Practice'].map(name => (
-                           <div key={name} onClick={() => setSecretGame(name)} className={`p-4 rounded-xl border border-stone-700 bg-stone-800 flex flex-col items-center text-center cursor-pointer active:scale-95 transition-transform hover:bg-stone-700 hover:border-stone-500 shadow-md`}>
-                             <Gamepad2 size={24} className={`mb-3 text-emerald-500`} />
-                             <span className={`text-xs font-bold text-stone-200 tracking-wide uppercase`}>{name}</span>
-                           </div>
-                         ))}
-                       </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {secretGame === 'Snake' && <ArcadeSnake onBack={() => setSecretGame('menu')} />}
-              {secretGame === 'Pickle Jump' && <ArcadePickleJump onBack={() => setSecretGame('menu')} />}
-              {secretGame === 'Memory' && <ArcadeMemory onBack={() => setSecretGame('menu')} />}
-              {secretGame === 'Tic-Tac-Toe' && <ArcadeTicTacToe onBack={() => setSecretGame('menu')} />}
-              {secretGame === 'Reaction Test' && <ArcadeReaction onBack={() => setSecretGame('menu')} />}
-              {secretGame === 'Wall Bounce' && <ArcadeWallBounce onBack={() => setSecretGame('menu')} />}
-              {secretGame === 'Tap Challenge' && <ArcadeTapChallenge onBack={() => setSecretGame('menu')} />}
-              {secretGame === 'Target Practice' && <ArcadeTargetPractice onBack={() => setSecretGame('menu')} />}
-
               {showResetModal && (
                 <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
                   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowResetModal(false)}></div>
@@ -2157,20 +2125,29 @@
                        <h2 className={`text-lg font-bold ${textMain}`}>{getT('shareAppTitle')}</h2>
                        <button onClick={() => setShowShareAppModal(false)} className={`p-2 -mr-2 rounded-full ${textSub} hover:${textMain}`}><X size={20}/></button>
                     </div>
-                    <div className="bg-white p-3 rounded-2xl inline-block shadow-sm border border-stone-200 mb-6">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://pickleball-point-counter.pages.dev/" alt="QR Code" className="w-40 h-40" />
+                    <div className="flex flex-col items-center">
+                        <div className="bg-white p-3 rounded-2xl inline-block shadow-sm border border-stone-200 mb-2 relative group">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://pickleball-point-counter.pages.dev/" alt="QR Code" className="w-40 h-40" />
+                        </div>
+                        <p className={`text-[10px] font-bold uppercase tracking-widest ${textSub} mb-6`}>Scan in person or Long-press to save</p>
                     </div>
                     <div className={`text-sm mb-6 ${textSub} text-left bg-stone-100 dark:bg-stone-800/50 p-4 rounded-xl border ${borderSub} leading-relaxed`}>
                        {getT('shareAppText')}
-                       <br/><br/>
-                       <a href="https://pickleball-point-counter.pages.dev/" className="text-emerald-500 font-bold block truncate" target="_blank" rel="noopener noreferrer">https://pickleball-point-counter.pages.dev/</a>
                     </div>
                     <button onClick={async () => {
-                        const shareText = `${getT('shareAppText')}\n\nhttps://pickleball-point-counter.pages.dev/`;
+                        const appUrl = 'https://pickleball-point-counter.pages.dev/';
+                        const shareText = getT('shareAppText');
+                        
                         if (navigator.share) {
-                            try { await navigator.share({ title: 'Pickleball Point Counter', text: shareText, url: 'https://pickleball-point-counter.pages.dev/' }); } catch(e) {}
+                            try { 
+                                await navigator.share({ 
+                                    title: 'Pickleball Point Counter', 
+                                    text: shareText, 
+                                    url: appUrl 
+                                }); 
+                            } catch(e) {}
                         } else {
-                            navigator.clipboard.writeText(shareText);
+                            navigator.clipboard.writeText(`${shareText}\n\n${appUrl}`);
                             setLinkCopied(true);
                             setTimeout(() => setLinkCopied(false), 2000);
                         }
