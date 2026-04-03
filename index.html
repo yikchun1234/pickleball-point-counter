@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Pickleball Point Counter</title>
     
+    <!-- FIXED: Added 'manifest-src' and allowed 'blob:' in script-src so Chrome can read the dynamic App Manifest and Service Worker -->
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self'; 
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://static.cloudflareinsights.com; 
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://static.cloudflareinsights.com blob:; 
         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
         font-src 'self' https://fonts.gstatic.com data:; 
         img-src 'self' data: blob: https://i.ibb.co https://api.qrserver.com; 
         connect-src 'self' https://cloudflareinsights.com;
+        manifest-src 'self' data: blob:;
         object-src 'none'; 
         worker-src 'self' blob:;
     ">
