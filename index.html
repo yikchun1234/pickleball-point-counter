@@ -77,8 +77,25 @@
     <!-- HARDCODED MANIFEST: Chrome sees this instantly! -->
     <link id="manifest-link" rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Pickleball%20Point%20Counter%22%2C%22short_name%22%3A%22Pickleball%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23fafaf9%22%2C%22theme_color%22%3A%22%2310b981%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fi.ibb.co%2FBHpkXPhP%2Fpickleballpointcounter.jpg%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fjpeg%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Fi.ibb.co%2FBHpkXPhP%2Fpickleballpointcounter.jpg%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fjpeg%22%7D%5D%7D">
 
+    <!-- PWA CORE SYSTEM -->
     <script>
-        // Generate Padded Icons for iOS/Favicon in the background
+        // 1. Catch the install prompt INSTANTLY before React loads
+        window.globalInstallPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            window.globalInstallPrompt = e;
+        });
+
+        // 2. Register Dummy Service Worker (Strictly required by Chrome)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swCode = `self.addEventListener('fetch', (e) => {});`;
+                const swBlob = new Blob([swCode], { type: 'application/javascript' });
+                navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+            });
+        }
+
+        // 3. Generate Padded Icons for iOS/Favicon in the background
         (function() {
             const img = new Image();
             img.crossOrigin = "Anonymous"; 
@@ -1780,12 +1797,11 @@
             const handleDisplayModeChange = (e) => setIsInstalled(e.matches);
             mediaQuery.addEventListener('change', handleDisplayModeChange);
             
-            // 1. Check if the event was already caught by our early listener!
+            // Look for the early prompt caught in HTML
             if (window.globalInstallPrompt) {
                 setInstallPrompt(window.globalInstallPrompt);
             }
 
-            // 2. Also listen just in case it fires late
             const handleBeforeInstall = (e) => { 
                 e.preventDefault(); 
                 window.globalInstallPrompt = e;
