@@ -1685,19 +1685,15 @@
                   }
                   if (isStrictSuddenDeathCurrent) isFirstTurnOfMatch = false;
 
-                  let ptsWonThisTurn = 0;
-                  for (let i = effectiveHistory.length - 1; i >= 0; i--) {
-                      if (effectiveHistory[i].type === 'SIDEOUT') break;
-                      if (effectiveHistory[i].type === `T${simServeTeam}_POINT`) ptsWonThisTurn++;
-                  }
+                  const currentScore = simServeTeam === 1 ? simT1Score : simT2Score;
 
                   if (isFirstTurnOfMatch) {
-                      courtServerPos = ptsWonThisTurn % 2 === 0 ? 'Right' : 'Left';
+                      courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
                   } else {
                       if (simServNum === 1) {
-                          courtServerPos = ptsWonThisTurn % 2 === 0 ? 'Right' : 'Left';
+                          courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
                       } else {
-                          courtServerPos = ptsWonThisTurn % 2 === 0 ? 'Left' : 'Right';
+                          courtServerPos = currentScore % 2 === 0 ? 'Left' : 'Right';
                       }
                   }
               } else {
@@ -2685,12 +2681,29 @@
                       courtServerPos = (simServeTeam === 1 ? simT1Score : simT2Score) % 2 === 0 ? 'Right' : 'Left';
                   } else {
                       let isServeToScoreCurrent = match.rules === 'standard' || (match.rules === 'custom' && match.serveToWinAt14) || (match.rules === '14-point' && match.serveToWinAt14 && simT1Score === 14 && simT2Score === 14);
+                      
+                      let isFirstTurnOfMatch = true;
+                      for (let i = 0; i < effectiveHistory.length; i++) {
+                          if (effectiveHistory[i].type === 'SIDEOUT' || (!isServeToScoreCurrent && (effectiveHistory[i].type === 'T1_POINT' || effectiveHistory[i].type === 'T2_POINT'))) { 
+                              isFirstTurnOfMatch = false; break;
+                          }
+                      }
+                      if (match.rules === '14-point' && match.serveToWinAt14 && simT1Score === 14 && simT2Score === 14) isFirstTurnOfMatch = false;
+
+                      const currentScore = simServeTeam === 1 ? simT1Score : simT2Score;
+
                       if (isServeToScoreCurrent) {
-                          let ptsWonThisTurn = 0;
-                          for (let i = effectiveHistory.length - 1; i >= 0; i--) { if (effectiveHistory[i].type === 'SIDEOUT') break; if (effectiveHistory[i].type === `T${simServeTeam}_POINT`) ptsWonThisTurn++; }
-                          courtServerPos = (simServNum === 1 ? ptsWonThisTurn % 2 === 0 : ptsWonThisTurn % 2 !== 0) ? 'Right' : 'Left';
+                          if (isFirstTurnOfMatch) {
+                              courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
+                          } else {
+                              if (simServNum === 1) {
+                                  courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
+                              } else {
+                                  courtServerPos = currentScore % 2 === 0 ? 'Left' : 'Right';
+                              }
+                          }
                       } else {
-                          courtServerPos = (simServeTeam === 1 ? simT1Score : simT2Score) % 2 === 0 ? 'Right' : 'Left';
+                          courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
                       }
                   }
 
