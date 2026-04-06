@@ -1770,7 +1770,7 @@
                     </div>
                     <div className="flex items-center">
                         {timelineData.map((event, index) => (
-                          <div key={event.id} onClick={() => { if (!timelineLocked || winner) setViewingPastIndex(index); }} className={`flex flex-col items-center justify-center w-8 gap-3 relative z-10 transition-colors ${(!timelineLocked || winner) ? 'cursor-pointer hover:bg-stone-500/10 rounded-lg py-1' : ''} ${viewingPastIndex === index ? 'bg-amber-500/20 rounded-lg py-1 ring-1 ring-amber-500/50' : ''}`}>
+                          <div key={event.id} onClick={() => { if (useScrollRef && (!timelineLocked || winner !== null)) setViewingPastIndex(index); }} className={`flex flex-col items-center justify-center w-8 gap-3 relative z-10 transition-colors ${useScrollRef && (!timelineLocked || winner !== null) ? 'cursor-pointer hover:bg-stone-500/10 rounded-lg py-1' : ''} ${useScrollRef && viewingPastIndex === index ? 'bg-amber-500/20 rounded-lg py-1 ring-1 ring-amber-500/50' : ''}`}>
                             <div className="h-6 flex items-center justify-center w-full">
                               {event.type === 'T1_POINT' ? (
                                   <div className={`w-5 h-5 rounded-full bg-emerald-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[10px] font-bold text-white shadow-sm z-10`}>
