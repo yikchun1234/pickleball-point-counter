@@ -809,6 +809,7 @@
           const [hasSwitchedEnds, setHasSwitchedEnds] = useState(false);
           const [elapsedTime, setElapsedTime] = useState(0);
           const [courtRotation, setCourtRotation] = useState(0);
+          const [activeTimeoutRemaining, setActiveTimeoutRemaining] = useState(0);
           
           const [showHistory, setShowHistory] = useState(false);
           const [history, setHistory] = useState([]); 
@@ -913,11 +914,21 @@
 
           useEffect(() => {
             let timer;
-            if (appState === 'game' && !winner && !showRetreatModal && !showBackConfirm && !showSwitchModal && !showTimeoutConfirm) {
+            // Pauses the match timer if activeTimeoutRemaining > 0
+            if (appState === 'game' && !winner && !showRetreatModal && !showBackConfirm && !showSwitchModal && !showTimeoutConfirm && activeTimeoutRemaining === 0) {
               timer = setInterval(() => setElapsedTime(prev => prev + 1), 1000);
             }
             return () => clearInterval(timer);
-          }, [appState, winner, showRetreatModal, showBackConfirm, showSwitchModal, showTimeoutConfirm]);
+          }, [appState, winner, showRetreatModal, showBackConfirm, showSwitchModal, showTimeoutConfirm, activeTimeoutRemaining]);
+
+          // Timeout 60-second Countdown Hook
+          useEffect(() => {
+            let timer;
+            if (activeTimeoutRemaining > 0) {
+              timer = setInterval(() => setActiveTimeoutRemaining(prev => prev - 1), 1000);
+            }
+            return () => clearInterval(timer);
+          }, [activeTimeoutRemaining]);
 
           useEffect(() => {
             const requestWakeLock = async () => {
@@ -1349,6 +1360,7 @@
             setEnableTimeouts(useTimeouts); setT1Timeouts(2); setT2Timeouts(2);
             setWinner(null); setWinReason('score'); setShowWinnerOverlay(false);
             setHistory([]); setStateHistory([]); setHasSwitchedEnds(false); setElapsedTime(0); setCourtRotation(0);
+            setActiveTimeoutRemaining(0);
             
             setAppState('game');
             window.scrollTo(0, 0); // Force scroll immediately when game starts
@@ -1385,6 +1397,7 @@
             if (prev.courtRotation !== undefined) setCourtRotation(prev.courtRotation);
             setHistory(prev.history); setHasSwitchedEnds(prev.hasSwitchedEnds || false);
             setStateHistory(s => s.slice(0, -1));
+            setActiveTimeoutRemaining(0);
           };
 
           const handleResetPointsOnly = () => {
@@ -1403,6 +1416,7 @@
               setT1Timeouts(enableTimeouts ? 2 : 2);
               setT2Timeouts(enableTimeouts ? 2 : 2);
               setShowResetModal(false);
+              setActiveTimeoutRemaining(0);
 
               setTimeout(() => {
                   const isServeToScore = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14);
@@ -1451,6 +1465,9 @@
              } else {
                  announceText(getT('receiverTimeout'));
              }
+             
+             // Start 60-second countdown
+             setActiveTimeoutRemaining(60);
           };
 
           const checkWin = (t1, t2, newServTeam, newServNum, newHistory, isServeToScore) => {
@@ -1509,7 +1526,7 @@
           };
 
           const handleRallyWin = (winningTeam) => {
-            if (winner) return;
+            if (winner || activeTimeoutRemaining > 0) return;
             triggerHaptic('point');
             saveStateForUndo();
 
@@ -2399,8 +2416,22 @@
                       </div>
                     )}
 
-                    <div className="mt-auto relative z-10">
-                      <div className="grid grid-cols-2 gap-4 h-40 md:h-48">
+                   <div className="mt-auto relative z-10">
+                      <div className="grid grid-cols-2 gap-4 h-40 md:h-48 relative">
+                        
+                        {/* Timeout Overlay Shield */}
+                        {activeTimeoutRemaining > 0 && (
+                          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-stone-900/60 dark:bg-black/60 backdrop-blur-sm rounded-xl border border-stone-700 shadow-2xl">
+                             <Timer size={32} className="text-amber-400 mb-2 animate-pulse" />
+                             <div className="text-4xl font-black text-white tracking-widest mb-1 drop-shadow-md">
+                                 00:{activeTimeoutRemaining.toString().padStart(2, '0')}
+                             </div>
+                             <button onClick={() => setActiveTimeoutRemaining(0)} className="px-5 py-2 mt-2 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-full text-xs font-bold uppercase tracking-widest transition-colors border border-stone-600 shadow-sm active:scale-95">
+                                 Resume
+                             </button>
+                          </div>
+                        )}
+
                         <button onClick={() => handleRallyWin(1)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${servingTeam === 1 && !winner ? bgAccentGreen : `muji-card ${bgCard} ${winner ? 'opacity-50' : ''}`}`}>
                           <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${servingTeam === 1 && !winner ? accentGreen : textMain}`}>{t1Name}</span>
                           <span className={`text-sm font-semibold ${servingTeam === 1 && !winner ? accentGreen : textSub}`}>{getT('wonRally')}</span>
