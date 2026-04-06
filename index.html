@@ -351,6 +351,8 @@
         const X = (props) => <IconWrapper iconObj={lucide.icons.X} {...props} />;
         const InfoIcon = (props) => <IconWrapper iconObj={lucide.icons.Info} {...props} />;
         const HardDrive = (props) => <IconWrapper iconObj={lucide.icons.HardDrive} {...props} />;
+        const Lock = (props) => <IconWrapper iconObj={lucide.icons.Lock} {...props} />;
+        const Unlock = (props) => <IconWrapper iconObj={lucide.icons.Unlock} {...props} />;
         const Volume2 = (props) => <IconWrapper iconObj={lucide.icons.Volume2} {...props} />;
         const VolumeX = (props) => <IconWrapper iconObj={lucide.icons.VolumeX} {...props} />;
         const BarChart2 = (props) => <IconWrapper iconObj={lucide.icons.BarChart2} {...props} />;
@@ -809,6 +811,10 @@
           const [hasSwitchedEnds, setHasSwitchedEnds] = useState(false);
           const [elapsedTime, setElapsedTime] = useState(0);
           const [courtRotation, setCourtRotation] = useState(0);
+          
+          // DVR Time Travel State
+          const [timelineLocked, setTimelineLocked] = useState(true);
+          const [viewingPastIndex, setViewingPastIndex] = useState(null);
           
           const [showHistory, setShowHistory] = useState(false);
           const [history, setHistory] = useState([]); 
@@ -1349,6 +1355,7 @@
             setEnableTimeouts(useTimeouts); setT1Timeouts(2); setT2Timeouts(2);
             setWinner(null); setWinReason('score'); setShowWinnerOverlay(false);
             setHistory([]); setStateHistory([]); setHasSwitchedEnds(false); setElapsedTime(0); setCourtRotation(0);
+            setTimelineLocked(true); setViewingPastIndex(null); // Lock timeline for new game
             
             setAppState('game');
             window.scrollTo(0, 0); // Force scroll immediately when game starts
@@ -1385,6 +1392,8 @@
             if (prev.courtRotation !== undefined) setCourtRotation(prev.courtRotation);
             setHistory(prev.history); setHasSwitchedEnds(prev.hasSwitchedEnds || false);
             setStateHistory(s => s.slice(0, -1));
+            setViewingPastIndex(null); // Snap back to present
+            if (prev.winner === null) setTimelineLocked(true); // Re-lock if undoing a win
           };
 
           const handleResetPointsOnly = () => {
@@ -1453,6 +1462,7 @@
 
             if (hasWinner) {
               setWinner(winTeam); setShowWinnerOverlay(true); triggerHaptic('win');
+              setTimelineLocked(false); setViewingPastIndex(null); // Auto-unlock on win
               
               if (soundEnabled && 'speechSynthesis' in window) {
                   window.speechSynthesis.cancel();
@@ -1541,6 +1551,7 @@
             setTeam1Score(newT1); setTeam2Score(newT2); setServingTeam(newServTeam); setServerNumber(newServNum);
             const newHist = [...history, { id: Date.now(), type: evType, team: winningTeam, point: evType === 'T1_POINT' ? newT1 : (evType === 'T2_POINT' ? newT2 : null) }];
             setHistory(newHist);
+            setViewingPastIndex(null); // Auto-snap back to present when scoring
             
             const switchPt = Math.ceil(playTo / 2);
             if (enableSwitchEnds && !hasSwitchedEnds && (newT1 === switchPt || newT2 === switchPt)) {
@@ -1601,8 +1612,11 @@
           let simServeTeam = startingServer;
           let simServNum = gameMode === 'double' ? 2 : 1;
 
-          for (let i = 0; i < history.length; i++) {
-              const ev = history[i];
+          // If Time-Traveling, cut the history loop short!
+          const effectiveHistory = viewingPastIndex !== null ? history.slice(0, viewingPastIndex + 1) : history;
+
+          for (let i = 0; i < effectiveHistory.length; i++) {
+              const ev = effectiveHistory[i];
               
               let isServeToScoreLoop = false;
               let isStrictSuddenDeathLoop = false;
@@ -1691,13 +1705,23 @@
               }
           }
 
-          if (servingTeam === 1) {
+          if (simServeTeam === 1) {
               courtServerPos = courtServerPos === 'Right' ? 'bottom-right' : 'bottom-left';
               courtReceiverPos = courtServerPos === 'bottom-right' ? 'top-left' : 'top-right'; 
           } else {
               courtServerPos = courtServerPos === 'Right' ? 'top-left' : 'top-right';
               courtReceiverPos = courtServerPos === 'top-left' ? 'bottom-right' : 'bottom-left'; 
           }
+
+          // Variables that control what the scoreboard actually shows
+          const displayT1Score = viewingPastIndex !== null ? simT1Score : team1Score;
+          const displayT2Score = viewingPastIndex !== null ? simT2Score : team2Score;
+          const displayServingTeam = viewingPastIndex !== null ? simServeTeam : servingTeam;
+          const displayServerNumber = viewingPastIndex !== null ? simServNum : serverNumber;
+
+          const isSuddenDeath = ruleSet === '14-point' && displayT1Score === 14 && displayT2Score === 14;
+          const isServeToScoreModeUI = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14) || (ruleSet === '14-point' && serveToWinAt14 && displayT1Score === 14 && displayT2Score === 14);
+          const showServerNumberUI = gameMode === 'double' && isServeToScoreModeUI && !isSuddenDeath;
 
           const renderPlayerBadge = (name, role) => {
               if (!name) return null;
@@ -2270,47 +2294,75 @@
 
                   <main className="flex-1 flex flex-col justify-center relative mt-2">
                     
-                    {/* --- PERFECT SCOREBOARD ALIGNMENT --- */}
-                    <div className={`flex justify-center items-center gap-4 md:gap-8 mt-10 mb-8 relative z-10`}>
-                      
-                      {/* TEAM 1 */}
-                      <div className="flex flex-col items-center relative w-24 md:w-32">
-                        <span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest truncate w-[150%] text-center ${textSub}`}>{t1Name}</span>
-                        <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${servingTeam === 1 && !winner ? accentGreen : textMain}`}>{team1Score}</span>
-                        {enableTimeouts && !winner && (
-                          <div className="absolute top-full mt-3 flex gap-2 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t1Timeouts > 0 && setShowTimeoutConfirm(1)} title={getT('callTimeout')}>
-                            <div className={`w-2.5 h-2.5 rounded-full transition-colors ${t1Timeouts >= 1 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>
-                            <div className={`w-2.5 h-2.5 rounded-full transition-colors ${t1Timeouts >= 2 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* HYPHEN */}
-                      <span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span>
-                      
-                      {/* TEAM 2 */}
-                      <div className="flex flex-col items-center relative w-24 md:w-32">
-                        <span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest truncate w-[150%] text-center ${textSub}`}>{t2Name}</span>
-                        <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${servingTeam === 2 && !winner ? accentRed : textMain}`}>{team2Score}</span>
-                        {enableTimeouts && !winner && (
-                          <div className="absolute top-full mt-3 flex gap-2 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t2Timeouts > 0 && setShowTimeoutConfirm(2)} title={getT('callTimeout')}>
-                            <div className={`w-2.5 h-2.5 rounded-full transition-colors ${t2Timeouts >= 1 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>
-                            <div className={`w-2.5 h-2.5 rounded-full transition-colors ${t2Timeouts >= 2 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* SERVER */}
-                      {showServerNumberUI && (
-                          <>
-                              <span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span>
-                              <div className="flex flex-col items-center relative">
-                                  <span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest ${textSub}`}>{getT('server')}</span>
-                                  <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${winner ? textMain : 'text-amber-500'}`}>{serverNumber}</span>
-                              </div>
-                          </>
-                      )}
+           const renderTimeline = (timelineData, useScrollRef = false) => (
+            <div className={`mt-6 muji-card p-5 rounded-xl relative`}>
+              <div className="flex justify-between items-center mb-4">
+                <div className={`text-[10px] font-bold uppercase tracking-widest ${textSub}`}>{getT('timeline')}</div>
+                {useScrollRef && (
+                  <button onClick={() => { setTimelineLocked(!timelineLocked); setViewingPastIndex(null); }} className={`flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest transition-colors active:scale-95 ${timelineLocked ? 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'}`}>
+                    {timelineLocked ? <Lock size={12} /> : <Unlock size={12} />} {timelineLocked ? 'Locked' : 'Unlocked'}
+                  </button>
+                )}
+              </div>
+              <div ref={useScrollRef ? timelineScrollRef : null} className="overflow-x-auto pb-4 pt-2 muji-scrollbar relative scroll-smooth">
+                {timelineData.length === 0 && <div className={`text-xs italic ${textSub} px-2`}>{getT('awaiting')}</div>}
+                {timelineData.length > 0 && (
+                  <div className="flex min-w-max relative px-2">
+                    <div className={`absolute top-[12px] left-14 right-0 h-px ${isDark ? 'bg-stone-700' : 'bg-stone-200'} z-0`}></div>
+                    <div className={`absolute bottom-[12px] left-14 right-0 h-px ${isDark ? 'bg-stone-700' : 'bg-stone-200'} z-0`}></div>
+                    <div className={`w-12 flex flex-col gap-3 sticky left-0 z-20 ${bgCard} pr-2 ${isDark ? 'shadow-[4px_0_8px_-4px_rgba(0,0,0,0.3)]' : 'shadow-[4px_0_8px_-4px_rgba(0,0,0,0.1)]'}`}>
+                        <div className={`h-6 flex items-center text-[10px] font-bold uppercase ${accentGreen}`}>{getT('t1Label')}</div>
+                        <div className="h-4"></div>
+                        <div className={`h-6 flex items-center text-[10px] font-bold uppercase ${accentRed}`}>{getT('t2Label')}</div>
                     </div>
+                    <div className="flex items-center">
+                        {timelineData.map((event, index) => (
+                          <div key={event.id} onClick={() => { if (!timelineLocked || winner) setViewingPastIndex(index); }} className={`flex flex-col items-center justify-center w-8 gap-3 relative z-10 transition-colors ${(!timelineLocked || winner) ? 'cursor-pointer hover:bg-stone-500/10 rounded-lg py-1' : ''} ${viewingPastIndex === index ? 'bg-amber-500/20 rounded-lg py-1 ring-1 ring-amber-500/50' : ''}`}>
+                            <div className="h-6 flex items-center justify-center w-full">
+                              {event.type === 'T1_POINT' ? (
+                                  <div className={`w-5 h-5 rounded-full bg-emerald-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[10px] font-bold text-white shadow-sm z-10`}>
+                                    {event.point}
+                                  </div>
+                              ) : event.type === 'T1_TIMEOUT' ? (
+                                  <div className={`w-4 h-4 rounded-[4px] bg-amber-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[8px] font-black text-white shadow-sm z-10`}>T</div>
+                              ) : (
+                                  <div className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-stone-600' : 'bg-stone-300'} z-10`}></div>
+                              )}
+                            </div>
+                            <div className="h-4 flex items-center justify-center w-full">
+                                {(event.type === 'SIDEOUT' || event.type === 'FAULT') && (
+                                  <div className={`w-4 h-4 rounded-sm rotate-45 border flex items-center justify-center shadow-sm z-10 ${
+                                      event.team === 2 
+                                        ? (isDark ? 'bg-emerald-900/40 border-emerald-600' : 'bg-emerald-100 border-emerald-300') 
+                                        : (isDark ? 'bg-rose-900/40 border-rose-600' : 'bg-rose-100 border-rose-300')
+                                  }`}>
+                                    <span className={`text-[8px] font-black -rotate-45 ${
+                                        event.team === 2 
+                                          ? (isDark ? 'text-emerald-400' : 'text-emerald-700') 
+                                          : (isDark ? 'text-rose-400' : 'text-rose-700')
+                                    }`}>{event.type === 'FAULT' ? 'F' : 'S'}</span>
+                                  </div>
+                                )}
+                            </div>
+                            <div className="h-6 flex items-center justify-center w-full">
+                              {event.type === 'T2_POINT' ? (
+                                  <div className={`w-5 h-5 rounded-full bg-rose-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[10px] font-bold text-white shadow-sm z-10`}>
+                                    {event.point}
+                                  </div>
+                              ) : event.type === 'T2_TIMEOUT' ? (
+                                  <div className={`w-4 h-4 rounded-[4px] bg-amber-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[8px] font-black text-white shadow-sm z-10`}>T</div>
+                              ) : (
+                                  <div className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-stone-600' : 'bg-stone-300'} z-10`}></div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
 
                     {/* MINI COURT BELOW SCORES */}
                     <div className={`flex justify-center w-full mt-6 md:mt-8 ${isSuddenDeath && !winner ? 'mb-4' : 'mb-6 md:mb-8'} relative z-10`}>
