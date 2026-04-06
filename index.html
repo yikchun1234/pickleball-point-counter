@@ -1660,14 +1660,14 @@
           let courtReceiverPos = '';
 
           if (gameMode === 'single') {
-              const currentScore = servingTeam === 1 ? team1Score : team2Score;
+              const currentScore = simServeTeam === 1 ? simT1Score : simT2Score;
               courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
           } else {
               let isServeToScoreCurrent = false;
               let isStrictSuddenDeathCurrent = false;
               if (ruleSet === 'standard') isServeToScoreCurrent = true;
               else if (ruleSet === 'custom' && serveToWinAt14) isServeToScoreCurrent = true;
-              else if (ruleSet === '14-point' && serveToWinAt14 && team1Score === 14 && team2Score === 14) {
+              else if (ruleSet === '14-point' && serveToWinAt14 && simT1Score === 14 && simT2Score === 14) {
                   isServeToScoreCurrent = true;
                   isStrictSuddenDeathCurrent = true;
               }
@@ -1691,14 +1691,14 @@
                   if (isFirstTurnOfMatch) {
                       courtServerPos = ptsWonThisTurn % 2 === 0 ? 'Right' : 'Left';
                   } else {
-                      if (serverNumber === 1) {
+                      if (simServNum === 1) {
                           courtServerPos = ptsWonThisTurn % 2 === 0 ? 'Right' : 'Left';
                       } else {
                           courtServerPos = ptsWonThisTurn % 2 === 0 ? 'Left' : 'Right';
                       }
                   }
               } else {
-                  const currentScore = servingTeam === 1 ? team1Score : team2Score;
+                  const currentScore = simServeTeam === 1 ? simT1Score : simT2Score;
                   courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
               }
           }
