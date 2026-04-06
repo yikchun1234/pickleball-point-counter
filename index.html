@@ -821,6 +821,9 @@
           const [stateHistory, setStateHistory] = useState([]);
           const [savedMatches, setSavedMatches] = useState([]);
           
+          // History Replay Modal State
+          const [historyReplay, setHistoryReplay] = useState(null);
+          
           const [isExporting, setIsExporting] = useState(false);
           
           const [showResetModal, setShowResetModal] = useState(false);
@@ -1747,7 +1750,7 @@
               );
           };
 
-          const renderTimeline = (timelineData, useScrollRef = false) => (
+          const renderTimeline = (timelineData, useScrollRef = false, parentMatch = null) => (
             <div className={`mt-6 muji-card p-5 rounded-xl relative`}>
               <div className="flex justify-between items-center mb-4">
                 <div className={`text-[10px] font-bold uppercase tracking-widest ${textSub}`}>{getT('timeline')}</div>
@@ -1770,7 +1773,7 @@
                     </div>
                     <div className="flex items-center">
                         {timelineData.map((event, index) => (
-                          <div key={event.id} onClick={() => { if (useScrollRef && (!timelineLocked || winner !== null)) setViewingPastIndex(index); }} className={`flex flex-col items-center justify-center w-8 gap-3 relative z-10 transition-colors ${useScrollRef && (!timelineLocked || winner !== null) ? 'cursor-pointer hover:bg-stone-500/10 rounded-lg py-1' : ''} ${useScrollRef && viewingPastIndex === index ? 'bg-amber-500/20 rounded-lg py-1 ring-1 ring-amber-500/50' : ''}`}>
+                          <div key={event.id} onClick={() => { if (useScrollRef) { if (!timelineLocked || winner !== null) setViewingPastIndex(index); } else if (parentMatch) { setHistoryReplay({ match: parentMatch, index: index }); } }} className={`flex flex-col items-center justify-center w-8 gap-3 relative z-10 transition-colors cursor-pointer hover:bg-stone-500/10 rounded-lg py-1 ${useScrollRef && viewingPastIndex === index ? 'bg-amber-500/20 ring-1 ring-amber-500/50' : ''} ${!useScrollRef && historyReplay?.match?.id === parentMatch?.id && historyReplay?.index === index ? 'bg-amber-500/20 ring-1 ring-amber-500/50' : ''}`}>
                             <div className="h-6 flex items-center justify-center w-full">
                               {event.type === 'T1_POINT' ? (
                                   <div className={`w-5 h-5 rounded-full bg-emerald-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[10px] font-bold text-white shadow-sm z-10`}>
@@ -2240,7 +2243,7 @@
                                 <div className="text-center"><span className={`text-[10px] font-bold uppercase tracking-widest ${textSub} block mb-1 truncate max-w-[60px]`} title={match.t2Name}>{match.t2Name}</span><span className={`text-3xl font-black ${match.winner === 2 ? accentRed : textMain}`}>{match.t2Score}</span></div>
                               </div>
                             </div>
-                            {renderTimeline(match.history)}
+                            {renderTimeline(match.history, false, match)}
                           </div>
                         ))}
                       </div>
@@ -2643,6 +2646,108 @@
                   </div>
                 </div>
               )}
+
+              {/* --- INSTANT REPLAY MODAL --- */}
+              {historyReplay && (() => {
+                  const match = historyReplay.match;
+                  const targetIndex = historyReplay.index;
+                  const effectiveHistory = match.history.slice(0, targetIndex + 1);
+                  
+                  let simT1Score = 0; let simT2Score = 0;
+                  let t1Swaps = 0; let t2Swaps = 0;
+                  // We assume initial server was 1 if not recorded, though your new code records it!
+                  let simServeTeam = match.initialServer || 1; 
+                  let simServNum = match.mode === 'double' ? 2 : 1;
+
+                  for (let i = 0; i < effectiveHistory.length; i++) {
+                      const ev = effectiveHistory[i];
+                      let isServeToScoreLoop = match.rules === 'standard' || (match.rules === 'custom' && match.serveToWinAt14) || (match.rules === '14-point' && match.serveToWinAt14 && simT1Score === 14 && simT2Score === 14);
+                      
+                      if (ev.type === 'T1_POINT') { simT1Score++; if (isServeToScoreLoop) { if (simServeTeam === 1) t1Swaps++; } else { if (simServeTeam === 1) t1Swaps++; else { simServeTeam = 1; simServNum = 1; } } } 
+                      else if (ev.type === 'T2_POINT') { simT2Score++; if (isServeToScoreLoop) { if (simServeTeam === 2) t2Swaps++; } else { if (simServeTeam === 2) t2Swaps++; else { simServeTeam = 2; simServNum = 1; } } } 
+                      else if (ev.type === 'FAULT') { if (match.mode === 'double' && !(match.rules === '14-point' && match.serveToWinAt14 && simT1Score === 14 && simT2Score === 14)) { simServNum = 2; } } 
+                      else if (ev.type === 'SIDEOUT') { simServeTeam = simServeTeam === 1 ? 2 : 1; simServNum = 1; }
+                  }
+
+                  const currentT1Left = (t1Swaps % 2 === 0) ? match.t1PLeft || match.t1Name : match.t1PRight;
+                  const currentT1Right = (t1Swaps % 2 === 0) ? match.t1PRight : match.t1PLeft || match.t1Name;
+                  const currentT2Left = (t2Swaps % 2 === 0) ? match.t2PLeft || match.t2Name : match.t2PRight;
+                  const currentT2Right = (t2Swaps % 2 === 0) ? match.t2PRight : match.t2PLeft || match.t2Name;
+
+                  let courtServerPos = ''; let courtReceiverPos = '';
+                  if (match.mode === 'single') {
+                      courtServerPos = (simServeTeam === 1 ? simT1Score : simT2Score) % 2 === 0 ? 'Right' : 'Left';
+                  } else {
+                      let isServeToScoreCurrent = match.rules === 'standard' || (match.rules === 'custom' && match.serveToWinAt14) || (match.rules === '14-point' && match.serveToWinAt14 && simT1Score === 14 && simT2Score === 14);
+                      if (isServeToScoreCurrent) {
+                          let ptsWonThisTurn = 0;
+                          for (let i = effectiveHistory.length - 1; i >= 0; i--) { if (effectiveHistory[i].type === 'SIDEOUT') break; if (effectiveHistory[i].type === `T${simServeTeam}_POINT`) ptsWonThisTurn++; }
+                          courtServerPos = (simServNum === 1 ? ptsWonThisTurn % 2 === 0 : ptsWonThisTurn % 2 !== 0) ? 'Right' : 'Left';
+                      } else {
+                          courtServerPos = (simServeTeam === 1 ? simT1Score : simT2Score) % 2 === 0 ? 'Right' : 'Left';
+                      }
+                  }
+
+                  if (simServeTeam === 1) { courtServerPos = courtServerPos === 'Right' ? 'bottom-right' : 'bottom-left'; courtReceiverPos = courtServerPos === 'bottom-right' ? 'top-left' : 'top-right'; } 
+                  else { courtServerPos = courtServerPos === 'Right' ? 'top-left' : 'top-right'; courtReceiverPos = courtServerPos === 'top-left' ? 'bottom-right' : 'bottom-left'; }
+
+                  const renderBadge = (name, role) => {
+                      if (!name) return null;
+                      let bg = 'bg-stone-500/20 text-stone-400 dark:text-stone-300 border border-stone-400/20'; let scale = 1; let zIndex = 0;
+                      if (role === 'server') { bg = 'bg-amber-400 text-amber-950 shadow-lg ring-2 ring-white'; scale = 1.1; zIndex = 10; } 
+                      else if (role === 'receiver') { bg = 'bg-white text-emerald-800 shadow-md ring-2 ring-emerald-400/50'; scale = 1.05; zIndex = 10; }
+                      return <div className={`px-2 py-1 rounded shadow-sm max-w-[90%] truncate text-[8px] font-black tracking-wider uppercase ${bg}`} style={{ transform: `scale(${scale})`, zIndex }}>{name}</div>;
+                  };
+
+                  return (
+                    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+                      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setHistoryReplay(null)}></div>
+                      <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl p-6 animate-screen-enter`}>
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className={`text-sm font-bold uppercase tracking-widest text-amber-500`}>Point Replay</h2>
+                            <button onClick={() => setHistoryReplay(null)} className={`p-2 -mr-2 rounded-full ${textSub} hover:${textMain}`}><X size={20}/></button>
+                        </div>
+
+                        {/* Scores */}
+                        <div className="flex justify-between items-center mb-6 px-4">
+                            <div className="text-center w-20"><span className={`text-[9px] font-bold uppercase tracking-widest ${textSub} block mb-1 truncate`} title={match.t1Name}>{match.t1Name}</span><span className={`text-4xl font-black ${simServeTeam === 1 ? accentGreen : textMain}`}>{simT1Score}</span></div>
+                            <div className="flex flex-col items-center">
+                                <span className={`text-2xl font-light ${textSub}`}>-</span>
+                                {match.mode === 'double' && <span className={`text-[10px] font-bold mt-1 ${textSub}`}>S{simServNum}</span>}
+                            </div>
+                            <div className="text-center w-20"><span className={`text-[9px] font-bold uppercase tracking-widest ${textSub} block mb-1 truncate`} title={match.t2Name}>{match.t2Name}</span><span className={`text-4xl font-black ${simServeTeam === 2 ? accentRed : textMain}`}>{simT2Score}</span></div>
+                        </div>
+
+                        {/* Mini Court */}
+                        <div className="flex justify-center mb-6">
+                            <div className="relative flex items-center justify-center w-[200px] h-[240px]">
+                                <div className="w-[160px] h-[220px] bg-emerald-600 rounded-[3px] border-[3px] border-white/90 shadow-md relative flex flex-col overflow-hidden pointer-events-none">
+                                    <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">{courtServerPos === 'bottom-right' || courtServerPos === 'top-left' ? <line x1="75%" y1="85%" x2="25%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" /> : <line x1="25%" y1="85%" x2="75%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" />}</svg>
+                                    <div className="flex-1 relative border-b border-white/50 z-20">
+                                        <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
+                                        <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">{(match.mode === 'double' || courtServerPos === 'top-left' || courtReceiverPos === 'top-left') && renderBadge(match.mode === 'single' ? match.t2Name : currentT2Right, courtServerPos === 'top-left' ? 'server' : courtReceiverPos === 'top-left' ? 'receiver' : 'partner')}</div>
+                                        <div className="absolute top-1 right-0 w-1/2 flex justify-center items-center h-full">{(match.mode === 'double' || courtServerPos === 'top-right' || courtReceiverPos === 'top-right') && renderBadge(match.mode === 'single' ? match.t2Name : currentT2Left, courtServerPos === 'top-right' ? 'server' : courtReceiverPos === 'top-right' ? 'receiver' : 'partner')}</div>
+                                    </div>
+                                    <div className="h-6 border-b-2 border-white/80 bg-emerald-500 z-20"></div><div className="h-6 border-b border-white/50 bg-emerald-500 z-20"></div>
+                                    <div className="flex-1 relative z-20">
+                                        <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
+                                        <div className="absolute bottom-1 left-0 w-1/2 flex justify-center items-center h-full">{(match.mode === 'double' || courtServerPos === 'bottom-left' || courtReceiverPos === 'bottom-left') && renderBadge(match.mode === 'single' ? match.t1Name : currentT1Left, courtServerPos === 'bottom-left' ? 'server' : courtReceiverPos === 'bottom-left' ? 'receiver' : 'partner')}</div>
+                                        <div className="absolute bottom-1 right-0 w-1/2 flex justify-center items-center h-full">{(match.mode === 'double' || courtServerPos === 'bottom-right' || courtReceiverPos === 'bottom-right') && renderBadge(match.mode === 'single' ? match.t1Name : currentT1Right, courtServerPos === 'bottom-right' ? 'server' : courtReceiverPos === 'bottom-right' ? 'receiver' : 'partner')}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Controls */}
+                        <div className="flex justify-between items-center gap-4">
+                            <button disabled={targetIndex === 0} onClick={() => setHistoryReplay({ match, index: targetIndex - 1 })} className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors ${targetIndex === 0 ? 'bg-stone-100 dark:bg-stone-800 text-stone-400 opacity-50' : 'bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-200 hover:bg-stone-300 dark:hover:bg-stone-600'}`}><ChevronLeft size={18}/> Prev</button>
+                            <span className={`text-[10px] font-bold uppercase tracking-widest ${textSub}`}>Pt {targetIndex + 1} / {match.history.length}</span>
+                            <button disabled={targetIndex === match.history.length - 1} onClick={() => setHistoryReplay({ match, index: targetIndex + 1 })} className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors ${targetIndex === match.history.length - 1 ? 'bg-stone-100 dark:bg-stone-800 text-stone-400 opacity-50' : 'bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-200 hover:bg-stone-300 dark:hover:bg-stone-600'}`}>Next <ChevronRight size={18}/></button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+              })()}
 
               {/* --- CLEAR HISTORY CONFIRM --- */}
               {showClearConfirm && (
