@@ -1355,7 +1355,7 @@
             setEnableTimeouts(useTimeouts); setT1Timeouts(2); setT2Timeouts(2);
             setWinner(null); setWinReason('score'); setShowWinnerOverlay(false);
             setHistory([]); setStateHistory([]); setHasSwitchedEnds(false); setElapsedTime(0); setCourtRotation(0);
-            setTimelineLocked(true); setViewingPastIndex(null); // Lock timeline for new game
+            setTimelineLocked(true); setViewingPastIndex(null);
             
             setAppState('game');
             window.scrollTo(0, 0); // Force scroll immediately when game starts
@@ -1392,8 +1392,8 @@
             if (prev.courtRotation !== undefined) setCourtRotation(prev.courtRotation);
             setHistory(prev.history); setHasSwitchedEnds(prev.hasSwitchedEnds || false);
             setStateHistory(s => s.slice(0, -1));
-            setViewingPastIndex(null); // Snap back to present
-            if (prev.winner === null) setTimelineLocked(true); // Re-lock if undoing a win
+            setViewingPastIndex(null);
+            if (prev.winner === null) setTimelineLocked(true);
           };
 
           const handleResetPointsOnly = () => {
@@ -1412,6 +1412,7 @@
               setT1Timeouts(enableTimeouts ? 2 : 2);
               setT2Timeouts(enableTimeouts ? 2 : 2);
               setShowResetModal(false);
+              setTimelineLocked(true); setViewingPastIndex(null);
 
               setTimeout(() => {
                   const isServeToScore = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14);
@@ -1462,7 +1463,7 @@
 
             if (hasWinner) {
               setWinner(winTeam); setShowWinnerOverlay(true); triggerHaptic('win');
-              setTimelineLocked(false); setViewingPastIndex(null); // Auto-unlock on win
+              setTimelineLocked(false); setViewingPastIndex(null);
               
               if (soundEnabled && 'speechSynthesis' in window) {
                   window.speechSynthesis.cancel();
@@ -1551,7 +1552,7 @@
             setTeam1Score(newT1); setTeam2Score(newT2); setServingTeam(newServTeam); setServerNumber(newServNum);
             const newHist = [...history, { id: Date.now(), type: evType, team: winningTeam, point: evType === 'T1_POINT' ? newT1 : (evType === 'T2_POINT' ? newT2 : null) }];
             setHistory(newHist);
-            setViewingPastIndex(null); // Auto-snap back to present when scoring
+            setViewingPastIndex(null);
             
             const switchPt = Math.ceil(playTo / 2);
             if (enableSwitchEnds && !hasSwitchedEnds && (newT1 === switchPt || newT2 === switchPt)) {
@@ -1573,10 +1574,7 @@
             return `${m}:${s}`;
           };
 
-          const isSuddenDeath = ruleSet === '14-point' && team1Score === 14 && team2Score === 14;
-          const isServeToScoreModeUI = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14) || (ruleSet === '14-point' && serveToWinAt14 && team1Score === 14 && team2Score === 14);
-          const showServerNumberUI = gameMode === 'double' && isServeToScoreModeUI && !isSuddenDeath;
-          const serverLabel = showServerNumberUI ? `S${serverNumber}` : 'S';
+          const serverLabel = showServerNumberUI ? `S${displayServerNumber}` : 'S';
 
           const textMain = isDark ? 'text-stone-100' : 'text-stone-800';
           const textSub = isDark ? 'text-stone-400' : 'text-stone-500';
@@ -1676,8 +1674,8 @@
 
               if (isServeToScoreCurrent) {
                   let isFirstTurnOfMatch = true;
-                  for (let i = 0; i < history.length; i++) {
-                      if (history[i].type === 'SIDEOUT' || (!isServeToScoreCurrent && (history[i].type === 'T1_POINT' || history[i].type === 'T2_POINT'))) { 
+                  for (let i = 0; i < effectiveHistory.length; i++) {
+                      if (effectiveHistory[i].type === 'SIDEOUT' || (!isServeToScoreCurrent && (effectiveHistory[i].type === 'T1_POINT' || effectiveHistory[i].type === 'T2_POINT'))) { 
                           isFirstTurnOfMatch = false;
                           break;
                       }
@@ -1685,9 +1683,9 @@
                   if (isStrictSuddenDeathCurrent) isFirstTurnOfMatch = false;
 
                   let ptsWonThisTurn = 0;
-                  for (let i = history.length - 1; i >= 0; i--) {
-                      if (history[i].type === 'SIDEOUT') break;
-                      if (history[i].type === `T${servingTeam}_POINT`) ptsWonThisTurn++;
+                  for (let i = effectiveHistory.length - 1; i >= 0; i--) {
+                      if (effectiveHistory[i].type === 'SIDEOUT') break;
+                      if (effectiveHistory[i].type === `T${simServeTeam}_POINT`) ptsWonThisTurn++;
                   }
 
                   if (isFirstTurnOfMatch) {
@@ -1705,7 +1703,7 @@
               }
           }
 
-          if (simServeTeam === 1) {
+          if (servingTeam === 1) {
               courtServerPos = courtServerPos === 'Right' ? 'bottom-right' : 'bottom-left';
               courtReceiverPos = courtServerPos === 'bottom-right' ? 'top-left' : 'top-right'; 
           } else {
@@ -1750,15 +1748,8 @@
           };
 
           const renderTimeline = (timelineData, useScrollRef = false) => (
-            <div className={`mt-6 muji-card p-5 rounded-xl relative`}>
-              <div className="flex justify-between items-center mb-4">
-                <div className={`text-[10px] font-bold uppercase tracking-widest ${textSub}`}>{getT('timeline')}</div>
-                {useScrollRef && (
-                  <button onClick={() => { setTimelineLocked(!timelineLocked); setViewingPastIndex(null); }} className={`flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest transition-colors active:scale-95 ${timelineLocked ? 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'}`}>
-                    {timelineLocked ? <Lock size={12} /> : <Unlock size={12} />} {timelineLocked ? 'Locked' : 'Unlocked'}
-                  </button>
-                )}
-              </div>
+            <div className={`mt-6 muji-card p-5 rounded-xl`}>
+              <div className={`text-[10px] font-bold uppercase tracking-widest mb-4 ${textSub}`}>{getT('timeline')}</div>
               <div ref={useScrollRef ? timelineScrollRef : null} className="overflow-x-auto pb-4 pt-2 muji-scrollbar relative scroll-smooth">
                 {timelineData.length === 0 && <div className={`text-xs italic ${textSub} px-2`}>{getT('awaiting')}</div>}
                 {timelineData.length > 0 && (
@@ -1771,15 +1762,15 @@
                         <div className={`h-6 flex items-center text-[10px] font-bold uppercase ${accentRed}`}>{getT('t2Label')}</div>
                     </div>
                     <div className="flex items-center">
-                        {timelineData.map((event, index) => (
-                          <div key={event.id} onClick={() => { if (!timelineLocked || winner) setViewingPastIndex(index); }} className={`flex flex-col items-center justify-center w-8 gap-3 relative z-10 transition-colors ${(!timelineLocked || winner) ? 'cursor-pointer hover:bg-stone-500/10 rounded-lg py-1' : ''} ${viewingPastIndex === index ? 'bg-amber-500/20 rounded-lg py-1 ring-1 ring-amber-500/50' : ''}`}>
+                        {timelineData.map((event) => (
+                          <div key={event.id} className="flex flex-col items-center justify-center w-8 gap-3 relative z-10">
                             <div className="h-6 flex items-center justify-center w-full">
                               {event.type === 'T1_POINT' ? (
-                                  <div className={`w-5 h-5 rounded-full bg-emerald-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[10px] font-bold text-white shadow-sm z-10`}>
+                                  <div className={`w-5 h-5 rounded-full bg-emerald-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[10px] font-bold text-white transition-transform hover:scale-110 cursor-default shadow-sm z-10`}>
                                     {event.point}
                                   </div>
                               ) : event.type === 'T1_TIMEOUT' ? (
-                                  <div className={`w-4 h-4 rounded-[4px] bg-amber-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[8px] font-black text-white shadow-sm z-10`}>T</div>
+                                  <div className={`w-4 h-4 rounded-[4px] bg-amber-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[8px] font-black text-white cursor-default shadow-sm z-10`} title="Timeout">T</div>
                               ) : (
                                   <div className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-stone-600' : 'bg-stone-300'} z-10`}></div>
                               )}
@@ -1790,7 +1781,7 @@
                                       event.team === 2 
                                         ? (isDark ? 'bg-emerald-900/40 border-emerald-600' : 'bg-emerald-100 border-emerald-300') 
                                         : (isDark ? 'bg-rose-900/40 border-rose-600' : 'bg-rose-100 border-rose-300')
-                                  }`}>
+                                  }`} title={event.type}>
                                     <span className={`text-[8px] font-black -rotate-45 ${
                                         event.team === 2 
                                           ? (isDark ? 'text-emerald-400' : 'text-emerald-700') 
@@ -1801,11 +1792,11 @@
                             </div>
                             <div className="h-6 flex items-center justify-center w-full">
                               {event.type === 'T2_POINT' ? (
-                                  <div className={`w-5 h-5 rounded-full bg-rose-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[10px] font-bold text-white shadow-sm z-10`}>
+                                  <div className={`w-5 h-5 rounded-full bg-rose-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[10px] font-bold text-white transition-transform hover:scale-110 cursor-default shadow-sm z-10`}>
                                     {event.point}
                                   </div>
                               ) : event.type === 'T2_TIMEOUT' ? (
-                                  <div className={`w-4 h-4 rounded-[4px] bg-amber-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[8px] font-black text-white shadow-sm z-10`}>T</div>
+                                  <div className={`w-4 h-4 rounded-[4px] bg-amber-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[8px] font-black text-white cursor-default shadow-sm z-10`} title="Timeout">T</div>
                               ) : (
                                   <div className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-stone-600' : 'bg-stone-300'} z-10`}></div>
                               )}
@@ -2307,8 +2298,8 @@
                       {/* TEAM 1 */}
                       <div className="flex flex-col items-center relative w-24 md:w-32">
                         <span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest truncate w-[150%] text-center ${textSub}`}>{t1Name}</span>
-                        <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${displayServingTeam === 1 && !winner ? accentGreen : textMain}`}>{displayT1Score}</span>
-                        {enableTimeouts && !winner && viewingPastIndex === null && (
+                        <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${servingTeam === 1 && !winner ? accentGreen : textMain}`}>{team1Score}</span>
+                        {enableTimeouts && !winner && (
                           <div className="absolute top-full mt-3 flex gap-2 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t1Timeouts > 0 && setShowTimeoutConfirm(1)} title={getT('callTimeout')}>
                             <div className={`w-2.5 h-2.5 rounded-full transition-colors ${t1Timeouts >= 1 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>
                             <div className={`w-2.5 h-2.5 rounded-full transition-colors ${t1Timeouts >= 2 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>
@@ -2317,16 +2308,13 @@
                       </div>
                       
                       {/* HYPHEN */}
-                      <span className={`text-3xl md:text-5xl font-light flex flex-col items-center ${textSub}`}>
-                         -
-                         {viewingPastIndex !== null && <span className="absolute top-full mt-4 text-[9px] font-black uppercase tracking-widest text-amber-500 bg-amber-500/10 px-2 py-1 rounded">Replay</span>}
-                      </span>
+                      <span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span>
                       
                       {/* TEAM 2 */}
                       <div className="flex flex-col items-center relative w-24 md:w-32">
                         <span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest truncate w-[150%] text-center ${textSub}`}>{t2Name}</span>
-                        <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${displayServingTeam === 2 && !winner ? accentRed : textMain}`}>{displayT2Score}</span>
-                        {enableTimeouts && !winner && viewingPastIndex === null && (
+                        <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${servingTeam === 2 && !winner ? accentRed : textMain}`}>{team2Score}</span>
+                        {enableTimeouts && !winner && (
                           <div className="absolute top-full mt-3 flex gap-2 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t2Timeouts > 0 && setShowTimeoutConfirm(2)} title={getT('callTimeout')}>
                             <div className={`w-2.5 h-2.5 rounded-full transition-colors ${t2Timeouts >= 1 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>
                             <div className={`w-2.5 h-2.5 rounded-full transition-colors ${t2Timeouts >= 2 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>
@@ -2340,7 +2328,7 @@
                               <span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span>
                               <div className="flex flex-col items-center relative">
                                   <span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest ${textSub}`}>{getT('server')}</span>
-                                  <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${winner ? textMain : 'text-amber-500'}`}>{displayServerNumber}</span>
+                                  <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${winner ? textMain : 'text-amber-500'}`}>{serverNumber}</span>
                               </div>
                           </>
                       )}
@@ -2355,6 +2343,7 @@
                                 className="w-[180px] h-[240px] md:w-[220px] md:h-[280px] bg-emerald-600 rounded-[3px] border-[3px] border-white/90 shadow-md relative flex flex-col overflow-hidden pointer-events-none transition-transform duration-500 ease-in-out"
                                 style={{ transform: `rotate(${courtRotation}deg)` }}
                             >
+                                
                                 {/* Dashed Cross-Court Laser */}
                                 <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
                                     {courtServerPos === 'bottom-right' || courtServerPos === 'top-left' ? (
@@ -2369,13 +2358,13 @@
                                     <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
                                     <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">
                                         {(gameMode === 'double' || courtServerPos === 'top-left' || courtReceiverPos === 'top-left') && renderPlayerBadge(
-                                            gameMode === 'single' ? t2PLeft : currentT2Right, 
+                                            gameMode === 'single' ? t2PLeft : currentT2Right, // Viewer's top-left is T2's right side
                                             courtServerPos === 'top-left' ? 'server' : courtReceiverPos === 'top-left' ? 'receiver' : 'partner'
                                         )}
                                     </div>
                                     <div className="absolute top-1 right-0 w-1/2 flex justify-center items-center h-full">
                                         {(gameMode === 'double' || courtServerPos === 'top-right' || courtReceiverPos === 'top-right') && renderPlayerBadge(
-                                            gameMode === 'single' ? t2PLeft : currentT2Left, 
+                                            gameMode === 'single' ? t2PLeft : currentT2Left, // Viewer's top-right is T2's left side
                                             courtServerPos === 'top-right' ? 'server' : courtReceiverPos === 'top-right' ? 'receiver' : 'partner'
                                         )}
                                     </div>
@@ -2413,6 +2402,7 @@
                                     <RotateCw size={18} />
                                 </button>
                             </div>
+
                         </div>
                     </div>
 
@@ -2426,15 +2416,15 @@
 
                     <div className="mt-auto relative z-10">
                       <div className="grid grid-cols-2 gap-4 h-40 md:h-48">
-                        <button onClick={() => handleRallyWin(1)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${displayServingTeam === 1 && !winner ? bgAccentGreen : `muji-card ${bgCard} ${winner ? 'opacity-50' : ''}`}`}>
-                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${displayServingTeam === 1 && !winner ? accentGreen : textMain}`}>{t1Name}</span>
-                          <span className={`text-sm font-semibold ${displayServingTeam === 1 && !winner ? accentGreen : textSub}`}>{getT('wonRally')}</span>
-                          {displayServingTeam === 1 && !winner && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentGreen}`}><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>{getT('serving')}</div>}
+                        <button onClick={() => handleRallyWin(1)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${servingTeam === 1 && !winner ? bgAccentGreen : `muji-card ${bgCard} ${winner ? 'opacity-50' : ''}`}`}>
+                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${servingTeam === 1 && !winner ? accentGreen : textMain}`}>{t1Name}</span>
+                          <span className={`text-sm font-semibold ${servingTeam === 1 && !winner ? accentGreen : textSub}`}>{getT('wonRally')}</span>
+                          {servingTeam === 1 && !winner && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentGreen}`}><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>{getT('serving')}</div>}
                         </button>
-                        <button onClick={() => handleRallyWin(2)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${displayServingTeam === 2 && !winner ? bgAccentRed : `muji-card ${bgCard} ${winner ? 'opacity-50' : ''}`}`}>
-                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${displayServingTeam === 2 && !winner ? accentRed : textMain}`}>{t2Name}</span>
-                          <span className={`text-sm font-semibold ${displayServingTeam === 2 && !winner ? accentRed : textSub}`}>{getT('wonRally')}</span>
-                          {displayServingTeam === 2 && !winner && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentRed}`}><div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></div>{getT('serving')}</div>}
+                        <button onClick={() => handleRallyWin(2)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${servingTeam === 2 && !winner ? bgAccentRed : `muji-card ${bgCard} ${winner ? 'opacity-50' : ''}`}`}>
+                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${servingTeam === 2 && !winner ? accentRed : textMain}`}>{t2Name}</span>
+                          <span className={`text-sm font-semibold ${servingTeam === 2 && !winner ? accentRed : textSub}`}>{getT('wonRally')}</span>
+                          {servingTeam === 2 && !winner && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentRed}`}><div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></div>{getT('serving')}</div>}
                         </button>
                       </div>
                     </div>
