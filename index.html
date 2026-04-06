@@ -351,8 +351,6 @@
         const X = (props) => <IconWrapper iconObj={lucide.icons.X} {...props} />;
         const InfoIcon = (props) => <IconWrapper iconObj={lucide.icons.Info} {...props} />;
         const HardDrive = (props) => <IconWrapper iconObj={lucide.icons.HardDrive} {...props} />;
-        const Lock = (props) => <IconWrapper iconObj={lucide.icons.Lock} {...props} />;
-        const Unlock = (props) => <IconWrapper iconObj={lucide.icons.Unlock} {...props} />;
         const Volume2 = (props) => <IconWrapper iconObj={lucide.icons.Volume2} {...props} />;
         const VolumeX = (props) => <IconWrapper iconObj={lucide.icons.VolumeX} {...props} />;
         const BarChart2 = (props) => <IconWrapper iconObj={lucide.icons.BarChart2} {...props} />;
@@ -812,17 +810,10 @@
           const [elapsedTime, setElapsedTime] = useState(0);
           const [courtRotation, setCourtRotation] = useState(0);
           
-          // DVR Time Travel State
-          const [timelineLocked, setTimelineLocked] = useState(true);
-          const [viewingPastIndex, setViewingPastIndex] = useState(null);
-          
           const [showHistory, setShowHistory] = useState(false);
           const [history, setHistory] = useState([]); 
           const [stateHistory, setStateHistory] = useState([]);
           const [savedMatches, setSavedMatches] = useState([]);
-          
-          // History Replay Modal State
-          const [historyReplay, setHistoryReplay] = useState(null);
           
           const [isExporting, setIsExporting] = useState(false);
           
@@ -949,7 +940,7 @@
                 id: currentMatchId, title: matchTitle || getT('untitledMatch'),
                 date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
                 mode: gameMode, rules: ruleSet, t1Score: team1Score, t2Score: team2Score,
-                t1Name, t2Name, t1PLeft, t1PRight, t2PLeft, t2PRight, winner, winReason, elapsedTime, history: [...history]
+                t1Name, t2Name, winner, winReason, elapsedTime, history: [...history]
               };
               setSavedMatches(prev => {
                 const existingIndex = prev.findIndex(m => m.id === currentMatchId);
@@ -1358,7 +1349,6 @@
             setEnableTimeouts(useTimeouts); setT1Timeouts(2); setT2Timeouts(2);
             setWinner(null); setWinReason('score'); setShowWinnerOverlay(false);
             setHistory([]); setStateHistory([]); setHasSwitchedEnds(false); setElapsedTime(0); setCourtRotation(0);
-            setTimelineLocked(true); setViewingPastIndex(null);
             
             setAppState('game');
             window.scrollTo(0, 0); // Force scroll immediately when game starts
@@ -1395,8 +1385,6 @@
             if (prev.courtRotation !== undefined) setCourtRotation(prev.courtRotation);
             setHistory(prev.history); setHasSwitchedEnds(prev.hasSwitchedEnds || false);
             setStateHistory(s => s.slice(0, -1));
-            setViewingPastIndex(null);
-            if (prev.winner === null) setTimelineLocked(true);
           };
 
           const handleResetPointsOnly = () => {
@@ -1415,7 +1403,6 @@
               setT1Timeouts(enableTimeouts ? 2 : 2);
               setT2Timeouts(enableTimeouts ? 2 : 2);
               setShowResetModal(false);
-              setTimelineLocked(true); setViewingPastIndex(null);
 
               setTimeout(() => {
                   const isServeToScore = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14);
@@ -1466,7 +1453,6 @@
 
             if (hasWinner) {
               setWinner(winTeam); setShowWinnerOverlay(true); triggerHaptic('win');
-              setTimelineLocked(false); setViewingPastIndex(null);
               
               if (soundEnabled && 'speechSynthesis' in window) {
                   window.speechSynthesis.cancel();
@@ -1555,7 +1541,6 @@
             setTeam1Score(newT1); setTeam2Score(newT2); setServingTeam(newServTeam); setServerNumber(newServNum);
             const newHist = [...history, { id: Date.now(), type: evType, team: winningTeam, point: evType === 'T1_POINT' ? newT1 : (evType === 'T2_POINT' ? newT2 : null) }];
             setHistory(newHist);
-            setViewingPastIndex(null);
             
             const switchPt = Math.ceil(playTo / 2);
             if (enableSwitchEnds && !hasSwitchedEnds && (newT1 === switchPt || newT2 === switchPt)) {
@@ -1577,7 +1562,10 @@
             return `${m}:${s}`;
           };
 
-          const serverLabel = showServerNumberUI ? `S${displayServerNumber}` : 'S';
+          const isSuddenDeath = ruleSet === '14-point' && team1Score === 14 && team2Score === 14;
+          const isServeToScoreModeUI = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14) || (ruleSet === '14-point' && serveToWinAt14 && team1Score === 14 && team2Score === 14);
+          const showServerNumberUI = gameMode === 'double' && isServeToScoreModeUI && !isSuddenDeath;
+          const serverLabel = showServerNumberUI ? `S${serverNumber}` : 'S';
 
           const textMain = isDark ? 'text-stone-100' : 'text-stone-800';
           const textSub = isDark ? 'text-stone-400' : 'text-stone-500';
@@ -1613,11 +1601,8 @@
           let simServeTeam = startingServer;
           let simServNum = gameMode === 'double' ? 2 : 1;
 
-          // If Time-Traveling, cut the history loop short!
-          const effectiveHistory = viewingPastIndex !== null ? history.slice(0, viewingPastIndex + 1) : history;
-
-          for (let i = 0; i < effectiveHistory.length; i++) {
-              const ev = effectiveHistory[i];
+          for (let i = 0; i < history.length; i++) {
+              const ev = history[i];
               
               let isServeToScoreLoop = false;
               let isStrictSuddenDeathLoop = false;
@@ -1663,41 +1648,45 @@
           let courtReceiverPos = '';
 
           if (gameMode === 'single') {
-              const currentScore = simServeTeam === 1 ? simT1Score : simT2Score;
+              const currentScore = servingTeam === 1 ? team1Score : team2Score;
               courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
           } else {
               let isServeToScoreCurrent = false;
               let isStrictSuddenDeathCurrent = false;
               if (ruleSet === 'standard') isServeToScoreCurrent = true;
               else if (ruleSet === 'custom' && serveToWinAt14) isServeToScoreCurrent = true;
-              else if (ruleSet === '14-point' && serveToWinAt14 && simT1Score === 14 && simT2Score === 14) {
+              else if (ruleSet === '14-point' && serveToWinAt14 && team1Score === 14 && team2Score === 14) {
                   isServeToScoreCurrent = true;
                   isStrictSuddenDeathCurrent = true;
               }
 
               if (isServeToScoreCurrent) {
                   let isFirstTurnOfMatch = true;
-                  for (let i = 0; i < effectiveHistory.length; i++) {
-                      if (effectiveHistory[i].type === 'SIDEOUT' || (!isServeToScoreCurrent && (effectiveHistory[i].type === 'T1_POINT' || effectiveHistory[i].type === 'T2_POINT'))) { 
+                  for (let i = 0; i < history.length; i++) {
+                      if (history[i].type === 'SIDEOUT' || (!isServeToScoreCurrent && (history[i].type === 'T1_POINT' || history[i].type === 'T2_POINT'))) { 
                           isFirstTurnOfMatch = false;
                           break;
                       }
                   }
                   if (isStrictSuddenDeathCurrent) isFirstTurnOfMatch = false;
 
-                  const currentScore = simServeTeam === 1 ? simT1Score : simT2Score;
+                  let ptsWonThisTurn = 0;
+                  for (let i = history.length - 1; i >= 0; i--) {
+                      if (history[i].type === 'SIDEOUT') break;
+                      if (history[i].type === `T${servingTeam}_POINT`) ptsWonThisTurn++;
+                  }
 
                   if (isFirstTurnOfMatch) {
-                      courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
+                      courtServerPos = ptsWonThisTurn % 2 === 0 ? 'Right' : 'Left';
                   } else {
-                      if (simServNum === 1) {
-                          courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
+                      if (serverNumber === 1) {
+                          courtServerPos = ptsWonThisTurn % 2 === 0 ? 'Right' : 'Left';
                       } else {
-                          courtServerPos = currentScore % 2 === 0 ? 'Left' : 'Right';
+                          courtServerPos = ptsWonThisTurn % 2 === 0 ? 'Left' : 'Right';
                       }
                   }
               } else {
-                  const currentScore = simServeTeam === 1 ? simT1Score : simT2Score;
+                  const currentScore = servingTeam === 1 ? team1Score : team2Score;
                   courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
               }
           }
@@ -1709,16 +1698,6 @@
               courtServerPos = courtServerPos === 'Right' ? 'top-left' : 'top-right';
               courtReceiverPos = courtServerPos === 'top-left' ? 'bottom-right' : 'bottom-left'; 
           }
-
-          // Variables that control what the scoreboard actually shows
-          const displayT1Score = viewingPastIndex !== null ? simT1Score : team1Score;
-          const displayT2Score = viewingPastIndex !== null ? simT2Score : team2Score;
-          const displayServingTeam = viewingPastIndex !== null ? simServeTeam : servingTeam;
-          const displayServerNumber = viewingPastIndex !== null ? simServNum : serverNumber;
-
-          const isSuddenDeath = ruleSet === '14-point' && displayT1Score === 14 && displayT2Score === 14;
-          const isServeToScoreModeUI = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14) || (ruleSet === '14-point' && serveToWinAt14 && displayT1Score === 14 && displayT2Score === 14);
-          const showServerNumberUI = gameMode === 'double' && isServeToScoreModeUI && !isSuddenDeath;
 
           const renderPlayerBadge = (name, role) => {
               if (!name) return null;
@@ -1746,16 +1725,9 @@
               );
           };
 
-          const renderTimeline = (timelineData, useScrollRef = false, parentMatch = null) => (
-            <div className={`mt-6 muji-card p-5 rounded-xl relative`}>
-              <div className="flex justify-between items-center mb-4">
-                <div className={`text-[10px] font-bold uppercase tracking-widest ${textSub}`}>{getT('timeline')}</div>
-                {useScrollRef && (
-                  <button onClick={() => { setTimelineLocked(!timelineLocked); setViewingPastIndex(null); }} className={`flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest transition-colors active:scale-95 ${timelineLocked ? 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'}`}>
-                    {timelineLocked ? <Lock size={12} /> : <Unlock size={12} />} {timelineLocked ? 'Locked' : 'Unlocked'}
-                  </button>
-                )}
-              </div>
+          const renderTimeline = (timelineData, useScrollRef = false) => (
+            <div className={`mt-6 muji-card p-5 rounded-xl`}>
+              <div className={`text-[10px] font-bold uppercase tracking-widest mb-4 ${textSub}`}>{getT('timeline')}</div>
               <div ref={useScrollRef ? timelineScrollRef : null} className="overflow-x-auto pb-4 pt-2 muji-scrollbar relative scroll-smooth">
                 {timelineData.length === 0 && <div className={`text-xs italic ${textSub} px-2`}>{getT('awaiting')}</div>}
                 {timelineData.length > 0 && (
@@ -1768,15 +1740,15 @@
                         <div className={`h-6 flex items-center text-[10px] font-bold uppercase ${accentRed}`}>{getT('t2Label')}</div>
                     </div>
                     <div className="flex items-center">
-                        {timelineData.map((event, index) => (
-                          <div key={event.id} onClick={() => { if (useScrollRef) { if (!timelineLocked || winner !== null) setViewingPastIndex(index); } else if (parentMatch) { setHistoryReplay({ match: parentMatch, index: index }); } }} className={`flex flex-col items-center justify-center w-8 gap-3 relative z-10 transition-colors cursor-pointer hover:bg-stone-500/10 rounded-lg py-1 ${useScrollRef && viewingPastIndex === index ? 'bg-amber-500/20 ring-1 ring-amber-500/50' : ''} ${!useScrollRef && historyReplay?.match?.id === parentMatch?.id && historyReplay?.index === index ? 'bg-amber-500/20 ring-1 ring-amber-500/50' : ''}`}>
+                        {timelineData.map((event) => (
+                          <div key={event.id} className="flex flex-col items-center justify-center w-8 gap-3 relative z-10">
                             <div className="h-6 flex items-center justify-center w-full">
                               {event.type === 'T1_POINT' ? (
-                                  <div className={`w-5 h-5 rounded-full bg-emerald-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[10px] font-bold text-white shadow-sm z-10`}>
+                                  <div className={`w-5 h-5 rounded-full bg-emerald-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[10px] font-bold text-white transition-transform hover:scale-110 cursor-default shadow-sm z-10`}>
                                     {event.point}
                                   </div>
                               ) : event.type === 'T1_TIMEOUT' ? (
-                                  <div className={`w-4 h-4 rounded-[4px] bg-amber-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[8px] font-black text-white shadow-sm z-10`}>T</div>
+                                  <div className={`w-4 h-4 rounded-[4px] bg-amber-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[8px] font-black text-white cursor-default shadow-sm z-10`} title="Timeout">T</div>
                               ) : (
                                   <div className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-stone-600' : 'bg-stone-300'} z-10`}></div>
                               )}
@@ -1787,7 +1759,7 @@
                                       event.team === 2 
                                         ? (isDark ? 'bg-emerald-900/40 border-emerald-600' : 'bg-emerald-100 border-emerald-300') 
                                         : (isDark ? 'bg-rose-900/40 border-rose-600' : 'bg-rose-100 border-rose-300')
-                                  }`}>
+                                  }`} title={event.type}>
                                     <span className={`text-[8px] font-black -rotate-45 ${
                                         event.team === 2 
                                           ? (isDark ? 'text-emerald-400' : 'text-emerald-700') 
@@ -1798,11 +1770,11 @@
                             </div>
                             <div className="h-6 flex items-center justify-center w-full">
                               {event.type === 'T2_POINT' ? (
-                                  <div className={`w-5 h-5 rounded-full bg-rose-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[10px] font-bold text-white shadow-sm z-10`}>
+                                  <div className={`w-5 h-5 rounded-full bg-rose-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[10px] font-bold text-white transition-transform hover:scale-110 cursor-default shadow-sm z-10`}>
                                     {event.point}
                                   </div>
                               ) : event.type === 'T2_TIMEOUT' ? (
-                                  <div className={`w-4 h-4 rounded-[4px] bg-amber-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[8px] font-black text-white shadow-sm z-10`}>T</div>
+                                  <div className={`w-4 h-4 rounded-[4px] bg-amber-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[8px] font-black text-white cursor-default shadow-sm z-10`} title="Timeout">T</div>
                               ) : (
                                   <div className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-stone-600' : 'bg-stone-300'} z-10`}></div>
                               )}
@@ -2239,7 +2211,7 @@
                                 <div className="text-center"><span className={`text-[10px] font-bold uppercase tracking-widest ${textSub} block mb-1 truncate max-w-[60px]`} title={match.t2Name}>{match.t2Name}</span><span className={`text-3xl font-black ${match.winner === 2 ? accentRed : textMain}`}>{match.t2Score}</span></div>
                               </div>
                             </div>
-                            {renderTimeline(match.history, false, match)}
+                            {renderTimeline(match.history)}
                           </div>
                         ))}
                       </div>
@@ -2304,8 +2276,8 @@
                       {/* TEAM 1 */}
                       <div className="flex flex-col items-center relative w-24 md:w-32">
                         <span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest truncate w-[150%] text-center ${textSub}`}>{t1Name}</span>
-                        <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${displayServingTeam === 1 && !winner ? accentGreen : textMain}`}>{displayT1Score}</span>
-                        {enableTimeouts && !winner && viewingPastIndex === null && (
+                        <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${servingTeam === 1 && !winner ? accentGreen : textMain}`}>{team1Score}</span>
+                        {enableTimeouts && !winner && (
                           <div className="absolute top-full mt-3 flex gap-2 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t1Timeouts > 0 && setShowTimeoutConfirm(1)} title={getT('callTimeout')}>
                             <div className={`w-2.5 h-2.5 rounded-full transition-colors ${t1Timeouts >= 1 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>
                             <div className={`w-2.5 h-2.5 rounded-full transition-colors ${t1Timeouts >= 2 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>
@@ -2314,16 +2286,13 @@
                       </div>
                       
                       {/* HYPHEN */}
-                      <span className={`text-3xl md:text-5xl font-light flex flex-col items-center ${textSub}`}>
-                         -
-                         {viewingPastIndex !== null && <span className="absolute top-full mt-4 text-[9px] font-black uppercase tracking-widest text-amber-500 bg-amber-500/10 px-2 py-1 rounded">Replay</span>}
-                      </span>
+                      <span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span>
                       
                       {/* TEAM 2 */}
                       <div className="flex flex-col items-center relative w-24 md:w-32">
                         <span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest truncate w-[150%] text-center ${textSub}`}>{t2Name}</span>
-                        <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${displayServingTeam === 2 && !winner ? accentRed : textMain}`}>{displayT2Score}</span>
-                        {enableTimeouts && !winner && viewingPastIndex === null && (
+                        <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${servingTeam === 2 && !winner ? accentRed : textMain}`}>{team2Score}</span>
+                        {enableTimeouts && !winner && (
                           <div className="absolute top-full mt-3 flex gap-2 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t2Timeouts > 0 && setShowTimeoutConfirm(2)} title={getT('callTimeout')}>
                             <div className={`w-2.5 h-2.5 rounded-full transition-colors ${t2Timeouts >= 1 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>
                             <div className={`w-2.5 h-2.5 rounded-full transition-colors ${t2Timeouts >= 2 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>
@@ -2337,7 +2306,7 @@
                               <span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span>
                               <div className="flex flex-col items-center relative">
                                   <span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest ${textSub}`}>{getT('server')}</span>
-                                  <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${winner ? textMain : 'text-amber-500'}`}>{displayServerNumber}</span>
+                                  <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${winner ? textMain : 'text-amber-500'}`}>{serverNumber}</span>
                               </div>
                           </>
                       )}
@@ -2425,15 +2394,15 @@
 
                     <div className="mt-auto relative z-10">
                       <div className="grid grid-cols-2 gap-4 h-40 md:h-48">
-                        <button onClick={() => handleRallyWin(1)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${displayServingTeam === 1 && !winner ? bgAccentGreen : `muji-card ${bgCard} ${winner ? 'opacity-50' : ''}`}`}>
-                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${displayServingTeam === 1 && !winner ? accentGreen : textMain}`}>{t1Name}</span>
-                          <span className={`text-sm font-semibold ${displayServingTeam === 1 && !winner ? accentGreen : textSub}`}>{getT('wonRally')}</span>
-                          {displayServingTeam === 1 && !winner && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentGreen}`}><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>{getT('serving')}</div>}
+                        <button onClick={() => handleRallyWin(1)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${servingTeam === 1 && !winner ? bgAccentGreen : `muji-card ${bgCard} ${winner ? 'opacity-50' : ''}`}`}>
+                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${servingTeam === 1 && !winner ? accentGreen : textMain}`}>{t1Name}</span>
+                          <span className={`text-sm font-semibold ${servingTeam === 1 && !winner ? accentGreen : textSub}`}>{getT('wonRally')}</span>
+                          {servingTeam === 1 && !winner && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentGreen}`}><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>{getT('serving')}</div>}
                         </button>
-                        <button onClick={() => handleRallyWin(2)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${displayServingTeam === 2 && !winner ? bgAccentRed : `muji-card ${bgCard} ${winner ? 'opacity-50' : ''}`}`}>
-                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${displayServingTeam === 2 && !winner ? accentRed : textMain}`}>{t2Name}</span>
-                          <span className={`text-sm font-semibold ${displayServingTeam === 2 && !winner ? accentRed : textSub}`}>{getT('wonRally')}</span>
-                          {displayServingTeam === 2 && !winner && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentRed}`}><div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></div>{getT('serving')}</div>}
+                        <button onClick={() => handleRallyWin(2)} disabled={winner !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${servingTeam === 2 && !winner ? bgAccentRed : `muji-card ${bgCard} ${winner ? 'opacity-50' : ''}`}`}>
+                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${servingTeam === 2 && !winner ? accentRed : textMain}`}>{t2Name}</span>
+                          <span className={`text-sm font-semibold ${servingTeam === 2 && !winner ? accentRed : textSub}`}>{getT('wonRally')}</span>
+                          {servingTeam === 2 && !winner && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentRed}`}><div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></div>{getT('serving')}</div>}
                         </button>
                       </div>
                     </div>
@@ -2642,131 +2611,6 @@
                   </div>
                 </div>
               )}
-
-              {/* --- INSTANT REPLAY MODAL --- */}
-              {historyReplay && (() => {
-                  const match = historyReplay.match;
-                  const targetIndex = historyReplay.index;
-                  const effectiveHistory = match.history.slice(0, targetIndex + 1);
-                  
-                  let simT1Score = 0; let simT2Score = 0;
-                  let t1Swaps = 0; let t2Swaps = 0;
-                  // We assume initial server was 1 if not recorded, though your new code records it!
-                  let simServeTeam = match.initialServer || 1; 
-                  let simServNum = match.mode === 'double' ? 2 : 1;
-
-                  for (let i = 0; i < effectiveHistory.length; i++) {
-                      const ev = effectiveHistory[i];
-                      let isServeToScoreLoop = match.rules === 'standard' || (match.rules === 'custom' && match.serveToWinAt14) || (match.rules === '14-point' && match.serveToWinAt14 && simT1Score === 14 && simT2Score === 14);
-                      
-                      if (ev.type === 'T1_POINT') { simT1Score++; if (isServeToScoreLoop) { if (simServeTeam === 1) t1Swaps++; } else { if (simServeTeam === 1) t1Swaps++; else { simServeTeam = 1; simServNum = 1; } } } 
-                      else if (ev.type === 'T2_POINT') { simT2Score++; if (isServeToScoreLoop) { if (simServeTeam === 2) t2Swaps++; } else { if (simServeTeam === 2) t2Swaps++; else { simServeTeam = 2; simServNum = 1; } } } 
-                      else if (ev.type === 'FAULT') { if (match.mode === 'double' && !(match.rules === '14-point' && match.serveToWinAt14 && simT1Score === 14 && simT2Score === 14)) { simServNum = 2; } } 
-                      else if (ev.type === 'SIDEOUT') { simServeTeam = simServeTeam === 1 ? 2 : 1; simServNum = 1; }
-                  }
-
-                  // Safely extract individual names (handles old saved matches that only saved combined names)
-                  const m_t1L = match.t1PLeft || (match.t1Name && match.t1Name.includes(' & ') ? match.t1Name.split(' & ')[0] : match.t1Name);
-                  const m_t1R = match.t1PRight || (match.t1Name && match.t1Name.includes(' & ') ? match.t1Name.split(' & ')[1] : '');
-                  const m_t2L = match.t2PLeft || (match.t2Name && match.t2Name.includes(' & ') ? match.t2Name.split(' & ')[0] : match.t2Name);
-                  const m_t2R = match.t2PRight || (match.t2Name && match.t2Name.includes(' & ') ? match.t2Name.split(' & ')[1] : '');
-
-                  const currentT1Left = (t1Swaps % 2 === 0) ? m_t1L : m_t1R;
-                  const currentT1Right = (t1Swaps % 2 === 0) ? m_t1R : m_t1L;
-                  const currentT2Left = (t2Swaps % 2 === 0) ? m_t2L : m_t2R;
-                  const currentT2Right = (t2Swaps % 2 === 0) ? m_t2R : m_t2L;
-
-                  let courtServerPos = ''; let courtReceiverPos = '';
-                  if (match.mode === 'single') {
-                      courtServerPos = (simServeTeam === 1 ? simT1Score : simT2Score) % 2 === 0 ? 'Right' : 'Left';
-                  } else {
-                      let isServeToScoreCurrent = match.rules === 'standard' || (match.rules === 'custom' && match.serveToWinAt14) || (match.rules === '14-point' && match.serveToWinAt14 && simT1Score === 14 && simT2Score === 14);
-                      
-                      let isFirstTurnOfMatch = true;
-                      for (let i = 0; i < effectiveHistory.length; i++) {
-                          if (effectiveHistory[i].type === 'SIDEOUT' || (!isServeToScoreCurrent && (effectiveHistory[i].type === 'T1_POINT' || effectiveHistory[i].type === 'T2_POINT'))) { 
-                              isFirstTurnOfMatch = false; break;
-                          }
-                      }
-                      if (match.rules === '14-point' && match.serveToWinAt14 && simT1Score === 14 && simT2Score === 14) isFirstTurnOfMatch = false;
-
-                      const currentScore = simServeTeam === 1 ? simT1Score : simT2Score;
-
-                      if (isServeToScoreCurrent) {
-                          if (isFirstTurnOfMatch) {
-                              courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
-                          } else {
-                              if (simServNum === 1) {
-                                  courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
-                              } else {
-                                  courtServerPos = currentScore % 2 === 0 ? 'Left' : 'Right';
-                              }
-                          }
-                      } else {
-                          courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
-                      }
-                  }
-
-                  if (simServeTeam === 1) { courtServerPos = courtServerPos === 'Right' ? 'bottom-right' : 'bottom-left'; courtReceiverPos = courtServerPos === 'bottom-right' ? 'top-left' : 'top-right'; } 
-                  else { courtServerPos = courtServerPos === 'Right' ? 'top-left' : 'top-right'; courtReceiverPos = courtServerPos === 'top-left' ? 'bottom-right' : 'bottom-left'; }
-
-                  const renderBadge = (name, role) => {
-                      if (!name) return null;
-                      let bg = 'bg-stone-500/20 text-stone-400 dark:text-stone-300 border border-stone-400/20'; let scale = 1; let zIndex = 0;
-                      if (role === 'server') { bg = 'bg-amber-400 text-amber-950 shadow-lg ring-2 ring-white'; scale = 1.1; zIndex = 10; } 
-                      else if (role === 'receiver') { bg = 'bg-white text-emerald-800 shadow-md ring-2 ring-emerald-400/50'; scale = 1.05; zIndex = 10; }
-                      return <div className={`px-2 py-1 rounded shadow-sm max-w-[90%] truncate text-[8px] font-black tracking-wider uppercase ${bg}`} style={{ transform: `scale(${scale})`, zIndex }}>{name}</div>;
-                  };
-
-                  return (
-                    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-                      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setHistoryReplay(null)}></div>
-                      <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl p-6 animate-screen-enter`}>
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className={`text-sm font-bold uppercase tracking-widest text-amber-500`}>Point Replay</h2>
-                            <button onClick={() => setHistoryReplay(null)} className={`p-2 -mr-2 rounded-full ${textSub} hover:${textMain}`}><X size={20}/></button>
-                        </div>
-
-                        {/* Scores */}
-                        <div className="flex justify-between items-center mb-6 px-4">
-                            <div className="text-center w-20"><span className={`text-[9px] font-bold uppercase tracking-widest ${textSub} block mb-1 truncate`} title={match.t1Name}>{match.t1Name}</span><span className={`text-4xl font-black ${simServeTeam === 1 ? accentGreen : textMain}`}>{simT1Score}</span></div>
-                            <div className="flex flex-col items-center">
-                                <span className={`text-2xl font-light ${textSub}`}>-</span>
-                                {match.mode === 'double' && <span className={`text-[10px] font-bold mt-1 ${textSub}`}>S{simServNum}</span>}
-                            </div>
-                            <div className="text-center w-20"><span className={`text-[9px] font-bold uppercase tracking-widest ${textSub} block mb-1 truncate`} title={match.t2Name}>{match.t2Name}</span><span className={`text-4xl font-black ${simServeTeam === 2 ? accentRed : textMain}`}>{simT2Score}</span></div>
-                        </div>
-
-                        {/* Mini Court */}
-                        <div className="flex justify-center mb-6">
-                            <div className="relative flex items-center justify-center w-[200px] h-[240px]">
-                                <div className="w-[160px] h-[220px] bg-emerald-600 rounded-[3px] border-[3px] border-white/90 shadow-md relative flex flex-col overflow-hidden pointer-events-none">
-                                    <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">{courtServerPos === 'bottom-right' || courtServerPos === 'top-left' ? <line x1="75%" y1="85%" x2="25%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" /> : <line x1="25%" y1="85%" x2="75%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" />}</svg>
-                                    <div className="flex-1 relative border-b border-white/50 z-20">
-                                        <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
-                                        <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">{(match.mode === 'double' || courtServerPos === 'top-left' || courtReceiverPos === 'top-left') && renderBadge(match.mode === 'single' ? match.t2Name : currentT2Right, courtServerPos === 'top-left' ? 'server' : courtReceiverPos === 'top-left' ? 'receiver' : 'partner')}</div>
-                                        <div className="absolute top-1 right-0 w-1/2 flex justify-center items-center h-full">{(match.mode === 'double' || courtServerPos === 'top-right' || courtReceiverPos === 'top-right') && renderBadge(match.mode === 'single' ? match.t2Name : currentT2Left, courtServerPos === 'top-right' ? 'server' : courtReceiverPos === 'top-right' ? 'receiver' : 'partner')}</div>
-                                    </div>
-                                    <div className="h-6 border-b-2 border-white/80 bg-emerald-500 z-20"></div><div className="h-6 border-b border-white/50 bg-emerald-500 z-20"></div>
-                                    <div className="flex-1 relative z-20">
-                                        <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
-                                        <div className="absolute bottom-1 left-0 w-1/2 flex justify-center items-center h-full">{(match.mode === 'double' || courtServerPos === 'bottom-left' || courtReceiverPos === 'bottom-left') && renderBadge(match.mode === 'single' ? match.t1Name : currentT1Left, courtServerPos === 'bottom-left' ? 'server' : courtReceiverPos === 'bottom-left' ? 'receiver' : 'partner')}</div>
-                                        <div className="absolute bottom-1 right-0 w-1/2 flex justify-center items-center h-full">{(match.mode === 'double' || courtServerPos === 'bottom-right' || courtReceiverPos === 'bottom-right') && renderBadge(match.mode === 'single' ? match.t1Name : currentT1Right, courtServerPos === 'bottom-right' ? 'server' : courtReceiverPos === 'bottom-right' ? 'receiver' : 'partner')}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Controls */}
-                        <div className="flex justify-between items-center gap-4">
-                            <button disabled={targetIndex === 0} onClick={() => setHistoryReplay({ match, index: targetIndex - 1 })} className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors ${targetIndex === 0 ? 'bg-stone-100 dark:bg-stone-800 text-stone-400 opacity-50' : 'bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-200 hover:bg-stone-300 dark:hover:bg-stone-600'}`}><ChevronLeft size={18}/> Prev</button>
-                            <span className={`text-[10px] font-bold uppercase tracking-widest ${textSub}`}>Pt {targetIndex + 1} / {match.history.length}</span>
-                            <button disabled={targetIndex === match.history.length - 1} onClick={() => setHistoryReplay({ match, index: targetIndex + 1 })} className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors ${targetIndex === match.history.length - 1 ? 'bg-stone-100 dark:bg-stone-800 text-stone-400 opacity-50' : 'bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-200 hover:bg-stone-300 dark:hover:bg-stone-600'}`}>Next <ChevronRight size={18}/></button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-              })()}
 
               {/* --- CLEAR HISTORY CONFIRM --- */}
               {showClearConfirm && (
