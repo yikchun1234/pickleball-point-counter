@@ -949,7 +949,7 @@
                 id: currentMatchId, title: matchTitle || getT('untitledMatch'),
                 date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
                 mode: gameMode, rules: ruleSet, t1Score: team1Score, t2Score: team2Score,
-                t1Name, t2Name, winner, winReason, elapsedTime, history: [...history]
+                t1Name, t2Name, t1PLeft, t1PRight, t2PLeft, t2PRight, winner, winReason, elapsedTime, history: [...history]
               };
               setSavedMatches(prev => {
                 const existingIndex = prev.findIndex(m => m.id === currentMatchId);
@@ -2669,10 +2669,16 @@
                       else if (ev.type === 'SIDEOUT') { simServeTeam = simServeTeam === 1 ? 2 : 1; simServNum = 1; }
                   }
 
-                  const currentT1Left = (t1Swaps % 2 === 0) ? match.t1PLeft || match.t1Name : match.t1PRight;
-                  const currentT1Right = (t1Swaps % 2 === 0) ? match.t1PRight : match.t1PLeft || match.t1Name;
-                  const currentT2Left = (t2Swaps % 2 === 0) ? match.t2PLeft || match.t2Name : match.t2PRight;
-                  const currentT2Right = (t2Swaps % 2 === 0) ? match.t2PRight : match.t2PLeft || match.t2Name;
+                  // Safely extract individual names (handles old saved matches that only saved combined names)
+                  const m_t1L = match.t1PLeft || (match.t1Name && match.t1Name.includes(' & ') ? match.t1Name.split(' & ')[0] : match.t1Name);
+                  const m_t1R = match.t1PRight || (match.t1Name && match.t1Name.includes(' & ') ? match.t1Name.split(' & ')[1] : '');
+                  const m_t2L = match.t2PLeft || (match.t2Name && match.t2Name.includes(' & ') ? match.t2Name.split(' & ')[0] : match.t2Name);
+                  const m_t2R = match.t2PRight || (match.t2Name && match.t2Name.includes(' & ') ? match.t2Name.split(' & ')[1] : '');
+
+                  const currentT1Left = (t1Swaps % 2 === 0) ? m_t1L : m_t1R;
+                  const currentT1Right = (t1Swaps % 2 === 0) ? m_t1R : m_t1L;
+                  const currentT2Left = (t2Swaps % 2 === 0) ? m_t2L : m_t2R;
+                  const currentT2Right = (t2Swaps % 2 === 0) ? m_t2R : m_t2L;
 
                   let courtServerPos = ''; let courtReceiverPos = '';
                   if (match.mode === 'single') {
