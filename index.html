@@ -627,13 +627,11 @@
           const [t1Timeouts, setT1Timeouts] = useState(2);
           const [t2Timeouts, setT2Timeouts] = useState(2);
           const [showTimeoutConfirm, setShowTimeoutConfirm] = useState(null);
-          
           const [secretGame, setSecretGame] = useState(null); 
           
           const [lang, setLang] = useState('en');
           const [isDark, setIsDark] = useState(false);
           const secretClickCount = useRef(0);
-          
           const [soundEnabled, setSoundEnabled] = useState(true);
           const [installPrompt, setInstallPrompt] = useState(null);
           const [isInstalled, setIsInstalled] = useState(false);
@@ -654,7 +652,6 @@
           const [ruleSet, setRuleSet] = useState('standard');
           const [playTo, setPlayTo] = useState(11);
           const [winByMargin, setWinByMargin] = useState(2);
-          
           const [t1PLeft, setT1PLeft] = useState('');
           const [t1PRight, setT1PRight] = useState('');
           const [t2PLeft, setT2PLeft] = useState('');
@@ -677,7 +674,6 @@
           const [courtRotation, setCourtRotation] = useState(0);
           const [activeTimeoutRemaining, setActiveTimeoutRemaining] = useState(0);
           
-          // Phase 1 + 2: Timeline Replay States
           const [isTimelineLocked, setIsTimelineLocked] = useState(true);
           const [previewSnapshot, setPreviewSnapshot] = useState(null);
 
@@ -685,9 +681,7 @@
           const [history, setHistory] = useState([]); 
           const [stateHistory, setStateHistory] = useState([]);
           const [savedMatches, setSavedMatches] = useState([]);
-          
           const [isExporting, setIsExporting] = useState(false);
-          
           const [showResetModal, setShowResetModal] = useState(false);
           const [showShareAppModal, setShowShareAppModal] = useState(false);
           const [linkCopied, setLinkCopied] = useState(false);
@@ -707,9 +701,7 @@
 
           useEffect(() => {
               const scrollTimer = setTimeout(() => {
-                  window.scrollTo(0, 0);
-                  document.documentElement.scrollTop = 0;
-                  document.body.scrollTop = 0;
+                  window.scrollTo(0, 0); document.documentElement.scrollTop = 0; document.body.scrollTop = 0;
               }, 50);
               return () => clearTimeout(scrollTimer);
           }, [appState, pendingGame]);
@@ -717,30 +709,20 @@
           const isModalOpen = !!(pendingGame || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || (recoverGameData && appState !== 'splash') || showWinnerOverlay || secretGame || showTimeoutConfirm || isExporting || showResetModal || showShareAppModal || (previewSnapshot && appState === 'history'));
 
           useEffect(() => {
-              if (isModalOpen) document.body.style.overflow = 'hidden';
-              else document.body.style.overflow = '';
+              if (isModalOpen) document.body.style.overflow = 'hidden'; else document.body.style.overflow = '';
               return () => { document.body.style.overflow = ''; };
           }, [isModalOpen]);
 
           const closeScreenToMenu = (screenName) => {
               setClosingScreen(screenName);
-              setTimeout(() => {
-                  setClosingScreen(null);
-                  setAppState('menu');
-                  window.scrollTo(0, 0);
-              }, 280); 
+              setTimeout(() => { setClosingScreen(null); setAppState('menu'); window.scrollTo(0, 0); }, 280); 
           };
 
           const openScreenFromMenu = (screenName) => {
               setClosingScreen('menu');
               setTimeout(() => {
-                  setClosingScreen(null);
-                  setAppState(screenName);
-                  window.scrollTo(0, 0);
-                  if (screenName === 'history') {
-                      setIsHistoryLoading(true);
-                      setTimeout(() => setIsHistoryLoading(false), 400);
-                  }
+                  setClosingScreen(null); setAppState(screenName); window.scrollTo(0, 0);
+                  if (screenName === 'history') { setIsHistoryLoading(true); setTimeout(() => setIsHistoryLoading(false), 400); }
               }, 280); 
           };
 
@@ -750,187 +732,99 @@
             let savedLang = localStorage.getItem('pb_lang_pref');
             if (savedLang === 'zh') savedLang = 'zh_CN'; 
             if (savedLang && dict[savedLang]) setLang(savedLang);
-            
             if (localStorage.getItem('pb_theme_pref') === 'dark') setIsDark(true);
             if (localStorage.getItem('pb_sound_pref') === 'false') setSoundEnabled(false);
-
             const savedActive = localStorage.getItem('pb_active_game');
-            if (savedActive) {
-              try {
-                const parsed = JSON.parse(savedActive);
-                if (parsed && !parsed.winner) setRecoverGameData(parsed);
-              } catch (e) {}
-            }
+            if (savedActive) { try { const parsed = JSON.parse(savedActive); if (parsed && !parsed.winner) setRecoverGameData(parsed); } catch (e) {} }
           }, []);
 
           useEffect(() => {
             if (appState === 'game' && !winner) {
-              localStorage.setItem('pb_active_game', JSON.stringify({
-                currentMatchId, matchTitle, gameMode, ruleSet, playTo, winByMargin, 
-                t1PLeft, t1PRight, t2PLeft, t2PRight,
-                team1Score, team2Score, servingTeam, serverNumber, serveToWinAt14, enableSwitchEnds, hasSwitchedEnds,
-                elapsedTime, history, stateHistory, enableTimeouts, t1Timeouts, t2Timeouts, courtRotation, initialServer
-              }));
-            } else if (winner) {
-              localStorage.removeItem('pb_active_game');
-            }
+              localStorage.setItem('pb_active_game', JSON.stringify({ currentMatchId, matchTitle, gameMode, ruleSet, playTo, winByMargin, t1PLeft, t1PRight, t2PLeft, t2PRight, team1Score, team2Score, servingTeam, serverNumber, serveToWinAt14, enableSwitchEnds, hasSwitchedEnds, elapsedTime, history, stateHistory, enableTimeouts, t1Timeouts, t2Timeouts, courtRotation, initialServer }));
+            } else if (winner) localStorage.removeItem('pb_active_game');
           }, [team1Score, team2Score, servingTeam, serverNumber, history, appState, winner, elapsedTime, t1Timeouts, t2Timeouts, courtRotation, initialServer]);
 
           useEffect(() => {
             let timer;
-            if (appState === 'game' && !winner && !showRetreatModal && !showBackConfirm && !showSwitchModal && !showTimeoutConfirm && activeTimeoutRemaining === 0) {
-              timer = setInterval(() => setElapsedTime(prev => prev + 1), 1000);
-            }
+            if (appState === 'game' && !winner && !showRetreatModal && !showBackConfirm && !showSwitchModal && !showTimeoutConfirm && activeTimeoutRemaining === 0) timer = setInterval(() => setElapsedTime(prev => prev + 1), 1000);
             return () => clearInterval(timer);
           }, [appState, winner, showRetreatModal, showBackConfirm, showSwitchModal, showTimeoutConfirm, activeTimeoutRemaining]);
 
           useEffect(() => {
-            let timer;
-            if (activeTimeoutRemaining > 0) {
-              timer = setInterval(() => setActiveTimeoutRemaining(prev => prev - 1), 1000);
-            }
-            return () => clearInterval(timer);
+            let timer; if (activeTimeoutRemaining > 0) timer = setInterval(() => setActiveTimeoutRemaining(prev => prev - 1), 1000); return () => clearInterval(timer);
           }, [activeTimeoutRemaining]);
 
           useEffect(() => {
-            const requestWakeLock = async () => {
-              if (appState === 'game' && 'wakeLock' in navigator) {
-                try { wakeLockRef.current = await navigator.wakeLock.request('screen'); } catch (err) {}
-              }
-            };
+            const requestWakeLock = async () => { if (appState === 'game' && 'wakeLock' in navigator) try { wakeLockRef.current = await navigator.wakeLock.request('screen'); } catch (err) {} };
             const handleVisibility = () => { if (document.visibilityState === 'visible') requestWakeLock(); };
-            requestWakeLock();
-            document.addEventListener('visibilitychange', handleVisibility);
-            return () => {
-              if (wakeLockRef.current) wakeLockRef.current.release();
-              document.removeEventListener('visibilitychange', handleVisibility);
-            };
+            requestWakeLock(); document.addEventListener('visibilitychange', handleVisibility);
+            return () => { if (wakeLockRef.current) wakeLockRef.current.release(); document.removeEventListener('visibilitychange', handleVisibility); };
           }, [appState]);
 
           useEffect(() => {
             if (winner !== null && currentMatchId && history.length > 0) {
-              const newMatch = {
-                id: currentMatchId, title: matchTitle || getT('untitledMatch'),
-                date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                mode: gameMode, rules: ruleSet, t1Score: team1Score, t2Score: team2Score,
-                t1Name, t2Name, 
-                t1PLeft, t1PRight, t2PLeft, t2PRight, initialServer,
-                winner, winReason, elapsedTime, history: [...history]
-              };
+              const newMatch = { id: currentMatchId, title: matchTitle || getT('untitledMatch'), date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), mode: gameMode, rules: ruleSet, t1Score: team1Score, t2Score: team2Score, t1Name, t2Name, t1PLeft, t1PRight, t2PLeft, t2PRight, initialServer, winner, winReason, elapsedTime, history: [...history] };
               setSavedMatches(prev => {
                 const existingIndex = prev.findIndex(m => m.id === currentMatchId);
-                let updated;
-                if (existingIndex >= 0) {
-                  updated = [...prev];
-                  updated[existingIndex] = newMatch;
-                } else {
-                  updated = [newMatch, ...prev];
-                }
+                let updated = existingIndex >= 0 ? [...prev] : [newMatch, ...prev];
+                if (existingIndex >= 0) updated[existingIndex] = newMatch;
                 localStorage.setItem('pb_history_matches', JSON.stringify(updated));
                 return updated;
               });
             }
           }, [winner, currentMatchId, history]);
 
-          useEffect(() => {
-            if (timelineScrollRef.current) timelineScrollRef.current.scrollLeft = timelineScrollRef.current.scrollWidth;
-          }, [history]);
+          useEffect(() => { if (timelineScrollRef.current) timelineScrollRef.current.scrollLeft = timelineScrollRef.current.scrollWidth; }, [history]);
 
           useEffect(() => {
-            const baseColor = isDark ? '#1c1917' : '#fafaf9'; 
-            const modalColor = isDark ? '#110f0e' : '#969695'; 
-            const themeColor = isModalOpen ? modalColor : baseColor;
-            
+            const baseColor = isDark ? '#1c1917' : '#fafaf9'; const modalColor = isDark ? '#110f0e' : '#969695'; const themeColor = isModalOpen ? modalColor : baseColor;
             const metaThemeColor = document.getElementById('theme-color-meta');
             if (metaThemeColor) metaThemeColor.setAttribute('content', themeColor);
             document.documentElement.style.setProperty('--app-bg', baseColor);
           }, [isDark, isModalOpen]);
 
-          const triggerHaptic = (type) => {
-            if (!navigator.vibrate) return;
-            if (type === 'point') navigator.vibrate(50);
-            if (type === 'win') navigator.vibrate([200, 100, 200]);
-          };
+          const triggerHaptic = (type) => { if (!navigator.vibrate) return; if (type === 'point') navigator.vibrate(50); if (type === 'win') navigator.vibrate([200, 100, 200]); };
 
-          let simT1Score = 0; let simT2Score = 0;
-          let t1Swaps = 0; let t2Swaps = 0;
-          let simServeTeam = initialServer;
-          let simServNum = gameMode === 'double' ? 2 : 1;
-
+          // --- COURT LOGIC ---
+          let simT1Score = 0; let simT2Score = 0; let t1Swaps = 0; let t2Swaps = 0; let simServeTeam = initialServer; let simServNum = gameMode === 'double' ? 2 : 1;
           for (let i = 0; i < history.length; i++) {
               const ev = history[i];
               let isServeToScoreLoop = false; let isStrictSuddenDeathLoop = false;
               if (ruleSet === 'standard') isServeToScoreLoop = true;
               else if (ruleSet === 'custom' && serveToWinAt14) isServeToScoreLoop = true;
-              else if (ruleSet === '14-point' && serveToWinAt14 && simT1Score === 14 && simT2Score === 14) {
-                  isServeToScoreLoop = true; isStrictSuddenDeathLoop = true;
-              }
-              
-              if (ev.type === 'T1_POINT') {
-                  simT1Score++;
-                  if (isServeToScoreLoop) { if (simServeTeam === 1) t1Swaps++; }
-                  else { if (simServeTeam === 1) t1Swaps++; else { simServeTeam = 1; simServNum = 1; } }
-              } else if (ev.type === 'T2_POINT') {
-                  simT2Score++;
-                  if (isServeToScoreLoop) { if (simServeTeam === 2) t2Swaps++; }
-                  else { if (simServeTeam === 2) t2Swaps++; else { simServeTeam = 2; simServNum = 1; } }
-              } else if (ev.type === 'FAULT') {
-                  if (gameMode === 'double' && !isStrictSuddenDeathLoop) simServNum = 2;
-              } else if (ev.type === 'SIDEOUT') {
-                  simServeTeam = simServeTeam === 1 ? 2 : 1; simServNum = 1;
-              }
+              else if (ruleSet === '14-point' && serveToWinAt14 && simT1Score === 14 && simT2Score === 14) { isServeToScoreLoop = true; isStrictSuddenDeathLoop = true; }
+              if (ev.type === 'T1_POINT') { simT1Score++; if (isServeToScoreLoop) { if (simServeTeam === 1) t1Swaps++; } else { if (simServeTeam === 1) t1Swaps++; else { simServeTeam = 1; simServNum = 1; } } } 
+              else if (ev.type === 'T2_POINT') { simT2Score++; if (isServeToScoreLoop) { if (simServeTeam === 2) t2Swaps++; } else { if (simServeTeam === 2) t2Swaps++; else { simServeTeam = 2; simServNum = 1; } } } 
+              else if (ev.type === 'FAULT') { if (gameMode === 'double' && !isStrictSuddenDeathLoop) simServNum = 2; } 
+              else if (ev.type === 'SIDEOUT') { simServeTeam = simServeTeam === 1 ? 2 : 1; simServNum = 1; }
           }
 
-          const currentT1Left = (t1Swaps % 2 === 0) ? t1PLeft : t1PRight;
-          const currentT1Right = (t1Swaps % 2 === 0) ? t1PRight : t1PLeft;
-          const currentT2Left = (t2Swaps % 2 === 0) ? t2PLeft : t2PRight;
-          const currentT2Right = (t2Swaps % 2 === 0) ? t2PRight : t2PLeft;
-
+          const currentT1Left = (t1Swaps % 2 === 0) ? t1PLeft : t1PRight; const currentT1Right = (t1Swaps % 2 === 0) ? t1PRight : t1PLeft;
+          const currentT2Left = (t2Swaps % 2 === 0) ? t2PLeft : t2PRight; const currentT2Right = (t2Swaps % 2 === 0) ? t2PRight : t2PLeft;
           let courtServerPos = ''; let courtReceiverPos = '';
 
           if (gameMode === 'single') {
-              const currentScore = servingTeam === 1 ? team1Score : team2Score;
-              courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
+              courtServerPos = (servingTeam === 1 ? team1Score : team2Score) % 2 === 0 ? 'Right' : 'Left';
           } else {
               let isServeToScoreCurrent = false; let isStrictSuddenDeathCurrent = false;
               if (ruleSet === 'standard') isServeToScoreCurrent = true;
               else if (ruleSet === 'custom' && serveToWinAt14) isServeToScoreCurrent = true;
-              else if (ruleSet === '14-point' && serveToWinAt14 && team1Score === 14 && team2Score === 14) {
-                  isServeToScoreCurrent = true; isStrictSuddenDeathCurrent = true;
-              }
-
+              else if (ruleSet === '14-point' && serveToWinAt14 && team1Score === 14 && team2Score === 14) { isServeToScoreCurrent = true; isStrictSuddenDeathCurrent = true; }
               if (isServeToScoreCurrent) {
                   let isFirstTurnOfMatch = true;
-                  for (let i = 0; i < history.length; i++) {
-                      if (history[i].type === 'SIDEOUT' || (!isServeToScoreCurrent && (history[i].type === 'T1_POINT' || history[i].type === 'T2_POINT'))) { 
-                          isFirstTurnOfMatch = false; break;
-                      }
-                  }
+                  for (let i = 0; i < history.length; i++) { if (history[i].type === 'SIDEOUT' || (!isServeToScoreCurrent && (history[i].type === 'T1_POINT' || history[i].type === 'T2_POINT'))) { isFirstTurnOfMatch = false; break; } }
                   if (isStrictSuddenDeathCurrent) isFirstTurnOfMatch = false;
-
                   let ptsWonThisTurn = 0;
-                  for (let i = history.length - 1; i >= 0; i--) {
-                      if (history[i].type === 'SIDEOUT') break;
-                      if (history[i].type === `T${servingTeam}_POINT`) ptsWonThisTurn++;
-                  }
-
+                  for (let i = history.length - 1; i >= 0; i--) { if (history[i].type === 'SIDEOUT') break; if (history[i].type === `T${servingTeam}_POINT`) ptsWonThisTurn++; }
                   if (isFirstTurnOfMatch) courtServerPos = ptsWonThisTurn % 2 === 0 ? 'Right' : 'Left';
                   else courtServerPos = ptsWonThisTurn % 2 === 0 ? (serverNumber === 1 ? 'Right' : 'Left') : (serverNumber === 1 ? 'Left' : 'Right');
-              } else {
-                  const currentScore = servingTeam === 1 ? team1Score : team2Score;
-                  courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
-              }
+              } else courtServerPos = (servingTeam === 1 ? team1Score : team2Score) % 2 === 0 ? 'Right' : 'Left';
           }
+          if (servingTeam === 1) { courtServerPos = courtServerPos === 'Right' ? 'bottom-right' : 'bottom-left'; courtReceiverPos = courtServerPos === 'bottom-right' ? 'top-left' : 'top-right'; } 
+          else { courtServerPos = courtServerPos === 'Right' ? 'top-left' : 'top-right'; courtReceiverPos = courtServerPos === 'top-left' ? 'bottom-right' : 'bottom-left'; }
 
-          if (servingTeam === 1) {
-              courtServerPos = courtServerPos === 'Right' ? 'bottom-right' : 'bottom-left';
-              courtReceiverPos = courtServerPos === 'bottom-right' ? 'top-left' : 'top-right'; 
-          } else {
-              courtServerPos = courtServerPos === 'Right' ? 'top-left' : 'top-right';
-              courtReceiverPos = courtServerPos === 'top-left' ? 'bottom-right' : 'bottom-left'; 
-          }
-
-          const shareMatch = async (match) => { /* keeping export function intact */
+          // --- EXPORT ---
+          const shareMatch = async (match) => {
             setIsExporting(true);
             setTimeout(async () => {
                 try {
@@ -945,67 +839,35 @@
                     gradient.addColorStop(0, 'rgba(16,185,129,0.15)'); gradient.addColorStop(1, 'transparent');
                     ctx.fillStyle = gradient; ctx.fillRect(0, 0, width, height);
 
-                    const drawSvg = (svgString, x, y, w, h) => {
-                        return new Promise((resolve) => {
-                            const img = new Image(); const svg = new Blob([svgString], {type: 'image/svg+xml;charset=utf-8'});
-                            const DOMURL = window.URL || window.webkitURL || window; const url = DOMURL.createObjectURL(svg);
-                            img.onload = () => { ctx.drawImage(img, x, y, w, h); DOMURL.revokeObjectURL(url); resolve(); };
-                            img.onerror = (e) => { DOMURL.revokeObjectURL(url); resolve(); }; img.src = url;
-                        });
-                    };
-
-                    const trophyColor = '#10b981';
-                    const trophySvg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="${trophyColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>`;
+                    const drawSvg = (svgString, x, y, w, h) => { return new Promise((resolve) => { const img = new Image(); const svg = new Blob([svgString], {type: 'image/svg+xml;charset=utf-8'}); const DOMURL = window.URL || window.webkitURL || window; const url = DOMURL.createObjectURL(svg); img.onload = () => { ctx.drawImage(img, x, y, w, h); DOMURL.revokeObjectURL(url); resolve(); }; img.onerror = () => { DOMURL.revokeObjectURL(url); resolve(); }; img.src = url; }); };
+                    const trophySvg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>`;
                     await drawSvg(trophySvg, width/2 - 50, 100, 100, 100);
 
-                    ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillStyle = textMain; ctx.font = '900 48px "Noto Sans", sans-serif';
-                    ctx.letterSpacing = '6px'; ctx.fillText((match.title || 'FRIENDLY MATCH').toUpperCase(), width/2, 250);
+                    ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillStyle = textMain; ctx.font = '900 48px "Noto Sans", sans-serif'; ctx.letterSpacing = '6px'; ctx.fillText((match.title || 'FRIENDLY MATCH').toUpperCase(), width/2, 250);
                     ctx.fillStyle = textSub; ctx.font = '500 28px "Noto Sans", sans-serif'; ctx.letterSpacing = '0px'; ctx.fillText(match.date, width/2, 320);
 
-                    const drawNames = (nameStr, x, y) => {
-                        ctx.fillStyle = textSub; ctx.font = '900 34px "Noto Sans", sans-serif'; ctx.letterSpacing = '4px';
-                        if (match.mode === 'double' && nameStr.includes(' & ')) {
-                            const parts = nameStr.split(' & '); ctx.fillText(parts[0].toUpperCase(), x, y - 45);
-                            ctx.beginPath(); ctx.arc(x, y + 15, 6, 0, Math.PI*2); ctx.fillStyle = isDark ? '#57534e' : '#d6d3d1'; ctx.fill();
-                            ctx.fillStyle = textSub; ctx.fillText(parts[1].toUpperCase(), x, y + 45);
-                        } else { ctx.fillText(nameStr.toUpperCase(), x, y + 15); }
-                    };
+                    const drawNames = (nameStr, x, y) => { ctx.fillStyle = textSub; ctx.font = '900 34px "Noto Sans", sans-serif'; ctx.letterSpacing = '4px'; if (match.mode === 'double' && nameStr.includes(' & ')) { const parts = nameStr.split(' & '); ctx.fillText(parts[0].toUpperCase(), x, y - 45); ctx.beginPath(); ctx.arc(x, y + 15, 6, 0, Math.PI*2); ctx.fillStyle = isDark ? '#57534e' : '#d6d3d1'; ctx.fill(); ctx.fillStyle = textSub; ctx.fillText(parts[1].toUpperCase(), x, y + 45); } else { ctx.fillText(nameStr.toUpperCase(), x, y + 15); } };
                     drawNames(match.t1Name, width/2 - 250, 500); drawNames(match.t2Name, width/2 + 250, 500);
 
                     ctx.font = '900 280px "Noto Sans", sans-serif'; ctx.letterSpacing = '0px'; ctx.textBaseline = 'middle';
                     ctx.fillStyle = match.winner === 1 ? accentGreen : textMain; ctx.fillText(match.t1Score, width/2 - 250, 800);
                     ctx.fillStyle = match.winner === 2 ? accentRed : textMain; ctx.fillText(match.t2Score, width/2 + 250, 800);
-
                     ctx.fillStyle = isDark ? '#57534e' : '#d6d3d1'; ctx.beginPath(); ctx.roundRect(width/2 - 40, 800 - 10, 80, 20, 10); ctx.fill();
 
-                    const drawWinnerBadge = async (color, x, y) => {
-                        const hexColor = color === 'green' ? accentGreen : accentRed; const iconColor = color === 'green' ? '#d1fae5' : '#ffe4e6'; 
-                        const badgeSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>`;
-                        const badgeW = 280; const badgeH = 80; const badgeX = x - badgeW/2; const badgeY = y - badgeH/2;
-                        ctx.fillStyle = hexColor; ctx.beginPath(); ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 40); ctx.fill();
-                        await drawSvg(badgeSvg, badgeX + 40, badgeY + 22, 36, 36);
-                        ctx.fillStyle = '#ffffff'; ctx.font = '700 28px "Noto Sans", sans-serif'; 
-                        ctx.letterSpacing = '4px'; ctx.textBaseline = 'middle'; ctx.fillText("WINNER", badgeX + 165, badgeY + badgeH/2 + 2);
-                    };
-                    if (match.winner === 1) await drawWinnerBadge('green', width/2 - 250, 1050);
-                    if (match.winner === 2) await drawWinnerBadge('red', width/2 + 250, 1050);
+                    const drawWinnerBadge = async (color, x, y) => { const hexColor = color === 'green' ? accentGreen : accentRed; const iconColor = color === 'green' ? '#d1fae5' : '#ffe4e6'; const badgeSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>`; const badgeW = 280; const badgeH = 80; const badgeX = x - badgeW/2; const badgeY = y - badgeH/2; ctx.fillStyle = hexColor; ctx.beginPath(); ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 40); ctx.fill(); await drawSvg(badgeSvg, badgeX + 40, badgeY + 22, 36, 36); ctx.fillStyle = '#ffffff'; ctx.font = '700 28px "Noto Sans", sans-serif'; ctx.letterSpacing = '4px'; ctx.textBaseline = 'middle'; ctx.fillText("WINNER", badgeX + 165, badgeY + badgeH/2 + 2); };
+                    if (match.winner === 1) await drawWinnerBadge('green', width/2 - 250, 1050); if (match.winner === 2) await drawWinnerBadge('red', width/2 + 250, 1050);
 
-                    const modeText = match.mode === 'single' ? getT('singles') : getT('doubles');
-                    const rulesText = match.rules === 'standard' ? getT('stdTitle') : match.rules === '14-point' ? getT('fourteenTitle') : getT('customFormat');
-                    const footerText = `${modeText}   •   ${rulesText}   •   ${formatTime(match.elapsedTime || 0)}`;
-                    ctx.font = '500 26px "Noto Sans", sans-serif'; ctx.letterSpacing = '0px'; const footerWidth = ctx.measureText(footerText).width + 120;
-                    ctx.fillStyle = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'; ctx.beginPath(); ctx.roundRect(width/2 - footerWidth/2, 1180 - 35, footerWidth, 70, 35); ctx.fill();
-                    ctx.fillStyle = textSub; ctx.textBaseline = 'middle'; ctx.fillText(footerText, width/2, 1180);
+                    const modeText = match.mode === 'single' ? getT('singles') : getT('doubles'); const rulesText = match.rules === 'standard' ? getT('stdTitle') : match.rules === '14-point' ? getT('fourteenTitle') : getT('customFormat');
+                    const footerText = `${modeText}   •   ${rulesText}   •   ${formatTime(match.elapsedTime || 0)}`; ctx.font = '500 26px "Noto Sans", sans-serif'; ctx.letterSpacing = '0px'; const footerWidth = ctx.measureText(footerText).width + 120;
+                    ctx.fillStyle = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'; ctx.beginPath(); ctx.roundRect(width/2 - footerWidth/2, 1180 - 35, footerWidth, 70, 35); ctx.fill(); ctx.fillStyle = textSub; ctx.textBaseline = 'middle'; ctx.fillText(footerText, width/2, 1180);
                     ctx.font = '800 20px "Noto Sans", sans-serif'; ctx.letterSpacing = '3px'; ctx.fillStyle = isDark ? '#57534e' : '#a8a29e'; ctx.fillText("HTTPS://PICKLEBALL-POINT-COUNTER.PAGES.DEV", width/2, 1280);
 
                     canvas.toBlob(async (blob) => {
                         if (!blob) { setIsExporting(false); return; }
                         const file = new File([blob], `pickleball_${Date.now()}.png`, { type: 'image/png' });
                         const winName = match.winner === 1 ? match.t1Name : match.t2Name; const loseName = match.winner === 1 ? match.t2Name : match.t1Name;
-                        const winScore = match.winner === 1 ? match.t1Score : match.t2Score; const loseScore = match.winner === 1 ? match.t2Score : match.t1Score;
-                        const titleText = `🏆 ${winName} wins ${winScore}-${loseScore} against ${loseName}!\nScore tracked via Pickleball Point Counter: https://pickleball-point-counter.pages.dev`;
-                        const shareData = { title: 'Pickleball Result', text: titleText, files: [file] };
-                        if (navigator.canShare && navigator.canShare(shareData)) { navigator.share(shareData).catch(e => console.log('Share cancelled', e)); } 
+                        const titleText = `🏆 ${winName} wins ${match.winner===1?match.t1Score:match.t2Score}-${match.winner===1?match.t2Score:match.t1Score} against ${loseName}!\nScore tracked via Pickleball Point Counter: https://pickleball-point-counter.pages.dev`;
+                        if (navigator.canShare && navigator.canShare({ title: 'Pickleball Result', text: titleText, files: [file] })) { navigator.share({ title: 'Pickleball Result', text: titleText, files: [file] }).catch(e => console.log(e)); } 
                         else { const link = document.createElement('a'); link.download = file.name; link.href = URL.createObjectURL(blob); link.click(); }
                         setIsExporting(false);
                     }, 'image/png');
@@ -1013,39 +875,16 @@
             }, 50); 
           };
 
-          const applyFemaleVoice = (utterance, langTag) => {
-              utterance.lang = langTag; const voices = window.speechSynthesis.getVoices();
-              if (voices.length > 0) {
-                  const langVoices = voices.filter(v => v.lang.startsWith(langTag) || v.lang.startsWith(langTag.split('-')[0]));
-                  if (langVoices.length > 0) {
-                      let femaleVoice = langVoices.find(v => /female|woman|samantha|zira|karen|victoria|tessa|moira|veena|monica|ting-ting|kyoko|yuri/i.test(v.name));
-                      if (!femaleVoice) femaleVoice = langVoices.find(v => !/male|man|boy|david|alex|daniel|tom|kevin|oliver|aaron|arthur/i.test(v.name));
-                      utterance.voice = femaleVoice ? femaleVoice : langVoices[0];
-                  }
-              }
-          };
-
-          const detectLanguage = (text, defaultLangTag) => {
-              if (/[\u4e00-\u9fa5]/.test(text)) return 'zh-CN'; if (/[\u3040-\u30ff]/.test(text)) return 'ja-JP'; 
-              if (/[\uac00-\ud7af]/.test(text)) return 'ko-KR'; if (/[\u0e00-\u0e7f]/.test(text)) return 'th-TH'; return defaultLangTag;
-          };
+          const applyFemaleVoice = (utterance, langTag) => { utterance.lang = langTag; const voices = window.speechSynthesis.getVoices(); if (voices.length > 0) { const langVoices = voices.filter(v => v.lang.startsWith(langTag) || v.lang.startsWith(langTag.split('-')[0])); if (langVoices.length > 0) { let femaleVoice = langVoices.find(v => /female|woman|samantha|zira|karen|victoria|tessa|moira|veena|monica|ting-ting|kyoko|yuri/i.test(v.name)); if (!femaleVoice) femaleVoice = langVoices.find(v => !/male|man|boy|david|alex|daniel|tom|kevin|oliver|aaron|arthur/i.test(v.name)); utterance.voice = femaleVoice ? femaleVoice : langVoices[0]; } } };
+          const detectLanguage = (text, defaultLangTag) => { if (/[\u4e00-\u9fa5]/.test(text)) return 'zh-CN'; if (/[\u3040-\u30ff]/.test(text)) return 'ja-JP'; if (/[\uac00-\ud7af]/.test(text)) return 'ko-KR'; if (/[\u0e00-\u0e7f]/.test(text)) return 'th-TH'; return defaultLangTag; };
 
           const announceText = (text1, text2) => {
-            if (!soundEnabled || !('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel(); const langTag = getLangTag(lang);
+            if (!soundEnabled || !('speechSynthesis' in window)) return; window.speechSynthesis.cancel(); const langTag = getLangTag(lang);
             setTimeout(() => {
                 if (text1) {
                     const u1 = new SpeechSynthesisUtterance(text1); applyFemaleVoice(u1, langTag); let hasEnded = false;
-                    u1.onend = () => {
-                        if (hasEnded) return; hasEnded = true;
-                        if (text2) { setTimeout(() => { const u2 = new SpeechSynthesisUtterance(text2); applyFemaleVoice(u2, langTag); window.speechSynthesis.speak(u2); }, 500); }
-                    };
-                    setTimeout(() => {
-                        if (!hasEnded) {
-                            hasEnded = true;
-                            if (text2) { const u2 = new SpeechSynthesisUtterance(text2); applyFemaleVoice(u2, langTag); window.speechSynthesis.speak(u2); }
-                        }
-                    }, 1250); 
+                    u1.onend = () => { if (hasEnded) return; hasEnded = true; if (text2) { setTimeout(() => { const u2 = new SpeechSynthesisUtterance(text2); applyFemaleVoice(u2, langTag); window.speechSynthesis.speak(u2); }, 500); } };
+                    setTimeout(() => { if (!hasEnded) { hasEnded = true; if (text2) { const u2 = new SpeechSynthesisUtterance(text2); applyFemaleVoice(u2, langTag); window.speechSynthesis.speak(u2); } } }, 1250); 
                     window.speechSynthesis.speak(u1);
                 } else if (text2) { const u2 = new SpeechSynthesisUtterance(text2); applyFemaleVoice(u2, langTag); window.speechSynthesis.speak(u2); }
             }, 50);
@@ -1057,15 +896,9 @@
           const clearHistory = () => { setSavedMatches([]); localStorage.removeItem('pb_history_matches'); setShowClearConfirm(false); };
           const toggleTheme = () => { const newTheme = !isDark; setIsDark(newTheme); localStorage.setItem('pb_theme_pref', newTheme ? 'dark' : 'light'); };
 
-          const handleInstallClick = async () => {
-            if (installPrompt) { installPrompt.prompt(); const { outcome } = await installPrompt.userChoice; if (outcome === 'accepted') { setInstallPrompt(null); setIsInstalled(true); }
-            } else setShowInstallInstructions(true);
-          };
+          const handleInstallClick = async () => { if (installPrompt) { installPrompt.prompt(); const { outcome } = await installPrompt.userChoice; if (outcome === 'accepted') { setInstallPrompt(null); setIsInstalled(true); } } else setShowInstallInstructions(true); };
 
-          const handleRuleSelect = (mode, rules) => {
-            setMatchTitleInput(''); setT1PLeftInput(''); setT1PRightInput(''); setT2PLeftInput(''); setT2PRightInput('');
-            setCustomPlayTo(11); setCustomWinBy(2); setEnableSwitchEnds(false); setServeToWinAt14(false); setStartingServer(1); setEnableTimeoutsSetup(0); setPendingGame({ mode, rules });
-          };
+          const handleRuleSelect = (mode, rules) => { setMatchTitleInput(''); setT1PLeftInput(''); setT1PRightInput(''); setT2PLeftInput(''); setT2PRightInput(''); setCustomPlayTo(11); setCustomWinBy(2); setEnableSwitchEnds(false); setServeToWinAt14(false); setStartingServer(1); setEnableTimeoutsSetup(0); setPendingGame({ mode, rules }); };
 
           const resumeGame = (data) => {
             setCurrentMatchId(data.currentMatchId); setMatchTitle(data.matchTitle); setGameMode(data.gameMode); setRuleSet(data.ruleSet); setPlayTo(data.playTo); setWinByMargin(data.winByMargin);
@@ -1078,30 +911,15 @@
           };
 
           const startGame = (mode, rules, title, p1_left, p1_right, p2_left, p2_right, cPlayTo, cWinBy, enableSwitch, startServ, useTimeouts) => {
-            let pTo = 11; let wBy = 2;
-            if (rules === '14-point') { pTo = 15; wBy = 1; }
-            if (rules === 'custom') { pTo = cPlayTo; wBy = cWinBy; }
-            
-            setCurrentMatchId(Date.now()); setMatchTitle(title); setGameMode(mode); setRuleSet(rules);
-            setPlayTo(pTo); setWinByMargin(wBy); setEnableSwitchEnds(enableSwitch);
-            
-            if (mode === 'single') {
-                setT1PLeft(p1_left || getT('t1Name')); setT1PRight(''); setT2PLeft(p2_left || getT('t2Name')); setT2PRight('');
-            } else {
-                setT1PLeft(p1_left || getT('t1P1')); setT1PRight(p1_right || getT('t1P2'));
-                setT2PLeft(p2_left || getT('t2P1')); setT2PRight(p2_right || getT('t2P2'));
-            }
-
+            let pTo = 11; let wBy = 2; if (rules === '14-point') { pTo = 15; wBy = 1; } if (rules === 'custom') { pTo = cPlayTo; wBy = cWinBy; }
+            setCurrentMatchId(Date.now()); setMatchTitle(title); setGameMode(mode); setRuleSet(rules); setPlayTo(pTo); setWinByMargin(wBy); setEnableSwitchEnds(enableSwitch);
+            if (mode === 'single') { setT1PLeft(p1_left || getT('t1Name')); setT1PRight(''); setT2PLeft(p2_left || getT('t2Name')); setT2PRight(''); } 
+            else { setT1PLeft(p1_left || getT('t1P1')); setT1PRight(p1_right || getT('t1P2')); setT2PLeft(p2_left || getT('t2P1')); setT2PRight(p2_right || getT('t2P2')); }
             setInitialServer(startServ); setTeam1Score(0); setTeam2Score(0); setServingTeam(startServ); setServerNumber(mode === 'double' ? 2 : 1);
             setEnableTimeouts(useTimeouts); setT1Timeouts(useTimeouts); setT2Timeouts(useTimeouts); setWinner(null); setWinReason('score'); setShowWinnerOverlay(false);
             setHistory([]); setStateHistory([]); setHasSwitchedEnds(false); setElapsedTime(0); setCourtRotation(0); setActiveTimeoutRemaining(0);
             setIsTimelineLocked(true); setPreviewSnapshot(null); setAppState('game'); window.scrollTo(0, 0); 
-
-            setTimeout(() => {
-                const isServeToScore = rules === 'standard' || (rules === 'custom' && serveToWinAt14);
-                const initialAnnounce = `0, 0${mode === 'double' && isServeToScore ? `, ${mode === 'double' ? 2 : 1}` : ''}`;
-                announceText(null, initialAnnounce);
-            }, 200);
+            setTimeout(() => { const isServeToScore = rules === 'standard' || (rules === 'custom' && serveToWinAt14); announceText(null, `0, 0${mode === 'double' && isServeToScore ? `, ${mode === 'double' ? 2 : 1}` : ''}`); }, 200);
           };
 
           const saveStateForUndo = () => { setStateHistory(prev => [...prev, { team1Score, team2Score, servingTeam, serverNumber, winner, winReason, hasSwitchedEnds, history: [...history], t1Timeouts, t2Timeouts, courtRotation }]); };
@@ -1122,17 +940,11 @@
               setTimeout(() => { const isServeToScore = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14); announceText(null, `0, 0${gameMode === 'double' && isServeToScore ? `, ${gameMode === 'double' ? 2 : 1}` : ''}`); }, 200);
           };
 
-          const handleChangeSettings = () => {
-              setShowResetModal(false); setMatchTitleInput(matchTitle); setT1PLeftInput(t1PLeft); setT1PRightInput(t1PRight); setT2PLeftInput(t2PLeft); setT2PRightInput(t2PRight);
-              setCustomPlayTo(playTo); setCustomWinBy(winByMargin); setServeToWinAt14(serveToWinAt14); setEnableSwitchEnds(enableSwitchEnds); setEnableTimeoutsSetup(enableTimeouts); setStartingServer(initialServer);
-              setPendingGame({ mode: gameMode, rules: ruleSet });
-          };
-
+          const handleChangeSettings = () => { setShowResetModal(false); setMatchTitleInput(matchTitle); setT1PLeftInput(t1PLeft); setT1PRightInput(t1PRight); setT2PLeftInput(t2PLeft); setT2PRightInput(t2PRight); setCustomPlayTo(playTo); setCustomWinBy(winByMargin); setServeToWinAt14(serveToWinAt14); setEnableSwitchEnds(enableSwitchEnds); setEnableTimeoutsSetup(enableTimeouts); setStartingServer(initialServer); setPendingGame({ mode: gameMode, rules: ruleSet }); };
           const handleRetreat = (retreatingTeam) => { saveStateForUndo(); setWinReason('retreat'); setWinner(retreatingTeam === 1 ? 2 : 1); setShowRetreatModal(false); setShowWinnerOverlay(true); };
 
           const handleTimeout = (team) => {
-             if (winner) return; saveStateForUndo();
-             if (team === 1) setT1Timeouts(t => t - 1); else setT2Timeouts(t => t - 1);
+             if (winner) return; saveStateForUndo(); if (team === 1) setT1Timeouts(t => t - 1); else setT2Timeouts(t => t - 1);
              const evType = team === 1 ? 'T1_TIMEOUT' : 'T2_TIMEOUT';
              const snapshot = { team1Score, team2Score, servingTeam, serverNumber, elapsedTime, t1Left: currentT1Left, t1Right: currentT1Right, t2Left: currentT2Left, t2Right: currentT2Right, serverPos: courtServerPos, receiverPos: courtReceiverPos, isSnapshot: true };
              setHistory(prev => [...prev, { id: Date.now(), type: evType, team, point: null, snapshot }]); setShowTimeoutConfirm(null); triggerHaptic('point');
@@ -1141,28 +953,21 @@
 
           const checkWin = (t1, t2, newServTeam, newServNum, newHistory, isServeToScore) => {
             let hasWinner = false; let winTeam = null;
-            if (t1 >= playTo && (t1 - t2) >= winByMargin) { hasWinner = true; winTeam = 1; }
-            if (t2 >= playTo && (t2 - t1) >= winByMargin) { hasWinner = true; winTeam = 2; }
-
+            if (t1 >= playTo && (t1 - t2) >= winByMargin) { hasWinner = true; winTeam = 1; } if (t2 >= playTo && (t2 - t1) >= winByMargin) { hasWinner = true; winTeam = 2; }
             if (hasWinner) {
               setWinner(winTeam); setShowWinnerOverlay(true); triggerHaptic('win'); setIsTimelineLocked(false); 
               if (soundEnabled && 'speechSynthesis' in window) {
                   window.speechSynthesis.cancel(); const winnerName = winTeam === 1 ? t1Name : t2Name; const appLangTag = getLangTag(lang); const nameLangTag = detectLanguage(winnerName, appLangTag);
-                  const u1 = new SpeechSynthesisUtterance("Game over."); applyFemaleVoice(u1, appLangTag);
-                  const u2 = new SpeechSynthesisUtterance(winnerName); applyFemaleVoice(u2, nameLangTag);
-                  const u3 = new SpeechSynthesisUtterance(getT('winner')); applyFemaleVoice(u3, appLangTag);
-                  u1.onend = () => { setTimeout(() => window.speechSynthesis.speak(u2), 200); }; u2.onend = () => { setTimeout(() => window.speechSynthesis.speak(u3), 200); };
-                  setTimeout(() => window.speechSynthesis.speak(u1), 50);
+                  const u1 = new SpeechSynthesisUtterance("Game over."); applyFemaleVoice(u1, appLangTag); const u2 = new SpeechSynthesisUtterance(winnerName); applyFemaleVoice(u2, nameLangTag); const u3 = new SpeechSynthesisUtterance(getT('winner')); applyFemaleVoice(u3, appLangTag);
+                  u1.onend = () => { setTimeout(() => window.speechSynthesis.speak(u2), 200); }; u2.onend = () => { setTimeout(() => window.speechSynthesis.speak(u3), 200); }; setTimeout(() => window.speechSynthesis.speak(u1), 50);
               }
             } else {
               const isServeToScoreCurrent = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14);
               const scoreAnnounce = newServTeam === 1 ? `${t1}, ${t2}${(gameMode === 'double' && isServeToScoreCurrent && !(ruleSet === '14-point' && serveToWinAt14 && t1 === 14 && t2 === 14)) ? `, ${newServNum}` : ''}` : `${t2}, ${t1}${(gameMode === 'double' && isServeToScoreCurrent && !(ruleSet === '14-point' && serveToWinAt14 && t1 === 14 && t2 === 14)) ? `, ${newServNum}` : ''}`;
               const lastEvent = newHistory[newHistory.length-1];
               if (lastEvent) {
-                  if (lastEvent.type === 'FAULT') announceText(getT('secondServer'), scoreAnnounce);
-                  else if (lastEvent.type === 'SIDEOUT') announceText(getT('sideOut'), scoreAnnounce);
-                  else if (lastEvent.type.includes('POINT') && isServeToScoreCurrent) announceText(getT('point') || 'Point', scoreAnnounce);
-                  else announceText(null, scoreAnnounce);
+                  if (lastEvent.type === 'FAULT') announceText(getT('secondServer'), scoreAnnounce); else if (lastEvent.type === 'SIDEOUT') announceText(getT('sideOut'), scoreAnnounce);
+                  else if (lastEvent.type.includes('POINT') && isServeToScoreCurrent) announceText(getT('point') || 'Point', scoreAnnounce); else announceText(null, scoreAnnounce);
               } else announceText(null, scoreAnnounce);
             }
           };
@@ -1171,36 +976,23 @@
             if (winner || activeTimeoutRemaining > 0) return; triggerHaptic('point'); saveStateForUndo();
             let newT1 = team1Score; let newT2 = team2Score; let newServTeam = servingTeam; let newServNum = serverNumber; let evType = '';
             let isServeToScoreMode = false; let isStrictSuddenDeath = false;
-            if (ruleSet === 'standard') isServeToScoreMode = true;
-            else if (ruleSet === 'custom' && serveToWinAt14) isServeToScoreMode = true;
-            else if (ruleSet === '14-point' && serveToWinAt14 && team1Score === 14 && team2Score === 14) { isServeToScoreMode = true; isStrictSuddenDeath = true; }
-
+            if (ruleSet === 'standard') isServeToScoreMode = true; else if (ruleSet === 'custom' && serveToWinAt14) isServeToScoreMode = true; else if (ruleSet === '14-point' && serveToWinAt14 && team1Score === 14 && team2Score === 14) { isServeToScoreMode = true; isStrictSuddenDeath = true; }
             const grantPoint = () => { if (winningTeam === 1) { newT1 += 1; evType = 'T1_POINT'; } else { newT2 += 1; evType = 'T2_POINT'; } };
-            const grantSideout = () => {
-              if (gameMode === 'single' || isStrictSuddenDeath) { newServTeam = winningTeam; evType = 'SIDEOUT'; newServNum = 1; }
-              else { if (serverNumber === 1) { newServNum = 2; evType = 'FAULT'; } else { newServTeam = winningTeam; newServNum = 1; evType = 'SIDEOUT'; } }
-            };
-
-            if (isServeToScoreMode) { if (winningTeam === servingTeam) grantPoint(); else grantSideout(); } 
-            else { grantPoint(); if (winningTeam !== servingTeam) { newServTeam = winningTeam; newServNum = 1; } }
+            const grantSideout = () => { if (gameMode === 'single' || isStrictSuddenDeath) { newServTeam = winningTeam; evType = 'SIDEOUT'; newServNum = 1; } else { if (serverNumber === 1) { newServNum = 2; evType = 'FAULT'; } else { newServTeam = winningTeam; newServNum = 1; evType = 'SIDEOUT'; } } };
+            if (isServeToScoreMode) { if (winningTeam === servingTeam) grantPoint(); else grantSideout(); } else { grantPoint(); if (winningTeam !== servingTeam) { newServTeam = winningTeam; newServNum = 1; } }
 
             setTeam1Score(newT1); setTeam2Score(newT2); setServingTeam(newServTeam); setServerNumber(newServNum);
-            
             const snapshot = { team1Score, team2Score, servingTeam, serverNumber, elapsedTime, t1Left: currentT1Left, t1Right: currentT1Right, t2Left: currentT2Left, t2Right: currentT2Right, serverPos: courtServerPos, receiverPos: courtReceiverPos, isSnapshot: true };
             const newHist = [...history, { id: Date.now(), type: evType, team: winningTeam, point: evType === 'T1_POINT' ? newT1 : (evType === 'T2_POINT' ? newT2 : null), snapshot }];
             setHistory(newHist); setIsTimelineLocked(true); setPreviewSnapshot(null);
-            
-            const switchPt = Math.ceil(playTo / 2);
-            if (enableSwitchEnds && !hasSwitchedEnds && (newT1 === switchPt || newT2 === switchPt)) { setShowSwitchModal(true); setHasSwitchedEnds(true); }
+            const switchPt = Math.ceil(playTo / 2); if (enableSwitchEnds && !hasSwitchedEnds && (newT1 === switchPt || newT2 === switchPt)) { setShowSwitchModal(true); setHasSwitchedEnds(true); }
             checkWin(newT1, newT2, newServTeam, newServNum, newHist, isServeToScoreMode);
           };
 
           const handleEditSave = (id, newTitle) => { const updated = savedMatches.map(m => m.id === id ? { ...m, title: newTitle } : m); setSavedMatches(updated); localStorage.setItem('pb_history_matches', JSON.stringify(updated)); setEditingMatchId(null); };
           const formatTime = (sec) => { const m = Math.floor(sec / 60).toString().padStart(2, '0'); const s = (sec % 60).toString().padStart(2, '0'); return `${m}:${s}`; };
 
-          // =====================================================================
-          // GHOST COURT REPLAY INTERCEPTORS
-          // =====================================================================
+          // --- GHOST COURT INTERCEPTORS ---
           const d_t1Score = previewSnapshot ? previewSnapshot.team1Score : team1Score;
           const d_t2Score = previewSnapshot ? previewSnapshot.team2Score : team2Score;
           const d_serveTeam = previewSnapshot ? previewSnapshot.servingTeam : servingTeam;
@@ -1212,48 +1004,32 @@
           const d_t2Right = previewSnapshot ? previewSnapshot.t2Right : currentT2Right;
           const d_srvPos = previewSnapshot ? previewSnapshot.serverPos : courtServerPos;
           const d_rcvPos = previewSnapshot ? previewSnapshot.receiverPos : courtReceiverPos;
-          // =====================================================================
 
           const isSuddenDeath = ruleSet === '14-point' && d_t1Score === 14 && d_t2Score === 14;
           const isServeToScoreModeUI = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14) || (ruleSet === '14-point' && serveToWinAt14 && d_t1Score === 14 && d_t2Score === 14);
           const showServerNumberUI = gameMode === 'double' && isServeToScoreModeUI && !isSuddenDeath;
 
-          const textMain = isDark ? 'text-stone-100' : 'text-stone-800';
-          const textSub = isDark ? 'text-stone-400' : 'text-stone-500';
-          const bgMain = isDark ? 'bg-stone-900' : 'bg-stone-50';
-          const bgCard = isDark ? 'bg-stone-800' : 'bg-white';
-          const borderSub = isDark ? 'border-stone-700' : 'border-stone-200';
-          const accentRed = isDark ? 'text-rose-400' : 'text-rose-700';
-          const accentGreen = isDark ? 'text-emerald-400' : 'text-emerald-700';
-          const bgAccentRed = isDark ? 'bg-rose-900/30 border-rose-700' : 'bg-rose-50 border-rose-200';
-          const bgAccentGreen = isDark ? 'bg-emerald-900/30 border-emerald-700' : 'bg-emerald-50 border-emerald-200';
+          const textMain = isDark ? 'text-stone-100' : 'text-stone-800'; const textSub = isDark ? 'text-stone-400' : 'text-stone-500';
+          const bgMain = isDark ? 'bg-stone-900' : 'bg-stone-50'; const bgCard = isDark ? 'bg-stone-800' : 'bg-white'; const borderSub = isDark ? 'border-stone-700' : 'border-stone-200';
+          const accentRed = isDark ? 'text-rose-400' : 'text-rose-700'; const accentGreen = isDark ? 'text-emerald-400' : 'text-emerald-700';
+          const bgAccentRed = isDark ? 'bg-rose-900/30 border-rose-700' : 'bg-rose-50 border-rose-200'; const bgAccentGreen = isDark ? 'bg-emerald-900/30 border-emerald-700' : 'bg-emerald-50 border-emerald-200';
 
-          const totalMatchesCount = savedMatches.length;
-          const t1WinsCount = savedMatches.filter(m => m.winner === 1).length;
-          const t2WinsCount = savedMatches.filter(m => m.winner === 2).length;
-          const t1WinPct = totalMatchesCount ? Math.round((t1WinsCount / totalMatchesCount) * 100) : 0;
-          const t2WinPct = totalMatchesCount ? Math.round((t2WinsCount / totalMatchesCount) * 100) : 0;
-          const totalT1Points = savedMatches.reduce((acc, m) => acc + (m.t1Score || 0), 0);
-          const totalT2Points = savedMatches.reduce((acc, m) => acc + (m.t2Score || 0), 0);
-          const maxPoints = Math.max(totalT1Points, totalT2Points);
-          const t1PointHeight = maxPoints ? (totalT1Points / maxPoints) * 100 : 0;
-          const t2PointHeight = maxPoints ? (totalT2Points / maxPoints) * 100 : 0;
-          const singlesCount = savedMatches.filter(m => m.mode === 'single').length;
-          const doublesCount = savedMatches.filter(m => m.mode === 'double').length;
+          const totalMatchesCount = savedMatches.length; const t1WinsCount = savedMatches.filter(m => m.winner === 1).length; const t2WinsCount = savedMatches.filter(m => m.winner === 2).length;
+          const t1WinPct = totalMatchesCount ? Math.round((t1WinsCount / totalMatchesCount) * 100) : 0; const t2WinPct = totalMatchesCount ? Math.round((t2WinsCount / totalMatchesCount) * 100) : 0;
+          const totalT1Points = savedMatches.reduce((acc, m) => acc + (m.t1Score || 0), 0); const totalT2Points = savedMatches.reduce((acc, m) => acc + (m.t2Score || 0), 0);
+          const maxPoints = Math.max(totalT1Points, totalT2Points); const t1PointHeight = maxPoints ? (totalT1Points / maxPoints) * 100 : 0; const t2PointHeight = maxPoints ? (totalT2Points / maxPoints) * 100 : 0;
+          const singlesCount = savedMatches.filter(m => m.mode === 'single').length; const doublesCount = savedMatches.filter(m => m.mode === 'double').length;
 
           const renderPlayerBadge = (name, role) => {
               if (!name) return null;
-              let bg = 'bg-stone-500/20 text-stone-400 dark:text-stone-300 border border-stone-400/20'; 
-              let scale = 1; let zIndex = 0;
-              if (role === 'server') { bg = 'bg-amber-400 text-amber-950 shadow-lg ring-2 ring-white'; scale = 1.1; zIndex = 10; } 
-              else if (role === 'receiver') { bg = 'bg-white text-emerald-800 shadow-md ring-2 ring-emerald-400/50'; scale = 1.05; zIndex = 10; }
+              let bg = 'bg-stone-500/20 text-stone-400 dark:text-stone-300 border border-stone-400/20'; let scale = 1; let zIndex = 0;
+              if (role === 'server') { bg = 'bg-amber-400 text-amber-950 shadow-lg ring-2 ring-white'; scale = 1.1; zIndex = 10; } else if (role === 'receiver') { bg = 'bg-white text-emerald-800 shadow-md ring-2 ring-emerald-400/50'; scale = 1.05; zIndex = 10; }
               return (<div className={`px-2 py-1 rounded shadow-sm max-w-[90%] truncate text-[8px] md:text-[9px] font-black tracking-wider uppercase transition-all duration-500 ease-in-out ${bg}`} style={{ transform: `rotate(${-courtRotation}deg) scale(${scale})`, zIndex }}>{name}</div>);
           };
 
           const handleDotClick = (event, isLive) => {
-              if (!event.snapshot) { alert("Time travel function not enabled for games recorded before this update."); return; }
-              if (isLive) { if (!isTimelineLocked) setPreviewSnapshot(event.snapshot); } 
-              else { setPreviewSnapshot(event.snapshot); }
+              if (!event.snapshot) { alert("Time travel function not enabled for older games."); return; }
+              if (isLive) { if (!isTimelineLocked) setPreviewSnapshot(event.snapshot); } else { setPreviewSnapshot(event.snapshot); }
           };
 
           const renderTimeline = (timelineData, useScrollRef = false, isLive = false) => (
@@ -1262,8 +1038,7 @@
                  <span>{getT('timeline')}</span>
                  {isLive && (
                      <button onClick={() => { setIsTimelineLocked(!isTimelineLocked); if (!isTimelineLocked) setPreviewSnapshot(null); }} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors shadow-sm font-black text-[10px] ${isTimelineLocked ? `text-stone-500 bg-stone-100 dark:bg-stone-800` : `text-amber-900 bg-amber-400 animate-pulse`}`}>
-                         {isTimelineLocked ? <Lock size={14} /> : <Unlock size={14} />}
-                         {isTimelineLocked ? 'LOCKED' : 'GHOST REPLAY'}
+                         {isTimelineLocked ? <Lock size={14} /> : <Unlock size={14} />}{isTimelineLocked ? 'LOCKED' : 'GHOST REPLAY'}
                      </button>
                  )}
               </div>
@@ -1271,11 +1046,9 @@
                 {timelineData.length === 0 && <div className={`text-xs italic ${textSub} px-2`}>{getT('awaiting')}</div>}
                 {timelineData.length > 0 && (
                   <div className="flex min-w-max relative px-2">
-                    <div className={`absolute top-[12px] left-14 right-0 h-px ${isDark ? 'bg-stone-700' : 'bg-stone-200'} z-0`}></div>
-                    <div className={`absolute bottom-[12px] left-14 right-0 h-px ${isDark ? 'bg-stone-700' : 'bg-stone-200'} z-0`}></div>
+                    <div className={`absolute top-[12px] left-14 right-0 h-px ${isDark ? 'bg-stone-700' : 'bg-stone-200'} z-0`}></div><div className={`absolute bottom-[12px] left-14 right-0 h-px ${isDark ? 'bg-stone-700' : 'bg-stone-200'} z-0`}></div>
                     <div className={`w-12 flex flex-col gap-3 sticky left-0 z-20 ${bgCard} pr-2 ${isDark ? 'shadow-[4px_0_8px_-4px_rgba(0,0,0,0.3)]' : 'shadow-[4px_0_8px_-4px_rgba(0,0,0,0.1)]'}`}>
-                        <div className={`h-6 flex items-center text-[10px] font-bold uppercase ${accentGreen}`}>{getT('t1Label')}</div><div className="h-4"></div>
-                        <div className={`h-6 flex items-center text-[10px] font-bold uppercase ${accentRed}`}>{getT('t2Label')}</div>
+                        <div className={`h-6 flex items-center text-[10px] font-bold uppercase ${accentGreen}`}>{getT('t1Label')}</div><div className="h-4"></div><div className={`h-6 flex items-center text-[10px] font-bold uppercase ${accentRed}`}>{getT('t2Label')}</div>
                     </div>
                     <div className="flex items-center">
                         {timelineData.map((event) => (
@@ -1306,19 +1079,13 @@
             </div>
           );
 
-          const showMenuButtons = appState === 'menu' && closingScreen !== 'menu';
-
           useEffect(() => {
             const handlePointerMove = (e) => {
-              const x = e.touches ? e.touches[0].clientX : e.clientX;
-              const y = e.touches ? e.touches[0].clientY : e.clientY;
-              document.documentElement.style.setProperty('--cursor-x', `${x}px`);
-              document.documentElement.style.setProperty('--cursor-y', `${y}px`);
+              const x = e.touches ? e.touches[0].clientX : e.clientX; const y = e.touches ? e.touches[0].clientY : e.clientY;
+              document.documentElement.style.setProperty('--cursor-x', `${x}px`); document.documentElement.style.setProperty('--cursor-y', `${y}px`);
             };
-            document.documentElement.style.setProperty('--cursor-x', '-1000px');
-            document.documentElement.style.setProperty('--cursor-y', '-1000px');
-            window.addEventListener('mousemove', handlePointerMove);
-            window.addEventListener('touchmove', handlePointerMove, { passive: true });
+            document.documentElement.style.setProperty('--cursor-x', '-1000px'); document.documentElement.style.setProperty('--cursor-y', '-1000px');
+            window.addEventListener('mousemove', handlePointerMove); window.addEventListener('touchmove', handlePointerMove, { passive: true });
             return () => { window.removeEventListener('mousemove', handlePointerMove); window.removeEventListener('touchmove', handlePointerMove); };
           }, []);
 
@@ -1351,17 +1118,14 @@
                   <div className="pointer-events-auto">
                     {appState === 'game' && <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${bgCard} ${borderSub} border shadow-sm text-xs font-bold ${textSub}`}><Timer size={14}/> {formatTime(elapsedTime)}</div>}
                   </div>
-                  
                   <div className={`flex items-center gap-2 pointer-events-auto`}>
                     <button onClick={handleSoundClick} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform relative z-10`}>{soundEnabled ? <Volume2 size={18} className={accentGreen} /> : <VolumeX size={18} className={textSub} />}</button>
-                    
                     <div className={`flex items-center overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.2,1,0.4,1)] ${showMenuButtons ? 'max-w-[200px] opacity-100' : 'max-w-0 opacity-0 -ml-2 pointer-events-none'}`}>
                       <div className={`flex items-center gap-2 min-w-max transition-transform duration-500 ease-[cubic-bezier(0.2,1,0.4,1)] ${showMenuButtons ? 'translate-x-0 scale-100' : 'translate-x-4 scale-95'}`}>
                         <button onClick={() => openScreenFromMenu('stats')} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-all`}><BarChart2 size={18} className={textSub} /></button>
                         <button onClick={() => openScreenFromMenu('history')} className={`flex items-center gap-1.5 px-3 py-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-all text-xs font-bold ${textSub}`}><HistoryIcon size={16} /> <span className="hidden sm:inline">History</span></button>
                       </div>
                     </div>
-
                     <button onClick={() => setShowLangMenu(true)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform relative z-10`}><Globe size={18} className={textSub} /></button>
                     <button onClick={toggleTheme} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform relative z-10`}>{isDark ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-stone-500" />}</button>
                     <button onClick={() => setShowInfo(true)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform`}><InfoIcon size={18} className={textSub} /></button>
@@ -1369,16 +1133,21 @@
                 </div>
               )}
 
+              {recoverGameData && appState !== 'splash' && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-screen-enter">
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setRecoverGameData(null)}></div>
+                  <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden`}>
+                    <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50"><RotateCcw size={48} className="mx-auto text-emerald-500 mb-4" /><h2 className={`text-xl font-bold mb-2 text-center ${textMain}`}>{getT('resumeMatch')}</h2></div>
+                    <div className="px-6 py-4 overflow-y-auto muji-scrollbar flex-1 text-center overscroll-contain"><p className={`text-sm mb-2 ${textSub}`}>{getT('resumeDesc')}</p></div>
+                    <div className="p-6 pt-4 flex-shrink-0 border-t border-stone-100 dark:border-stone-800/50"><div className="flex gap-3"><button onClick={() => { localStorage.removeItem('pb_active_game'); setRecoverGameData(null); }} className={`flex-1 py-3 rounded-xl font-semibold border ${borderSub} ${textSub} hover:${textMain}`}>{getT('cancel')}</button><button onClick={() => resumeGame(recoverGameData)} className={`flex-1 py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-md`}>{getT('resumeMatch')}</button></div></div>
+                  </div>
+                </div>
+              )}
+
               {appState === 'splash' && (
                 <div className={`absolute inset-0 flex flex-col items-center justify-center cursor-pointer z-50`} onClick={() => { setZoomActive(true); setTimeout(() => { setAppState('menu'); setZoomActive(false); }, 900); }}>
-                  <div className="text-center z-10 transition-opacity duration-300 mb-12" style={{ opacity: zoomActive ? 0 : 1 }}>
-                    <h1 className={`text-5xl md:text-6xl font-bold tracking-tight ${textMain}`}>{getT('appTitle')}</h1>
-                    <p className={`text-2xl md:text-3xl mt-2 tracking-widest uppercase font-medium ${accentGreen}`}>{getT('appSub')}</p>
-                    <p className={`mt-10 text-lg md:text-xl font-medium uppercase tracking-widest ${textSub} animate-pulse`}>{getT('tapToStart')}</p>
-                  </div>
-                  <div className={`relative w-40 h-40 md:w-48 md:h-48 ${zoomActive ? 'animate-zoom-minimal' : 'animate-subtle-bounce'}`}>
-                    <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-xl transition-transform duration-300 hover:scale-110"><circle cx="50" cy="50" r="48" fill={isDark ? '#4ade80' : '#86efac'} /><circle cx="50" cy="50" r="48" fill="url(#ballGradient)" opacity="0.6" />{[ [30, 30], [50, 20], [70, 30], [20, 50], [40, 45], [60, 45], [80, 50], [30, 70], [50, 80], [70, 70] ].map(([cx, cy], i) => (<circle key={i} cx={cx} cy={cy} r="5" fill={isDark ? '#064e3b' : '#14532d'} opacity="0.8" />))}<defs><radialGradient id="ballGradient" cx="30%" cy="30%" r="70%"><stop offset="0%" stopColor="#ffffff" stopOpacity="0.8" /><stop offset="100%" stopColor="#000000" stopOpacity="0.3" /></radialGradient></defs></svg>
-                  </div>
+                  <div className="text-center z-10 transition-opacity duration-300 mb-12" style={{ opacity: zoomActive ? 0 : 1 }}><h1 className={`text-5xl md:text-6xl font-bold tracking-tight ${textMain}`}>{getT('appTitle')}</h1><p className={`text-2xl md:text-3xl mt-2 tracking-widest uppercase font-medium ${accentGreen}`}>{getT('appSub')}</p><p className={`mt-10 text-lg md:text-xl font-medium uppercase tracking-widest ${textSub} animate-pulse`}>{getT('tapToStart')}</p></div>
+                  <div className={`relative w-40 h-40 md:w-48 md:h-48 ${zoomActive ? 'animate-zoom-minimal' : 'animate-subtle-bounce'}`}><svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-xl transition-transform duration-300 hover:scale-110"><circle cx="50" cy="50" r="48" fill={isDark ? '#4ade80' : '#86efac'} /><circle cx="50" cy="50" r="48" fill="url(#ballGradient)" opacity="0.6" />{[ [30, 30], [50, 20], [70, 30], [20, 50], [40, 45], [60, 45], [80, 50], [30, 70], [50, 80], [70, 70] ].map(([cx, cy], i) => (<circle key={i} cx={cx} cy={cy} r="5" fill={isDark ? '#064e3b' : '#14532d'} opacity="0.8" />))}<defs><radialGradient id="ballGradient" cx="30%" cy="30%" r="70%"><stop offset="0%" stopColor="#ffffff" stopOpacity="0.8" /><stop offset="100%" stopColor="#000000" stopOpacity="0.3" /></radialGradient></defs></svg></div>
                 </div>
               )}
 
@@ -1389,23 +1158,16 @@
                     <div className="space-y-4">
                       <div className={`flex items-center gap-2 mb-4 pb-2 border-b ${borderSub}`}><User className={accentGreen} size={20} /><h2 className={`text-lg font-semibold ${textMain}`}>{getT('singles')}</h2></div>
                       {['standard', '14-point', 'custom'].map(r => (
-                        <button key={r} onClick={() => handleRuleSelect('single', r)} className={`w-full text-left p-5 muji-card transition-shadow hover:muji-shadow active:scale-[0.99] transition-transform duration-200`}>
-                          <div className="flex justify-between items-center mb-1"><h3 className={`font-bold ${textMain}`}>{r === 'standard' ? getT('stdTitle') : r === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</h3><ChevronRight size={16} className={textSub} /></div>
-                          <p className={`text-xs ${textSub}`}>{r === 'standard' ? getT('stdDescSingle') : r === '14-point' ? getT('fourteenDesc') : getT('customDesc')}</p>
-                        </button>
+                        <button key={r} onClick={() => handleRuleSelect('single', r)} className={`w-full text-left p-5 muji-card transition-shadow hover:muji-shadow active:scale-[0.99] transition-transform duration-200`}><div className="flex justify-between items-center mb-1"><h3 className={`font-bold ${textMain}`}>{r === 'standard' ? getT('stdTitle') : r === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</h3><ChevronRight size={16} className={textSub} /></div><p className={`text-xs ${textSub}`}>{r === 'standard' ? getT('stdDescSingle') : r === '14-point' ? getT('fourteenDesc') : getT('customDesc')}</p></button>
                       ))}
                     </div>
                     <div className="space-y-4 mt-6 md:mt-0">
                       <div className={`flex items-center gap-2 mb-4 pb-2 border-b ${borderSub}`}><Users className={accentRed} size={20} /><h2 className={`text-lg font-semibold ${textMain}`}>{getT('doubles')}</h2></div>
                       {['standard', '14-point', 'custom'].map(r => (
-                        <button key={r} onClick={() => handleRuleSelect('double', r)} className={`w-full text-left p-5 muji-card transition-shadow hover:muji-shadow active:scale-[0.99] transition-transform duration-200`}>
-                          <div className="flex justify-between items-center mb-1"><h3 className={`font-bold ${textMain}`}>{r === 'standard' ? getT('stdTitle') : r === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</h3><ChevronRight size={16} className={textSub} /></div>
-                          <p className={`text-xs ${textSub}`}>{r === 'standard' ? getT('stdDescDouble') : r === '14-point' ? getT('fourteenDesc') : getT('customDesc')}</p>
-                        </button>
+                        <button key={r} onClick={() => handleRuleSelect('double', r)} className={`w-full text-left p-5 muji-card transition-shadow hover:muji-shadow active:scale-[0.99] transition-transform duration-200`}><div className="flex justify-between items-center mb-1"><h3 className={`font-bold ${textMain}`}>{r === 'standard' ? getT('stdTitle') : r === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</h3><ChevronRight size={16} className={textSub} /></div><p className={`text-xs ${textSub}`}>{r === 'standard' ? getT('stdDescDouble') : r === '14-point' ? getT('fourteenDesc') : getT('customDesc')}</p></button>
                       ))}
                     </div>
                   </div>
-                  
                   <div className="mt-12 mb-8 flex flex-col items-center gap-6">
                     <div className={`text-center text-[10px] font-bold uppercase tracking-widest ${textSub}`}><p>{getT('designBy')}</p></div>
                     <div className="flex flex-wrap justify-center gap-3">
@@ -1413,7 +1175,6 @@
                        <a href="https://reclub.co/players/@amostan" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 active:scale-95 text-[10px] font-bold uppercase tracking-widest`}><img src="https://reclub.co/favicon.ico" alt="Reclub" className="w-3.5 h-3.5 rounded-sm" onError={(e) => { e.target.onerror = null; e.target.style.display='none'; }} /><span>Reclub</span></a>
                        <a href="https://reclub.co/clubs/@pick-to-sync" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 active:scale-95 text-[10px] font-bold uppercase tracking-widest`}><img src="https://reclub.co/favicon.ico" alt="Reclub Club" className="w-3.5 h-3.5 rounded-sm" onError={(e) => { e.target.onerror = null; e.target.style.display='none'; }} /><span>Reclub Club</span></a>
                     </div>
-                    
                     <div className="flex flex-col sm:flex-row items-center gap-3 mt-2">
                       <button onClick={() => setShowShareAppModal(true)} className={`flex items-center gap-2 px-6 py-3 rounded-full bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900 hover:scale-105 active:scale-95 transition-transform shadow-md font-bold text-xs uppercase tracking-widest`}><QrCode size={16} /> {getT('shareApp')}</button>
                       {!isInstalled && (<button onClick={handleInstallClick} className={`flex items-center gap-2 px-6 py-3 rounded-full bg-emerald-500 text-white hover:bg-emerald-600 transition-transform hover:scale-105 active:scale-95 shadow-md font-bold text-xs uppercase tracking-widest`}><Download size={16} /> {getT('installAsApp')}</button>)}
@@ -1424,17 +1185,12 @@
 
               {(appState === 'stats' || closingScreen === 'stats') && (
                 <div className={`flex-1 flex flex-col relative z-10 pb-12 w-full max-w-4xl mx-auto ${closingScreen === 'stats' ? 'animate-screen-exit' : 'animate-screen-enter'}`} style={{ paddingTop: 'max(5rem, calc(3rem + env(safe-area-inset-top)))', paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }}>
-                  <header className={`flex items-center justify-between mb-8 pb-4 border-b ${borderSub}`}>
-                    <button onClick={() => closeScreenToMenu('stats')} className={`p-2 -ml-2 rounded-lg ${textSub} hover:${textMain}`}><ArrowLeft size={20} /></button>
-                    <h1 className={`text-xl font-bold ${textMain}`}>{getT('stats')}</h1><div className="w-8"></div>
-                  </header>
-                  
+                  <header className={`flex items-center justify-between mb-8 pb-4 border-b ${borderSub}`}><button onClick={() => closeScreenToMenu('stats')} className={`p-2 -ml-2 rounded-lg ${textSub} hover:${textMain}`}><ArrowLeft size={20} /></button><h1 className={`text-xl font-bold ${textMain}`}>{getT('stats')}</h1><div className="w-8"></div></header>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                     <div className={`muji-card p-6 flex flex-col items-center text-center`}><HistoryIcon size={24} className={`mb-2 ${textSub}`} /><span className={`text-3xl font-black ${textMain}`}>{savedMatches.length}</span><span className={`text-xs font-bold uppercase tracking-widest ${textSub} mt-1`}>{getT('totalMatches')}</span></div>
                     <div className={`muji-card p-6 flex flex-col items-center text-center`}><Trophy size={24} className={`mb-2 ${accentGreen}`} /><span className={`text-3xl font-black ${textMain}`}>{savedMatches.length ? Math.round((savedMatches.filter(m=>m.winner===1).length / savedMatches.length)*100) : 0}%</span><span className={`text-xs font-bold uppercase tracking-widest ${textSub} mt-1`}>{getT('winRate')}</span></div>
                     <div className={`muji-card p-6 flex flex-col items-center text-center col-span-2 md:col-span-1`}><Timer size={24} className={`mb-2 ${textSub}`} /><span className={`text-3xl font-black ${textMain}`}>{savedMatches.length ? formatTime(Math.round(savedMatches.reduce((a,b)=>a+(b.elapsedTime||0),0)/savedMatches.length)) : '00:00'}</span><span className={`text-xs font-bold uppercase tracking-widest ${textSub} mt-1`}>{getT('avgDuration')}</span></div>
                   </div>
-
                   {savedMatches.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className={`muji-card p-6`}>
@@ -1443,11 +1199,9 @@
                               <div className={`absolute inset-[12%] ${bgCard} rounded-full flex flex-col items-center justify-center shadow-inner`}><span className={`text-2xl font-black ${textMain}`}>{totalMatchesCount}</span></div>
                           </div>
                           <div className="flex justify-center gap-6 mt-6">
-                               <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-emerald-500 rounded-[3px]"></div><span className={`text-xs font-bold ${textSub}`}>T1 ({t1WinPct}%)</span></div>
-                               <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-rose-500 rounded-[3px]"></div><span className={`text-xs font-bold ${textSub}`}>T2 ({t2WinPct}%)</span></div>
+                               <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-emerald-500 rounded-[3px]"></div><span className={`text-xs font-bold ${textSub}`}>T1 ({t1WinPct}%)</span></div><div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-rose-500 rounded-[3px]"></div><span className={`text-xs font-bold ${textSub}`}>T2 ({t2WinPct}%)</span></div>
                           </div>
                       </div>
-
                       <div className={`muji-card p-6 flex flex-col`}>
                           <h3 className={`text-[10px] font-bold uppercase tracking-widest ${textSub} mb-4`}>{getT('totalPoints')}</h3>
                           <div className="flex-1 flex items-end justify-center gap-8 h-32 mt-2 border-b border-stone-200 dark:border-stone-700/50 pb-0">
@@ -1456,18 +1210,11 @@
                           </div>
                           <div className="flex justify-center gap-8 mt-3"><span className={`text-[10px] uppercase font-black tracking-widest ${accentGreen} w-12 text-center`}>T1</span><span className={`text-[10px] uppercase font-black tracking-widest ${accentRed} w-12 text-center`}>T2</span></div>
                       </div>
-
                       <div className={`muji-card p-6 md:col-span-2`}>
                            <h3 className={`text-[10px] font-bold uppercase tracking-widest ${textSub} mb-6`}>{getT('formatStats')}</h3>
                            <div className="space-y-5">
-                               <div>
-                                   <div className="flex justify-between text-xs font-bold mb-2"><span className={textMain}>{getT('singles')}</span><span className={textSub}>{singlesCount}</span></div>
-                                   <div className={`w-full h-2.5 rounded-full ${isDark ? 'bg-stone-800 border border-stone-700' : 'bg-stone-100 border border-stone-200'} overflow-hidden`}><div className="h-full bg-stone-400 dark:bg-stone-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${totalMatchesCount ? (singlesCount/totalMatchesCount)*100 : 0}%` }}></div></div>
-                               </div>
-                               <div>
-                                   <div className="flex justify-between text-xs font-bold mb-2"><span className={textMain}>{getT('doubles')}</span><span className={textSub}>{doublesCount}</span></div>
-                                   <div className={`w-full h-2.5 rounded-full ${isDark ? 'bg-stone-800 border border-stone-700' : 'bg-stone-100 border border-stone-200'} overflow-hidden`}><div className="h-full bg-stone-400 dark:bg-stone-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${totalMatchesCount ? (doublesCount/totalMatchesCount)*100 : 0}%` }}></div></div>
-                               </div>
+                               <div><div className="flex justify-between text-xs font-bold mb-2"><span className={textMain}>{getT('singles')}</span><span className={textSub}>{singlesCount}</span></div><div className={`w-full h-2.5 rounded-full ${isDark ? 'bg-stone-800 border border-stone-700' : 'bg-stone-100 border border-stone-200'} overflow-hidden`}><div className="h-full bg-stone-400 dark:bg-stone-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${totalMatchesCount ? (singlesCount/totalMatchesCount)*100 : 0}%` }}></div></div></div>
+                               <div><div className="flex justify-between text-xs font-bold mb-2"><span className={textMain}>{getT('doubles')}</span><span className={textSub}>{doublesCount}</span></div><div className={`w-full h-2.5 rounded-full ${isDark ? 'bg-stone-800 border border-stone-700' : 'bg-stone-100 border border-stone-200'} overflow-hidden`}><div className="h-full bg-stone-400 dark:bg-stone-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${totalMatchesCount ? (doublesCount/totalMatchesCount)*100 : 0}%` }}></div></div></div>
                            </div>
                       </div>
                     </div>
@@ -1478,13 +1225,8 @@
               {(appState === 'history' || closingScreen === 'history') && (
                 <div className={`flex-1 flex flex-col relative z-10 pb-12 w-full max-w-4xl mx-auto ${closingScreen === 'history' ? 'animate-screen-exit' : 'animate-screen-enter'}`} style={{ paddingTop: 'max(5rem, calc(3rem + env(safe-area-inset-top)))', paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }}>
                   <header className={`flex items-center justify-between mb-8 pb-4 border-b ${borderSub}`}>
-                    <button onClick={() => closeScreenToMenu('history')} className={`p-2 -ml-2 rounded-lg ${textSub} hover:${textMain}`}><ArrowLeft size={20} /></button>
-                    <h1 className={`text-xl font-bold ${textMain}`}>{getT('matchHistory')}</h1>
-                    <div className="w-8 flex justify-end">
-                      {savedMatches.length > 0 && !isHistoryLoading && (
-                        <button onClick={() => setShowClearConfirm(true)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors`}><Trash2 size={16} /> <span className="hidden sm:inline">{getT('clearHistory')}</span></button>
-                      )}
-                    </div>
+                    <button onClick={() => closeScreenToMenu('history')} className={`p-2 -ml-2 rounded-lg ${textSub} hover:${textMain}`}><ArrowLeft size={20} /></button><h1 className={`text-xl font-bold ${textMain}`}>{getT('matchHistory')}</h1>
+                    <div className="w-8 flex justify-end">{savedMatches.length > 0 && !isHistoryLoading && (<button onClick={() => setShowClearConfirm(true)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors`}><Trash2 size={16} /> <span className="hidden sm:inline">{getT('clearHistory')}</span></button>)}</div>
                   </header>
 
                   <main className="flex-1 overflow-y-auto muji-scrollbar pr-2 overscroll-contain">
@@ -1498,10 +1240,7 @@
                               <div>
                                 <div className={`text-xs font-bold uppercase tracking-widest ${accentGreen} mb-1 flex justify-between items-center w-full`}><span>{match.date} • {formatTime(match.elapsedTime || 0)}</span><button onClick={() => shareMatch(match)} className="text-stone-400 hover:text-emerald-500 transition-colors"><Share2 size={14}/></button></div>
                                 {editingMatchId === match.id ? <input type="text" defaultValue={match.title} onBlur={(e) => handleEditSave(match.id, e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleEditSave(match.id, e.target.value)} autoFocus className={`text-2xl font-bold ${textMain} bg-transparent border-b ${borderSub} outline-none w-full`} /> : <h2 className={`text-2xl font-bold ${textMain} flex items-center gap-2 cursor-pointer group`} onClick={() => setEditingMatchId(match.id)}>{match.title} <Edit2 size={14} className="opacity-0 group-hover:opacity-100 transition-opacity text-stone-400"/></h2>}
-                                <div className={`text-xs font-semibold ${textSub} mt-1 flex flex-wrap items-center gap-2`}>
-                                  <span>{match.mode === 'single' ? getT('singles') : getT('doubles')} • {match.rules === 'standard' ? getT('stdTitle') : match.rules === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</span>
-                                  {match.winReason === 'retreat' && <span className="px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 text-[9px] uppercase font-bold tracking-widest border border-rose-200 dark:border-rose-800">{match.winner === 1 ? getT('t2Retreat') : getT('t1Retreat')}</span>}
-                                </div>
+                                <div className={`text-xs font-semibold ${textSub} mt-1 flex flex-wrap items-center gap-2`}><span>{match.mode === 'single' ? getT('singles') : getT('doubles')} • {match.rules === 'standard' ? getT('stdTitle') : match.rules === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</span>{match.winReason === 'retreat' && <span className="px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 text-[9px] uppercase font-bold tracking-widest border border-rose-200 dark:border-rose-800">{match.winner === 1 ? getT('t2Retreat') : getT('t1Retreat')}</span>}</div>
                               </div>
                               <div className="flex items-center justify-center w-full md:w-auto gap-8 mt-5 md:mt-0 bg-stone-900/5 dark:bg-stone-50/5 px-6 py-4 rounded-2xl border border-stone-200 dark:border-stone-800">
                                 <div className="text-center"><span className={`text-[10px] font-bold uppercase tracking-widest ${textSub} block mb-1 truncate max-w-[60px]`} title={match.t1Name}>{match.t1Name}</span><span className={`text-3xl font-black ${match.winner === 1 ? accentGreen : textMain}`}>{match.t1Score}</span></div>
@@ -1515,6 +1254,43 @@
                       </div>
                     )}
                   </main>
+
+                  {previewSnapshot && appState === 'history' && (
+                    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4" onClick={() => setPreviewSnapshot(null)}>
+                       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
+                       <div className={`relative p-8 ${bgCard} border ${borderSub} rounded-3xl shadow-2xl animate-screen-enter flex flex-col items-center w-full max-w-sm`} onClick={e => e.stopPropagation()}>
+                          <div className="flex justify-between items-center w-full mb-6">
+                             <h3 className={`text-lg font-bold tracking-widest uppercase ${textMain}`}>Ghost Replay</h3>
+                             <button onClick={() => setPreviewSnapshot(null)} className={`p-1.5 rounded-full bg-stone-100 dark:bg-stone-800 ${textSub} hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors`}><X size={16}/></button>
+                          </div>
+                          <div className="flex items-center justify-center gap-8 mb-8 w-full">
+                             <div className="text-center"><span className={`text-[10px] font-bold ${textSub} block uppercase tracking-widest mb-1`}>{previewSnapshot.servingTeam === 1 ? 'Server' : 'Receiver'}</span><span className={`text-5xl font-black ${previewSnapshot.servingTeam === 1 ? accentGreen : textMain}`}>{previewSnapshot.team1Score}</span></div>
+                             <span className={`text-3xl font-light text-stone-300 dark:text-stone-700`}>-</span>
+                             <div className="text-center"><span className={`text-[10px] font-bold ${textSub} block uppercase tracking-widest mb-1`}>{previewSnapshot.servingTeam === 2 ? 'Server' : 'Receiver'}</span><span className={`text-5xl font-black ${previewSnapshot.servingTeam === 2 ? accentRed : textMain}`}>{previewSnapshot.team2Score}</span></div>
+                          </div>
+                          
+                          <div className="relative flex items-center justify-center w-[220px] h-[280px]">
+                              <div className={`w-[180px] h-[240px] bg-amber-600 border-amber-300 rounded-[3px] border-[3px] shadow-lg relative flex flex-col overflow-hidden pointer-events-none transition-all duration-500 ease-in-out`} style={{ transform: `rotate(${previewSnapshot.courtRotation || 0}deg)` }}>
+                                  <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+                                      {previewSnapshot.serverPos === 'bottom-right' || previewSnapshot.serverPos === 'top-left' ? ( <line x1="75%" y1="85%" x2="25%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" /> ) : ( <line x1="25%" y1="85%" x2="75%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" /> )}
+                                  </svg>
+                                  <div className="flex-1 relative border-b border-white/50 z-20">
+                                      <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
+                                      <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || previewSnapshot.serverPos === 'top-left' || previewSnapshot.receiverPos === 'top-left') && renderPlayerBadge(gameMode === 'single' ? t2PLeft : previewSnapshot.t2Right, previewSnapshot.serverPos === 'top-left' ? 'server' : previewSnapshot.receiverPos === 'top-left' ? 'receiver' : 'partner')}</div>
+                                      <div className="absolute top-1 right-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || previewSnapshot.serverPos === 'top-right' || previewSnapshot.receiverPos === 'top-right') && renderPlayerBadge(gameMode === 'single' ? t2PLeft : previewSnapshot.t2Left, previewSnapshot.serverPos === 'top-right' ? 'server' : previewSnapshot.receiverPos === 'top-right' ? 'receiver' : 'partner')}</div>
+                                  </div>
+                                  <div className={`h-6 md:h-8 border-b-2 border-white/80 bg-amber-500 z-20`}></div>
+                                  <div className={`h-6 md:h-8 border-b border-white/50 bg-amber-500 z-20`}></div>
+                                  <div className="flex-1 relative z-20">
+                                      <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
+                                      <div className="absolute bottom-1 left-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || previewSnapshot.serverPos === 'bottom-left' || previewSnapshot.receiverPos === 'bottom-left') && renderPlayerBadge(gameMode === 'single' ? t1PLeft : previewSnapshot.t1Left, previewSnapshot.serverPos === 'bottom-left' ? 'server' : previewSnapshot.receiverPos === 'bottom-left' ? 'receiver' : 'partner')}</div>
+                                      <div className="absolute bottom-1 right-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || previewSnapshot.serverPos === 'bottom-right' || previewSnapshot.receiverPos === 'bottom-right') && renderPlayerBadge(gameMode === 'single' ? t1PLeft : previewSnapshot.t1Right, previewSnapshot.serverPos === 'bottom-right' ? 'server' : previewSnapshot.receiverPos === 'bottom-right' ? 'receiver' : 'partner')}</div>
+                                  </div>
+                              </div>
+                          </div>
+                       </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1526,17 +1302,12 @@
                         <ArrowLeft size={20} />{winner !== null && <span className="text-xs uppercase tracking-widest">{getT('menu')}</span>}
                       </button>
                     </div>
-                    <div className="text-center flex-[2]">
-                      <h1 className={`text-sm font-bold ${textMain}`}>{matchTitle || getT('untitledMatch')}</h1>
-                      <p className={`text-xs ${textSub} mt-1`}>{gameMode === 'single' ? getT('singles') : getT('doubles')} • {ruleSet === 'standard' ? getT('stdTitle') : ruleSet === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</p>
-                    </div>
+                    <div className="text-center flex-[2]"><h1 className={`text-sm font-bold ${textMain}`}>{matchTitle || getT('untitledMatch')}</h1><p className={`text-xs ${textSub} mt-1`}>{gameMode === 'single' ? getT('singles') : getT('doubles')} • {ruleSet === 'standard' ? getT('stdTitle') : ruleSet === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</p></div>
                     <div className="flex-1"></div>
                   </header>
 
                   <div className="flex justify-between items-center mb-2 relative z-20">
-                    <div className="flex justify-start">
-                      <button onClick={() => setShowResetModal(true)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border shadow-sm transition-all active:scale-95 ${bgCard} ${borderSub} ${textMain}`}><RefreshCw size={14} /> {getT('resetMatch')}</button>
-                    </div>
+                    <div className="flex justify-start"><button onClick={() => setShowResetModal(true)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border shadow-sm transition-all active:scale-95 ${bgCard} ${borderSub} ${textMain}`}><RefreshCw size={14} /> {getT('resetMatch')}</button></div>
                     <div className="flex justify-end gap-2">
                       <button onClick={handleUndo} disabled={stateHistory.length === 0} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border shadow-sm transition-all active:scale-95 ${stateHistory.length === 0 ? `border-transparent ${textSub} opacity-50` : `${bgCard} ${borderSub} ${textMain}`} `}><Undo2 size={14} /> {getT('undo')}</button>
                       <button onClick={() => { if (winner) { setMatchTitleInput(matchTitle); setT1PLeftInput(t1PLeft); setT1PRightInput(t1PRight); setT2PLeftInput(t2PLeft); setT2PRightInput(t2PRight); setPendingGame({ mode: gameMode, rules: ruleSet }); } else if (history.length > 0) setShowRetreatModal(true); }} disabled={!winner && history.length === 0} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border shadow-sm transition-all active:scale-95 ${!winner && history.length === 0 ? `border-transparent ${textSub} opacity-50` : !winner ? `border-rose-200 bg-rose-50 text-rose-600 dark:border-rose-800/50 dark:bg-rose-900/30 dark:text-rose-400` : `${bgCard} ${borderSub} ${textMain}`}`}><RotateCcw size={14} /> {winner ? getT('playAgain') : getT('reset')}</button>
@@ -1548,11 +1319,7 @@
                       <div className="flex flex-col items-center relative w-24 md:w-32">
                         <span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest truncate w-[150%] text-center ${textSub}`}>{t1Name}</span>
                         <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${previewSnapshot ? 'text-amber-500' : (d_serveTeam === 1 && !winner ? accentGreen : textMain)}`}>{d_t1Score}</span>
-                        {enableTimeouts > 0 && !winner && (
-                          <div className="absolute top-full mt-3 flex gap-2 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t1Timeouts > 0 && setShowTimeoutConfirm(1)} title={getT('callTimeout')}>
-                            {[...Array(enableTimeouts)].map((_, i) => (<div key={i} className={`w-2.5 h-2.5 rounded-full transition-colors ${t1Timeouts >= i + 1 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>))}
-                          </div>
-                        )}
+                        {enableTimeouts > 0 && !winner && (<div className="absolute top-full mt-3 flex gap-2 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t1Timeouts > 0 && setShowTimeoutConfirm(1)} title={getT('callTimeout')}>{[...Array(enableTimeouts)].map((_, i) => (<div key={i} className={`w-2.5 h-2.5 rounded-full transition-colors ${t1Timeouts >= i + 1 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>))}</div>)}
                       </div>
                       
                       <span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span>
@@ -1560,72 +1327,35 @@
                       <div className="flex flex-col items-center relative w-24 md:w-32">
                         <span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest truncate w-[150%] text-center ${textSub}`}>{t2Name}</span>
                         <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${previewSnapshot ? 'text-amber-500' : (d_serveTeam === 2 && !winner ? accentRed : textMain)}`}>{d_t2Score}</span>
-                        {enableTimeouts > 0 && !winner && (
-                          <div className="absolute top-full mt-3 flex gap-2 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t2Timeouts > 0 && setShowTimeoutConfirm(2)} title={getT('callTimeout')}>
-                            {[...Array(enableTimeouts)].map((_, i) => (<div key={i} className={`w-2.5 h-2.5 rounded-full transition-colors ${t2Timeouts >= i + 1 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>))}
-                          </div>
-                        )}
+                        {enableTimeouts > 0 && !winner && (<div className="absolute top-full mt-3 flex gap-2 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t2Timeouts > 0 && setShowTimeoutConfirm(2)} title={getT('callTimeout')}>{[...Array(enableTimeouts)].map((_, i) => (<div key={i} className={`w-2.5 h-2.5 rounded-full transition-colors ${t2Timeouts >= i + 1 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>))}</div>)}
                       </div>
                       
-                      {showServerNumberUI && (
-                          <>
-                              <span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span>
-                              <div className="flex flex-col items-center relative">
-                                  <span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest ${textSub}`}>{getT('server')}</span>
-                                  <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${winner ? textMain : 'text-amber-500'}`}>{d_serveNum}</span>
-                              </div>
-                          </>
-                      )}
+                      {showServerNumberUI && (<><span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span><div className="flex flex-col items-center relative"><span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest ${textSub}`}>{getT('server')}</span><span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${winner ? textMain : 'text-amber-500'}`}>{d_serveNum}</span></div></>)}
                     </div>
 
                     <div className={`flex justify-center w-full mt-6 md:mt-8 ${isSuddenDeath && !winner ? 'mb-4' : 'mb-6 md:mb-8'} relative z-10`}>
                         <div className="relative flex items-center justify-center w-[240px] h-[240px] md:w-[280px] md:h-[280px]">
                             <div className={`w-[180px] h-[240px] md:w-[220px] md:h-[280px] ${previewSnapshot ? 'bg-amber-600 border-amber-300' : 'bg-emerald-600 border-white/90'} rounded-[3px] border-[3px] shadow-md relative flex flex-col overflow-hidden pointer-events-none transition-all duration-500 ease-in-out`} style={{ transform: `rotate(${courtRotation}deg)` }}>
-                                <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
-                                    {d_srvPos === 'bottom-right' || d_srvPos === 'top-left' ? (
-                                        <line x1="75%" y1="85%" x2="25%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" />
-                                    ) : (
-                                        <line x1="25%" y1="85%" x2="75%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" />
-                                    )}
-                                </svg>
+                                <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">{d_srvPos === 'bottom-right' || d_srvPos === 'top-left' ? ( <line x1="75%" y1="85%" x2="25%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" /> ) : ( <line x1="25%" y1="85%" x2="75%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" /> )}</svg>
                                 <div className="flex-1 relative border-b border-white/50 z-20">
                                     <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
-                                    <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">
-                                        {(gameMode === 'double' || d_srvPos === 'top-left' || d_rcvPos === 'top-left') && renderPlayerBadge(gameMode === 'single' ? t2PLeft : d_t2Right, d_srvPos === 'top-left' ? 'server' : d_rcvPos === 'top-left' ? 'receiver' : 'partner')}
-                                    </div>
-                                    <div className="absolute top-1 right-0 w-1/2 flex justify-center items-center h-full">
-                                        {(gameMode === 'double' || d_srvPos === 'top-right' || d_rcvPos === 'top-right') && renderPlayerBadge(gameMode === 'single' ? t2PLeft : d_t2Left, d_srvPos === 'top-right' ? 'server' : d_rcvPos === 'top-right' ? 'receiver' : 'partner')}
-                                    </div>
+                                    <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || d_srvPos === 'top-left' || d_rcvPos === 'top-left') && renderPlayerBadge(gameMode === 'single' ? t2PLeft : d_t2Right, d_srvPos === 'top-left' ? 'server' : d_rcvPos === 'top-left' ? 'receiver' : 'partner')}</div>
+                                    <div className="absolute top-1 right-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || d_srvPos === 'top-right' || d_rcvPos === 'top-right') && renderPlayerBadge(gameMode === 'single' ? t2PLeft : d_t2Left, d_srvPos === 'top-right' ? 'server' : d_rcvPos === 'top-right' ? 'receiver' : 'partner')}</div>
                                 </div>
                                 <div className={`h-6 md:h-8 border-b-2 border-white/80 ${previewSnapshot ? 'bg-amber-500' : 'bg-emerald-500'} z-20 transition-colors`}></div>
                                 <div className={`h-6 md:h-8 border-b border-white/50 ${previewSnapshot ? 'bg-amber-500' : 'bg-emerald-500'} z-20 transition-colors`}></div>
                                 <div className="flex-1 relative z-20">
                                     <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
-                                    <div className="absolute bottom-1 left-0 w-1/2 flex justify-center items-center h-full">
-                                        {(gameMode === 'double' || d_srvPos === 'bottom-left' || d_rcvPos === 'bottom-left') && renderPlayerBadge(gameMode === 'single' ? t1PLeft : d_t1Left, d_srvPos === 'bottom-left' ? 'server' : d_rcvPos === 'bottom-left' ? 'receiver' : 'partner')}
-                                    </div>
-                                    <div className="absolute bottom-1 right-0 w-1/2 flex justify-center items-center h-full">
-                                        {(gameMode === 'double' || d_srvPos === 'bottom-right' || d_rcvPos === 'bottom-right') && renderPlayerBadge(gameMode === 'single' ? t1PLeft : d_t1Right, d_srvPos === 'bottom-right' ? 'server' : d_rcvPos === 'bottom-right' ? 'receiver' : 'partner')}
-                                    </div>
+                                    <div className="absolute bottom-1 left-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || d_srvPos === 'bottom-left' || d_rcvPos === 'bottom-left') && renderPlayerBadge(gameMode === 'single' ? t1PLeft : d_t1Left, d_srvPos === 'bottom-left' ? 'server' : d_rcvPos === 'bottom-left' ? 'receiver' : 'partner')}</div>
+                                    <div className="absolute bottom-1 right-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || d_srvPos === 'bottom-right' || d_rcvPos === 'bottom-right') && renderPlayerBadge(gameMode === 'single' ? t1PLeft : d_t1Right, d_srvPos === 'bottom-right' ? 'server' : d_rcvPos === 'bottom-right' ? 'receiver' : 'partner')}</div>
                                 </div>
                             </div>
-                            
-                            <div className="absolute top-1/2 -translate-y-1/2 -left-[50px] md:-left-[60px] pointer-events-auto z-20">
-                                <button onClick={() => setCourtRotation(r => r - 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md`}><RotateCcw size={18} /></button>
-                            </div>
-                            <div className="absolute top-1/2 -translate-y-1/2 -right-[50px] md:-right-[60px] pointer-events-auto z-20">
-                                <button onClick={() => setCourtRotation(r => r + 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md`}><RotateCw size={18} /></button>
-                            </div>
+                            <div className="absolute top-1/2 -translate-y-1/2 -left-[50px] md:-left-[60px] pointer-events-auto z-20"><button onClick={() => setCourtRotation(r => r - 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md`}><RotateCcw size={18} /></button></div>
+                            <div className="absolute top-1/2 -translate-y-1/2 -right-[50px] md:-right-[60px] pointer-events-auto z-20"><button onClick={() => setCourtRotation(r => r + 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md`}><RotateCw size={18} /></button></div>
                         </div>
                     </div>
 
-                    {isSuddenDeath && !winner && (
-                      <div className="flex justify-center w-full mb-6 relative z-10 animate-screen-enter">
-                        <span className={`px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-900/50 dark:text-rose-300 dark:border-rose-800 shadow-sm text-center max-w-[90%]`}>
-                          🔥 {getT('suddenDeath')} - {serveToWinAt14 ? getT('suddenDeathServeDesc') : getT('nextPointWins')} 🔥
-                        </span>
-                      </div>
-                    )}
+                    {isSuddenDeath && !winner && (<div className="flex justify-center w-full mb-6 relative z-10 animate-screen-enter"><span className={`px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-900/50 dark:text-rose-300 dark:border-rose-800 shadow-sm text-center max-w-[90%]`}>🔥 {getT('suddenDeath')} - {serveToWinAt14 ? getT('suddenDeathServeDesc') : getT('nextPointWins')} 🔥</span></div>)}
 
                    <div className="mt-auto relative z-10">
                       <div className="grid grid-cols-2 gap-4 h-40 md:h-48 relative">
@@ -1636,7 +1366,6 @@
                              <button onClick={() => setActiveTimeoutRemaining(0)} className="px-5 py-2 mt-2 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-full text-xs font-bold uppercase tracking-widest transition-colors border border-stone-600 shadow-sm active:scale-95">Resume</button>
                           </div>
                         )}
-
                         <button onClick={() => handleRallyWin(1)} disabled={winner !== null || previewSnapshot !== null} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${d_serveTeam === 1 && !winner && !previewSnapshot ? bgAccentGreen : `muji-card ${bgCard} ${winner || previewSnapshot ? 'opacity-50' : ''}`}`}>
                           <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${d_serveTeam === 1 && !winner && !previewSnapshot ? accentGreen : textMain}`}>{t1Name}</span>
                           <span className={`text-sm font-semibold ${d_serveTeam === 1 && !winner && !previewSnapshot ? accentGreen : textSub}`}>{getT('wonRally')}</span>
@@ -1658,13 +1387,10 @@
                 <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
                   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setPendingGame(null)}></div>
                   <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden`}>
-                    <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50">
-                      <h2 className={`text-xl font-bold ${textMain}`}>{pendingGame.mode === 'single' ? getT('singles') : getT('doubles')} - {pendingGame.rules === 'standard' ? getT('stdTitle') : pendingGame.rules === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</h2>
-                    </div>
+                    <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50"><h2 className={`text-xl font-bold ${textMain}`}>{pendingGame.mode === 'single' ? getT('singles') : getT('doubles')} - {pendingGame.rules === 'standard' ? getT('stdTitle') : pendingGame.rules === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</h2></div>
                     <div className="px-6 py-4 overflow-y-auto muji-scrollbar flex-1 overscroll-contain">
                       <div className="space-y-4">
                         <div><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('matchTitlePlaceholder')}</label><input type="text" placeholder={getT('untitledMatch')} value={matchTitleInput} onChange={(e) => setMatchTitleInput(e.target.value)} className={`w-full px-4 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} focus:outline-none focus:ring-2 focus:ring-emerald-500/50`} /></div>
-                        
                         {pendingGame.mode === 'single' ? (
                             <div className="flex gap-3">
                               <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('t1Name')}</label><input type="text" placeholder={getT('t1Name')} value={t1PLeftInput} onChange={(e) => setT1PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
@@ -1684,7 +1410,6 @@
                               </div>
                             </div>
                         )}
-                        
                         <div className="flex flex-col gap-1.5 mt-2 mb-2">
                           <label className={`block text-[10px] font-bold uppercase tracking-widest ${textSub}`}>{getT('firstServer')}</label>
                           <div className={`flex rounded-xl border ${borderSub} p-1 ${bgMain}`}>
@@ -1704,7 +1429,6 @@
                             <button className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${serveToWinAt14 ? 'bg-emerald-500' : 'bg-stone-300 dark:bg-stone-600'}`}><div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-300 ${serveToWinAt14 ? 'translate-x-6' : 'translate-x-0'}`} /></button>
                           </div>
                         )}
-                        
                         {pendingGame.rules === 'custom' ? (
                           <div className={`p-4 rounded-xl border ${borderSub} ${bgMain} flex items-center justify-between`}>
                             <div className="pr-4"><h3 className={`font-bold text-sm ${textMain}`}>{getT('enableTimeouts')}</h3><p className={`text-xs mt-1 ${textSub}`}>{getT('customTimeoutsDesc') || "Timeouts per team (0-3)"}</p></div>
@@ -1718,7 +1442,6 @@
                             <button className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${enableTimeoutsSetup ? 'bg-emerald-500' : 'bg-stone-300 dark:bg-stone-600'}`}><div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-300 ${enableTimeoutsSetup ? 'translate-x-6' : 'translate-x-0'}`} /></button>
                           </div>
                         )}
-                        
                         <div className={`p-4 rounded-xl border ${borderSub} ${bgMain} flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform`} onClick={() => setEnableSwitchEnds(!enableSwitchEnds)}>
                           <div className="pr-4"><h3 className={`font-bold text-sm ${textMain}`}>{getT('switchEndsOption')}</h3><p className={`text-xs mt-1 ${textSub}`}>{getT('switchEndsOptionDesc')}</p></div>
                           <button className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${enableSwitchEnds ? 'bg-emerald-500' : 'bg-stone-300 dark:bg-stone-600'}`}><div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-300 ${enableSwitchEnds ? 'translate-x-6' : 'translate-x-0'}`} /></button>
@@ -1799,12 +1522,7 @@
                     <h2 className={`text-3xl font-bold mb-1 truncate ${textMain}`}>{winner === 1 ? t1Name : t2Name}</h2>
                     <p className={`text-lg font-medium ${textSub} mb-8`}>{winReason === 'retreat' ? getT('winByRetreat') : getT('winner')}</p>
                     <div className="flex flex-col gap-3">
-                      <button onClick={() => shareMatch({
-                          id: currentMatchId, title: matchTitle || getT('untitledMatch'),
-                          date: new Date().toLocaleDateString(),
-                          mode: gameMode, rules: ruleSet, t1Score: team1Score, t2Score: team2Score,
-                          t1Name, t2Name, winner, winReason, elapsedTime, history
-                      })} className={`w-full py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors flex items-center justify-center gap-2 shadow-md`}><Share2 size={18}/> {getT('share')}</button>
+                      <button onClick={() => shareMatch({ id: currentMatchId, title: matchTitle || getT('untitledMatch'), date: new Date().toLocaleDateString(), mode: gameMode, rules: ruleSet, t1Score: team1Score, t2Score: team2Score, t1Name, t2Name, winner, winReason, elapsedTime, history })} className={`w-full py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors flex items-center justify-center gap-2 shadow-md`}><Share2 size={18}/> {getT('share')}</button>
                       <button onClick={() => { setShowWinnerOverlay(false); setMatchTitleInput(matchTitle); setT1PLeftInput(t1PLeft); setT1PRightInput(t1PRight); setT2PLeftInput(t2PLeft); setT2PRightInput(t2PRight); setPendingGame({ mode: gameMode, rules: ruleSet }); }} className={`w-full py-4 rounded-xl font-bold text-white bg-stone-800 dark:bg-stone-200 dark:text-stone-900 shadow-md flex items-center justify-center gap-2`}><RotateCcw size={18}/> {getT('playAgain')}</button>
                       <button onClick={() => setShowWinnerOverlay(false)} className={`w-full py-3 rounded-xl font-semibold border ${borderSub} ${textSub} hover:${textMain} flex items-center justify-center gap-2`}><Activity size={18}/> {getT('reviewMatch')}</button>
                       <button onClick={() => { setShowWinnerOverlay(false); setAppState('menu'); }} className={`w-full py-3 rounded-xl font-semibold border ${borderSub} ${textSub} hover:${textMain} flex items-center justify-center gap-2`}><Home size={18}/> {getT('menu')}</button>
@@ -1844,39 +1562,17 @@
                 <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
                   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowShareAppModal(false)}></div>
                   <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl text-center animate-screen-enter`}>
-                    <div className="flex justify-between items-center mb-6">
-                       <h2 className={`text-lg font-bold ${textMain}`}>{getT('shareAppTitle')}</h2>
-                       <button onClick={() => setShowShareAppModal(false)} className={`p-2 -mr-2 rounded-full ${textSub} hover:${textMain}`}><X size={20}/></button>
-                    </div>
+                    <div className="flex justify-between items-center mb-6"><h2 className={`text-lg font-bold ${textMain}`}>{getT('shareAppTitle')}</h2><button onClick={() => setShowShareAppModal(false)} className={`p-2 -mr-2 rounded-full ${textSub} hover:${textMain}`}><X size={20}/></button></div>
                     <div className="flex flex-col items-center">
-                        <div className="bg-white p-3 rounded-2xl inline-block shadow-sm border border-stone-200 mb-2 relative group">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://pickleball-point-counter.pages.dev/" alt="QR Code" className="w-40 h-40" />
-                        </div>
+                        <div className="bg-white p-3 rounded-2xl inline-block shadow-sm border border-stone-200 mb-2 relative group"><img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://pickleball-point-counter.pages.dev/" alt="QR Code" className="w-40 h-40" /></div>
                         <p className={`text-[10px] font-bold uppercase tracking-widest ${textSub} mb-6`}>Scan in person or Long-press to save</p>
                     </div>
-                    <div className={`text-sm mb-6 ${textSub} text-left bg-stone-100 dark:bg-stone-800/50 p-4 rounded-xl border ${borderSub} leading-relaxed`}>
-                       {getT('shareAppText')}
-                    </div>
+                    <div className={`text-sm mb-6 ${textSub} text-left bg-stone-100 dark:bg-stone-800/50 p-4 rounded-xl border ${borderSub} leading-relaxed`}>{getT('shareAppText')}</div>
                     <button onClick={async () => {
-                        const appUrl = 'https://pickleball-point-counter.pages.dev/';
-                        const shareText = getT('shareAppText');
-                        
-                        if (navigator.share) {
-                            try { 
-                                await navigator.share({ 
-                                    title: 'Pickleball Point Counter', 
-                                    text: shareText, 
-                                    url: appUrl 
-                                }); 
-                            } catch(e) {}
-                        } else {
-                            navigator.clipboard.writeText(`${shareText}\n\n${appUrl}`);
-                            setLinkCopied(true);
-                            setTimeout(() => setLinkCopied(false), 2000);
-                        }
+                        const appUrl = 'https://pickleball-point-counter.pages.dev/'; const shareText = getT('shareAppText');
+                        if (navigator.share) { try { await navigator.share({ title: 'Pickleball Point Counter', text: shareText, url: appUrl }); } catch(e) {} } else { navigator.clipboard.writeText(`${shareText}\n\n${appUrl}`); setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2000); }
                     }} className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-md transition-colors`}>
-                        {linkCopied ? <Check size={18} /> : <Share2 size={18} />}
-                        {linkCopied ? getT('copied') : getT('share')}
+                        {linkCopied ? <Check size={18} /> : <Share2 size={18} />}{linkCopied ? getT('copied') : getT('share')}
                     </button>
                   </div>
                 </div>
@@ -1886,34 +1582,17 @@
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" style={{touchAction: 'none'}} onClick={() => setShowInfo(false)}></div>
                   <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl transition-all duration-200 max-h-[85vh] overflow-hidden`}>
-                    <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50">
-                      <div className="flex items-center gap-3">
-                        <InfoIcon size={24} className={accentGreen} />
-                        <h2 className={`text-xl font-bold ${textMain}`}>{getT('infoTitle')}</h2>
-                      </div>
-                    </div>
+                    <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50"><div className="flex items-center gap-3"><InfoIcon size={24} className={accentGreen} /><h2 className={`text-xl font-bold ${textMain}`}>{getT('infoTitle')}</h2></div></div>
                     <div className="px-6 py-5 overflow-y-auto muji-scrollbar flex-1 overscroll-contain">
                       <div className={`text-sm ${textSub} text-left space-y-5`}>
-                        <div>
-                          <h3 className={`font-bold ${textMain} mb-2`}>{getT('infoHowToTitle')}</h3>
-                          <ul className="space-y-2 list-none pl-1 text-xs md:text-sm">
-                             <li>{getT('infoHowTo1')}</li>
-                             <li>{getT('infoHowTo2')}</li>
-                             <li>{getT('infoHowTo3')}</li>
-                             <li>{getT('infoHowTo4')}</li>
-                             <li>{getT('infoHowTo5')}</li>
-                             <li>{getT('infoHowTo6')}</li>
-                          </ul>
-                        </div>
+                        <div><h3 className={`font-bold ${textMain} mb-2`}>{getT('infoHowToTitle')}</h3><ul className="space-y-2 list-none pl-1 text-xs md:text-sm"><li>{getT('infoHowTo1')}</li><li>{getT('infoHowTo2')}</li><li>{getT('infoHowTo3')}</li><li>{getT('infoHowTo4')}</li><li>{getT('infoHowTo5')}</li><li>{getT('infoHowTo6')}</li></ul></div>
                         <div className={`w-full h-px bg-stone-200 dark:bg-stone-700`}></div>
                         <div className="flex items-start gap-3"><HardDrive size={18} className={`mt-0.5 flex-shrink-0 ${accentRed}`} /><p className="leading-relaxed">{getT('infoData')}</p></div>
                         <div className="flex items-start gap-3"><Github size={18} className={`mt-0.5 flex-shrink-0 ${textMain}`} /><p className="leading-relaxed">{getT('infoUsage')}</p></div>
                         <p className={`text-center pt-2 italic text-xs ${textSub}`}>{getT('infoFooter')}</p>
                       </div>
                     </div>
-                    <div className="p-6 pt-4 flex-shrink-0 border-t border-stone-100 dark:border-stone-800/50">
-                      <button onClick={() => setShowInfo(false)} className={`w-full py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors shadow-md`}>{getT('gotIt')}</button>
-                    </div>
+                    <div className="p-6 pt-4 flex-shrink-0 border-t border-stone-100 dark:border-stone-800/50"><button onClick={() => setShowInfo(false)} className={`w-full py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors shadow-md`}>{getT('gotIt')}</button></div>
                   </div>
                 </div>
               )}
@@ -1924,9 +1603,7 @@
                   <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl`}>
                     <div className="flex items-center gap-3 mb-6"><Globe size={24} className={accentGreen} /><h2 className={`text-xl font-bold ${textMain}`}>Select Language</h2></div>
                     <div className="grid grid-cols-2 gap-3 mb-6">
-                      {availableLanguages.map((l) => (
-                        <button key={l.code} onClick={() => handleLanguageChange(l.code)} className={`py-3 rounded-xl font-semibold border transition-all ${lang === l.code ? `bg-emerald-500 text-white border-emerald-500 shadow-md` : `${bgMain} ${borderSub} ${textSub} hover:${textMain} hover:border-emerald-400/50`}`}>{l.name}</button>
-                      ))}
+                      {availableLanguages.map((l) => (<button key={l.code} onClick={() => handleLanguageChange(l.code)} className={`py-3 rounded-xl font-semibold border transition-all ${lang === l.code ? `bg-emerald-500 text-white border-emerald-500 shadow-md` : `${bgMain} ${borderSub} ${textSub} hover:${textMain} hover:border-emerald-400/50`}`}>{l.name}</button>))}
                     </div>
                     <button onClick={() => setShowLangMenu(false)} className={`w-full py-3 rounded-xl font-semibold border ${borderSub} ${textSub} hover:${textMain}`}>{getT('cancel')}</button>
                   </div>
@@ -1957,12 +1634,8 @@
               {secretGame && (
                   <div className="fixed inset-0 z-[200] bg-stone-900 text-stone-100 flex flex-col animate-screen-enter select-none">
                       <div className="p-4 flex justify-between items-center border-b border-stone-800 bg-stone-950">
-                          <h2 className="text-xl font-black text-emerald-400 flex items-center gap-2">
-                              <Gamepad2 size={24} /> ARCADE MODE
-                          </h2>
-                          <button onClick={() => setSecretGame(secretGame === 'menu' ? null : 'menu')} className="p-2 bg-stone-800 hover:bg-stone-700 rounded-full">
-                              {secretGame === 'menu' ? <X size={20} /> : <Grid size={20} />}
-                          </button>
+                          <h2 className="text-xl font-black text-emerald-400 flex items-center gap-2"><Gamepad2 size={24} /> ARCADE MODE</h2>
+                          <button onClick={() => setSecretGame(secretGame === 'menu' ? null : 'menu')} className="p-2 bg-stone-800 hover:bg-stone-700 rounded-full">{secretGame === 'menu' ? <X size={20} /> : <Grid size={20} />}</button>
                       </div>
                       <div className="flex-1 p-4 overflow-y-auto">
                           {secretGame === 'menu' && <ArcadeMenu onSelect={(id) => setSecretGame(id)} />}
