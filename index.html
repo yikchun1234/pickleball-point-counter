@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Pickleball Point Counter</title>
     
-    <!-- FIXED: Added 'manifest-src' and allowed 'blob:' in script-src so Chrome can read the dynamic App Manifest and Service Worker -->
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self'; 
         script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://static.cloudflareinsights.com blob:; 
@@ -19,8 +18,6 @@
     ">
 
     <script>
-        // --- 2. Domain Lock ---
-        // Only allow execution on authorized domains or local dev
         const allowedDomains = ["pickleball-point-counter.pages.dev", "localhost", "127.0.0.1", ""];
         const currentDomain = window.location.hostname;
 
@@ -36,26 +33,13 @@
             throw new Error("Execution halted: Unauthorized domain theft detected.");
         }
 
-        // --- 3. Anti-Debugger Loop ---
-        // Freezes developer tools to prevent easy code inspection
-        setInterval(function() {
-            debugger;
-        }, 100);
-        
-        // Prevent right-click context menu
+        setInterval(function() { debugger; }, 100);
         document.addEventListener('contextmenu', event => event.preventDefault());
-
-        // --- 4. Block Developer Keyboard Shortcuts ---
         document.addEventListener('keydown', function(e) {
-            // Block F12
             if (e.key === 'F12' || e.keyCode === 123) e.preventDefault();
-            // Block Ctrl+Shift+I (Inspect) and Cmd+Opt+I (Mac)
             if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) e.preventDefault();
-            // Block Ctrl+Shift+J (Console) and Cmd+Opt+J (Mac)
             if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) e.preventDefault();
-            // Block Ctrl+U (View Source) and Cmd+Opt+U (Mac)
             if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) e.preventDefault();
-            // Block Ctrl+S (Save Page) and Cmd+S (Mac)
             if ((e.ctrlKey || e.metaKey) && (e.key === 'S' || e.key === 's' || e.keyCode === 83)) e.preventDefault();
         });
     </script>
@@ -66,72 +50,30 @@
     <meta name="apple-mobile-web-app-title" content="Pickleball Point Counter">
     <meta name="mobile-web-app-capable" content="yes">
 
-    <!-- 1. OPTIMIZE FONT LOADING (Fixes render-blocking) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
     <link id="favicon" rel="icon" type="image/png" sizes="512x512" href="/img/icon.png">
     <link id="apple-icon" rel="apple-touch-icon" sizes="512x512" href="/img/icon.png">
-    
-    <!-- 1. STANDARD PWA MANIFEST (Points to real file) -->
     <link id="manifest-link" rel="manifest" href="/script/manifest.json">
 
-    <!-- PWA Event Catcher & Service Worker -->
     <script>
-        // 2. Catch the install prompt INSTANTLY before React loads
         window.globalInstallPrompt = null;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             window.globalInstallPrompt = e;
         });
 
-        // 3. Register the real Service Worker (Required by Desktop Chrome)
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch(()=>{});
-            });
+            window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(()=>{}); });
         }
-
-        // 4. Generate Padded Icons for iOS/Favicon in the background
-        (function() {
-            const img = new Image();
-            img.crossOrigin = "Anonymous"; 
-            img.onload = function() {
-                try {
-                    const canvasAndroid = document.createElement('canvas');
-                    canvasAndroid.width = 512; canvasAndroid.height = 512;
-                    const ctxAndroid = canvasAndroid.getContext('2d');
-                    ctxAndroid.fillStyle = '#ffffff'; ctxAndroid.fillRect(0, 0, 512, 512);
-                    const scaleAndroid = 0.65; const sizeAndroid = 512 * scaleAndroid;
-                    ctxAndroid.drawImage(img, (512 - sizeAndroid) / 2, (512 - sizeAndroid) / 2, sizeAndroid, sizeAndroid);
-                    
-                    const canvasIOS = document.createElement('canvas');
-                    canvasIOS.width = 512; canvasIOS.height = 512;
-                    const ctxIOS = canvasIOS.getContext('2d');
-                    ctxIOS.fillStyle = '#ffffff'; ctxIOS.fillRect(0, 0, 512, 512);
-                    const scaleIOS = 0.9; const sizeIOS = 512 * scaleIOS;
-                    ctxIOS.drawImage(img, (512 - sizeIOS) / 2, (512 - sizeIOS) / 2, sizeIOS, sizeIOS);
-                    
-                    document.getElementById('favicon').href = canvasAndroid.toDataURL('image/png');
-                    document.getElementById('apple-icon').href = canvasIOS.toDataURL('image/png');
-                } catch (e) { }
-            };
-            img.src = '/img/icon.png';
-        })();
     </script>
 
     <script>
-        // 1. INJECT MANIFEST IMMEDIATELY (So Chrome sees it instantly, no waiting!)
         const appUrl = window.location.pathname || "/";
         const manifest = {
-            name: "Pickleball Point Counter",
-            short_name: "Pickleball",
-            start_url: appUrl,
-            id: appUrl,
-            display: "standalone",
-            background_color: "#fafaf9",
-            theme_color: "#10b981",
+            name: "Pickleball Point Counter", short_name: "Pickleball", start_url: appUrl, id: appUrl,
+            display: "standalone", background_color: "#fafaf9", theme_color: "#10b981",
             icons: [
                 { src: "/img/icon.png", sizes: "192x192", type: "image/jpeg", purpose: "any maskable" },
                 { src: "/img/icon.png", sizes: "512x512", type: "image/jpeg", purpose: "any maskable" }
@@ -139,62 +81,35 @@
         };
         document.getElementById('manifest-link').href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
 
-        // 2. Generate Padded Icons for iOS/Favicon in the background
         (function() {
-            const img = new Image();
-            img.crossOrigin = "Anonymous"; 
+            const img = new Image(); img.crossOrigin = "Anonymous"; 
             img.onload = function() {
                 try {
-                    const canvasAndroid = document.createElement('canvas');
-                    canvasAndroid.width = 512; canvasAndroid.height = 512;
-                    const ctxAndroid = canvasAndroid.getContext('2d');
-                    ctxAndroid.fillStyle = '#ffffff'; 
-                    ctxAndroid.fillRect(0, 0, 512, 512);
-                    const scaleAndroid = 0.65; 
-                    const sizeAndroid = 512 * scaleAndroid;
-                    const offsetAndroid = (512 - sizeAndroid) / 2;
+                    const canvasAndroid = document.createElement('canvas'); canvasAndroid.width = 512; canvasAndroid.height = 512;
+                    const ctxAndroid = canvasAndroid.getContext('2d'); ctxAndroid.fillStyle = '#ffffff'; ctxAndroid.fillRect(0, 0, 512, 512);
+                    const scaleAndroid = 0.65; const sizeAndroid = 512 * scaleAndroid; const offsetAndroid = (512 - sizeAndroid) / 2;
                     ctxAndroid.drawImage(img, offsetAndroid, offsetAndroid, sizeAndroid, sizeAndroid);
                     
-                    const canvasIOS = document.createElement('canvas');
-                    canvasIOS.width = 512; canvasIOS.height = 512;
-                    const ctxIOS = canvasIOS.getContext('2d');
-                    ctxIOS.fillStyle = '#ffffff'; 
-                    ctxIOS.fillRect(0, 0, 512, 512);
-                    const scaleIOS = 0.9;
-                    const sizeIOS = 512 * scaleIOS;
-                    const offsetIOS = (512 - sizeIOS) / 2;
+                    const canvasIOS = document.createElement('canvas'); canvasIOS.width = 512; canvasIOS.height = 512;
+                    const ctxIOS = canvasIOS.getContext('2d'); ctxIOS.fillStyle = '#ffffff'; ctxIOS.fillRect(0, 0, 512, 512);
+                    const scaleIOS = 0.9; const sizeIOS = 512 * scaleIOS; const offsetIOS = (512 - sizeIOS) / 2;
                     ctxIOS.drawImage(img, offsetIOS, offsetIOS, sizeIOS, sizeIOS);
                     
                     document.getElementById('favicon').href = canvasAndroid.toDataURL('image/png');
                     document.getElementById('favicon').type = 'image/png';
                     document.getElementById('apple-icon').href = canvasIOS.toDataURL('image/png');
-                } catch (e) {
-                    console.warn("Could not generate padded icon due to CORS.");
-                }
+                } catch (e) {}
             };
             img.src = '/img/icon.png';
         })();
     </script>
     
-    <!-- Catch Install Prompt Early -->
-    <script>
-        window.globalInstallPrompt = null;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            window.globalInstallPrompt = e;
-        });
-    </script>
-    
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
     <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- 2. INLINE THEME DETECTOR (Prevents white-flash on dark mode) -->
     <script>
         (function() {
             try {
@@ -209,77 +124,27 @@
     </script>
 
     <style>
-        /* * Stable Background & Body Rendering */
-        html, body { 
-            width: 100%; 
-            min-height: 100vh;
-            min-height: 100dvh;
-            -webkit-tap-highlight-color: transparent; 
-            background-color: var(--app-bg, #fafaf9) !important; 
-            transition: background-color 0.3s ease;
-            -webkit-touch-callout: none; 
-            -webkit-user-select: none;   
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        
-        body { 
-            font-family: 'Noto Sans', sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            overscroll-behavior-y: none; 
-        }
-
-        input, select, textarea {
-            -webkit-user-select: auto !important;
-            -khtml-user-select: auto !important;
-            -moz-user-select: auto !important;
-            -ms-user-select: auto !important;
-            user-select: auto !important;
-        }
-
-        /* * Screen Animations */
-        @keyframes scaleFadeIn {
-            0% { opacity: 0; transform: scale(0.96) translateY(20px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        @keyframes scaleFadeOut {
-            0% { opacity: 1; transform: scale(1) translateY(0); }
-            100% { opacity: 0; transform: scale(0.96) translateY(20px); }
-        }
+        html, body { width: 100%; min-height: 100vh; min-height: 100dvh; -webkit-tap-highlight-color: transparent; background-color: var(--app-bg, #fafaf9) !important; transition: background-color 0.3s ease; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+        body { font-family: 'Noto Sans', sans-serif; margin: 0; padding: 0; overscroll-behavior-y: none; }
+        input, select, textarea { -webkit-user-select: auto !important; -khtml-user-select: auto !important; -moz-user-select: auto !important; -ms-user-select: auto !important; user-select: auto !important; }
+        @keyframes scaleFadeIn { 0% { opacity: 0; transform: scale(0.96) translateY(20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes scaleFadeOut { 0% { opacity: 1; transform: scale(1) translateY(0); } 100% { opacity: 0; transform: scale(0.96) translateY(20px); } }
         .animate-screen-enter { animation: scaleFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .animate-screen-exit { animation: scaleFadeOut 0.28s cubic-bezier(0.4, 0, 1, 1) forwards; }
-
-        @keyframes popInButton {
-            0% { opacity: 0; transform: scale(0.8) translateY(-10px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); }
-        }
+        @keyframes popInButton { 0% { opacity: 0; transform: scale(0.8) translateY(-10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
         .animate-pop-btn-1 { animation: popInButton 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards; opacity: 0; }
         .animate-pop-btn-2 { animation: popInButton 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards; opacity: 0; }
-
-        @keyframes popOutButton {
-            0% { opacity: 1; transform: scale(1) translateY(0); }
-            100% { opacity: 0; transform: scale(0.8) translateY(-10px); }
-        }
+        @keyframes popOutButton { 0% { opacity: 1; transform: scale(1) translateY(0); } 100% { opacity: 0; transform: scale(0.8) translateY(-10px); } }
         .animate-pop-out-btn-1 { animation: popOutButton 0.25s cubic-bezier(0.4, 0, 1, 1) forwards; }
         .animate-pop-out-btn-2 { animation: popOutButton 0.25s cubic-bezier(0.4, 0, 1, 1) 0.05s forwards; }
-
-        @keyframes secretHintBounce {
-            0%, 90%, 100% { transform: scale(1) translateY(0); }
-            95% { transform: scale(1.02) translateY(-4px); }
-        }
+        @keyframes secretHintBounce { 0%, 90%, 100% { transform: scale(1) translateY(0); } 95% { transform: scale(1.02) translateY(-4px); } }
         .animate-secret-hint { animation: secretHintBounce 5s infinite ease-in-out; cursor: pointer; display: inline-block; }
-        
         @keyframes pulse-static { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
         @keyframes spin-static { 100% { transform: rotate(360deg); } }
         .animate-spin-static { animation: spin-static 1.5s linear infinite; }
     </style>
 </head>
 <body style="background-color: var(--app-bg); color: var(--app-text);">
-    
-    <!-- 3. STATIC PRELOADER (Fixes 10-second LCP blank screen) -->
     <div id="root">
         <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:50;">
             <div style="text-align:center; z-index:10; margin-bottom:3rem;">
@@ -386,7 +251,7 @@
           ja: { appTitle: "ピックルボール", appSub: "カウンター", tapToStart: "タップして開始", newMatch: "新しい試合", selectFormat: "フォーマットを選択", singles: "シングルス", doubles: "ダブルス", stdTitle: "標準 (11点)", stdDescSingle: "11点先取 • 2点差", stdDescDouble: "11点先取 • 2点差", fourteenTitle: "14点ルール", fourteenDesc: "15点先取 • ラリースコア", customFormat: "カスタム", customDesc: "ルールを作成", playTo: "目標スコア", winBy: "勝利の差", t1Name: "プレイヤー 1", t2Name: "プレイヤー 2", team1: "チーム 1", team2: "チーム 2", server: "サーバー", wonRally: "ポイント", serving: "サーブ中", winner: "勝利！", playAgain: "もう一度", undo: "元に戻す", reset: "棄権", timeline: "タイムライン", awaiting: "待機中...", suddenDeath: "サドンデス", nextPointWins: "次のポイントで勝利", install: "アプリをインストール", serveToWinOption: "14-14 サーブで勝利", serveToWinDesc: "サーブ権が必要", suddenDeathServeDesc: "サーブが必要", switchEndsOption: "コート交代の提示", switchEndsOptionDesc: "半分のポイントでコート交代を通知", customServeToWin: "サーブで得点", customServeToWinDesc: "サーブ側のみ得点可能 (0-0-2)", customServeToWinDescSingle: "サーブ側のみ得点可能 (0-0)", matchPoint: "マッチポイント", cancel: "キャンセル", startMatch: "開始", t1Label: "T1", t2Label: "T2", installAsApp: "アプリをインストール", designBy: "Amos © 2026", matchTitlePlaceholder: "タイトル (任意)", matchHistory: "履歴", clearHistory: "履歴を消去", reviewMatch: "確認", noHistory: "試合がありません", untitledMatch: "フレンドリー", confirmClear: "すべて消去？", yesClear: "はい", showResults: "結果", installStepsIOS: '共有 -> ホーム画面に追加。', installStepsAndroid: 'メニュー -> インストール。', gotIt: '了解！', infoTitle: '情報', infoHowToTitle: '使い方', infoHowTo1: '1. 設定: フォーマット、ルール、タイムアウト、コート交代を選択します。', infoHowTo2: '2. スコア: チームをタップして得点します。間違いは元に戻すで修正できます。', infoHowTo3: '3. コート図: 立ち位置を確認できます。視点に合わせてコートを回転可能です。', infoHowTo4: '4. 音声: スピーカーをオンにすると、自動でスコアを読み上げます。', infoHowTo5: '5. 共有: 履歴や統計を確認し、試合結果を画像としてエクスポートできます。', infoHowTo6: '6. 秘密: 「どこか」を5回タップして「イースターエッグ」を解放', infoData: 'ローカルデータ。クラウドなし。', infoUsage: 'オープンソース。Amosにクレジットを。', infoFooter: '❤️で作られました。', retreatTitle: '棄権？', t1Retreat: 'T1棄権', t2Retreat: 'T2棄権', quitMatch: '終了', quitConfirm: 'メニューに戻る？', yesQuit: 'はい', winByRetreat: '棄権による勝利！', loading: '読み込み中...', switchEnds: "コート交代！", switchEndsDesc: "コートを交代してください。", resumeMatch: "試合を再開", resumeDesc: "中断した試合を再開しますか？", stats: "統計", totalMatches: "合計試合", avgDuration: "平均時間", share: "共有", edit: "編集", winRate: "T1勝率", time: "時間", firstServer: "最初のサーブ", sideOut: "サイドアウト", secondServer: "セカンドサーバー", totalPoints: "合計ポイント", winDist: "勝利の分布", formatStats: "フォーマットの統計", enableTimeouts: "タイムアウトを有効化", timeoutsDesc: "各チーム1回のタイムアウト", customTimeoutsDesc: "各チームのタイムアウト (0-3)", callTimeout: "タイムアウト", courtPosTitle: "コートポジション", courtPosDesc: "サーバーとレシーバーの位置", receiver: "レシーバー", generatingImage: "画像を生成中", t1P1: "T1 L. プレイヤー", t1P2: "T1 R. プレイヤー", t2P1: "T2 L. プレイヤー", t2P2: "T2 R. プレイヤー", oddCourt: "(左から)", evenCourt: "(右から)", point: "ポイント", resetMatch: "リセット", resetTitle: "試合をリセットしますか？", resetWarning: "現在の進行状況は保存されません。", resetSettings: "プレイヤー/設定を変更", resetPoints: "ポイントのみリセット", menu: "メニュー", shareApp: "アプリを共有", shareAppTitle: "プレイヤーと共有", shareAppText: "ピックルボールファンの皆さん！🏓 スコアを忘れる心配はもうありません。この素晴らしいポイントカウンターをぜひ使ってみてください！", copied: "コピーしました！", serverTimeout: "サーバーのタイムアウト", receiverTimeout: "レシーバーのタイムアウト" },
           ko: { appTitle: "피클볼", appSub: "카운터", tapToStart: "탭하여 시작", newMatch: "새 경기", selectFormat: "형식 선택", singles: "단식", doubles: "복식", stdTitle: "표준 (11점)", stdDescSingle: "11점 • 2점차", stdDescDouble: "11점 • 2점차", fourteenTitle: "14점 규칙", fourteenDesc: "15점 • 랠 스코어", customFormat: "사용자 지정", customDesc: "규칙 만들기", playTo: "목표 점수", winBy: "승리 점수차", t1Name: "플레이어 1", t2Name: "플레이어 2", team1: "팀 1", team2: "팀 2", 서버: "서버", wonRally: "포인트", serving: "서브 중", winner: "승리!", playAgain: "다시 하기", undo: "실행 취소", reset: "기권", timeline: "타임라인", awaiting: "대기 중...", suddenDeath: "서든 데스", nextPointWins: "다음 포인트 승리", install: "앱 설치", serveToWinOption: "14-14 서브 득점 승리", serveToWinDesc: "서브권 필요", suddenDeathServeDesc: "서브 필요", switchEndsOption: "코트 변경 알림", switchEndsOptionDesc: "절반 점수에서 코트 변경 알림", customServeToWin: "서브 득점제", customServeToWinDesc: "서브팀만 득점 가능 (0-0-2 규칙)", customServeToWinDescSingle: "서브팀만 득점 가능 (0-0 규칙)", matchPoint: "매치 포인트", cancel: "취소", startMatch: "시작", t1Label: "T1", t2Label: "T2", installAsApp: "앱 설치", designBy: "Amos © 2026", matchTitlePlaceholder: "제목 (선택)", matchHistory: "기록", clearHistory: "기록 삭제", reviewMatch: "확인", noHistory: "경기가 없습니다", untitledMatch: "친선 경기", confirmClear: "모두 삭제?", yesClear: "네", showResults: "결과", installStepsIOS: '공유 -> 홈 화면에 추가.', installStepsAndroid: '메뉴 -> 설치.', gotIt: '알겠습니다!', infoTitle: '정보', infoHowToTitle: '사용법', infoHowTo1: '1. 설정: 모드, 규칙, 타임아웃 및 코트 변경을 선택합니다.', infoHowTo2: '2. 득점: 팀을 탭하여 점수를 추가합니다. 실행 취소로 수정하세요.', infoHowTo3: '3. 코트 맵: 선수 위치를 확인하고 시야에 맞게 코트를 회전할 수 있습니다.', infoHowTo4: '4. 음성: 스피커 아이콘을 켜면 점수를 자동으로 읽어줍니다.', infoHowTo5: '5. 공유: 기록과 통계를 확인하고 경기 결과를 이미지로 내보내세요.', infoHowTo6: '6. 비밀: "어딘가"를 5번 탭하여 "이스터 에그" 열기', infoData: '로컬 데이터. 클라우드 없음.', infoUsage: '오픈 소스. Amos에게 크레딧.', infoFooter: '❤️로 만들었습니다.', retreatTitle: '기권?', t1Retreat: 'T1 기권', t2Retreat: 'T2 기권', quitMatch: '종료', quitConfirm: '메뉴로?', yesQuit: '네', winByRetreat: '기권 승리!', loading: '로딩 중...', switchEnds: "코트 변경!", switchEndsDesc: "코트를 변경하세요.", resumeMatch: "경기 재개", resumeDesc: "중단된 경기를 재개하시겠습니까?", stats: "통계", totalMatches: "총 경기", avgDuration: "평균 시간", share: "공유", edit: "편집", winRate: "T1 승률", time: "시간", firstServer: "첫 서브", sideOut: "사이드 아웃", secondServer: "세컨드 서브", totalPoints: "총 포인트", winDist: "승리 분포", formatStats: "포맷 통계", enableTimeouts: "타임아웃 사용", timeoutsDesc: "팀당 1회 타임아웃", customTimeoutsDesc: "팀당 타임아웃 (0-3)", callTimeout: "타임아웃", courtPosTitle: "코트 위치", courtPosDesc: "서버 및 리시버 위치", receiver: "리시버", generatingImage: "이미지 생성 중", t1P1: "T1 L. 플레이어", t1P2: "T1 R. 플레이어", t2P1: "T2 L. 플레이어", t2P2: "T2 R. 플레이어", oddCourt: "(왼쪽)", evenCourt: "(오른쪽)", point: "포인트", resetMatch: "초기화", resetTitle: "경기를 초기화하시겠습니까?", resetWarning: "현재 진행 상황은 저장되지 않습니다.", resetSettings: "플레이어/설정 변경", resetPoints: "점수만 초기화", menu: "메뉴", shareApp: "앱 공유", shareAppTitle: "플레이어와 공유", shareAppText: "피클볼 팬 여러분! 🏓 점수를 잊어버릴 걱정은 이제 그만. 사용하기 쉽고 멋진 이 피클볼 카운터를 사용해보세요!", copied: "복사됨!", serverTimeout: "서버 타임아웃", receiverTimeout: "리시버 타임아웃" },
           de: { appTitle: "Pickleball", appSub: "Zähler", tapToStart: "Tippen zum Starten", newMatch: "Neues Spiel", selectFormat: "Format wählen", singles: "Einzel", doubles: "Doppel", stdTitle: "Standard (11 Pkt)", stdDescSingle: "Bis 11 • Sieg mit 2", stdDescDouble: "Bis 11 • Sieg mit 2", fourteenTitle: "14-Pkt-Regel", fourteenDesc: "Bis 15 • Rallye", customFormat: "Benutzerdefiniert", customDesc: "Eigene Regeln", playTo: "Spielen bis", winBy: "Sieg mit", t1Name: "Spieler 1", t2Name: "Spieler 2", team1: "Team 1", team2: "Team 2", server: "Aufschläger", wonRally: "Punkt", serving: "Aufschlag", winner: "Gewinnt!", playAgain: "Nochmal spielen", undo: "Rückgängig", reset: "Aufgeben", timeline: "Verlauf", awaiting: "Warten...", suddenDeath: "Sudden Death", nextPointWins: "Nächster Punkt", install: "App installieren", serveToWinOption: "14-14 Aufschlag", serveToWinDesc: "Aufschlag nötig", suddenDeathServeDesc: "Aufschlag nötig", switchEndsOption: "Seitenwechsel-Alarm", switchEndsOptionDesc: "Hinweis zum Seitenwechsel zur Halbzeit", customServeToWin: "Aufschlag für Punkte", customServeToWinDesc: "Nur Aufschläger punktet (0-0-2)", customServeToWinDescSingle: "Nur Aufschläger punktet (0-0)", matchPoint: "Matchball", cancel: "Abbrechen", startMatch: "Starten", t1Label: "T1", t2Label: "T2", installAsApp: "App installieren", designBy: "Amos © 2026", matchTitlePlaceholder: "Titel (Optional)", matchHistory: "Verlauf", clearHistory: "Verlauf löschen", reviewMatch: "Ansehen", noHistory: "Keine Spiele.", untitledMatch: "Freundschaftsspiel", confirmClear: "Alles löschen?", yesClear: "Ja", showResults: "Ergebnisse", installStepsIOS: 'Teilen -> Zum Home-Bildschirm.', installStepsAndroid: 'Menü -> Installieren.', gotIt: 'Verstanden!', infoTitle: 'Info', infoHowToTitle: 'Anleitung', infoHowTo1: '1. Setup: Format, Regeln, Auszeiten und Seitenwechsel wählen.', infoHowTo2: '2. Punkten: Team antippen. Rückgängig machen bei Fehlern.', infoHowTo3: '3. Platz: Positionen prüfen. Platzansicht nach Bedarf drehen.', infoHowTo4: '4. Sprache: Lautsprecher für automatische Ansagen aktivieren.', infoHowTo5: '5. Teilen: Verlauf/Statistiken ansehen und als Bild exportieren.', infoHowTo6: '6. Geheimnis: 5x auf "Irgendwo" tippen für ein "Easter Egg"', infoData: 'Lokale Daten. Keine Cloud.', infoUsage: 'Open Source. Credit an Amos.', infoFooter: 'Mit ❤️ gemacht.', retreatTitle: 'Aufgabe?', t1Retreat: 'T1 Aufgabe', t2Retreat: 'T2 Aufgabe', quitMatch: 'Beenden', quitConfirm: 'Zum Menü?', yesQuit: 'Ja', winByRetreat: 'Sieg durch Aufgabe!', loading: 'Laden...', switchEnds: "Seitenwechsel!", switchEndsDesc: "Bitte Seiten wechseln.", resumeMatch: "Spiel fortsetzen", resumeDesc: "Spiel fortsetzen?", stats: "Statistiken", totalMatches: "Spiele Gesamt", avgDuration: "Ø Dauer", share: "Teilen", edit: "Bearbeiten", winRate: "T1 Siegrate", time: "Zeit", firstServer: "Erster Aufschlag", sideOut: "Aufschlagwechsel", secondServer: "Zweiter Aufschlag", totalPoints: "Gesamtpunkte", winDist: "Siegverteilung", formatStats: "Format-Statistiken", enableTimeouts: "Auszeiten aktivieren", timeoutsDesc: "1 Auszeit pro Team", customTimeoutsDesc: "Auszeiten pro Team (0-3)", callTimeout: "Auszeit", courtPosTitle: "Position auf dem Platz", courtPosDesc: "Startpositionen", receiver: "Rückschläger", generatingImage: "Bild wird erstellt", t1P1: "T1 L. Spieler", t1P2: "T1 R. Spieler", t2P1: "T2 L. Spieler", t2P2: "T2 R. Spieler", oddCourt: "(Links)", evenCourt: "(Rechts)", point: "Punkt", resetMatch: "Zurücksetzen", resetTitle: "Spiel zurücksetzen?", resetWarning: "Der aktuelle Fortschritt wird nicht gespeichert.", resetSettings: "Spieler/Einstellungen ändern", resetPoints: "Nur Punkte zurücksetzen", menu: "Menü", shareApp: "App Teilen", shareAppTitle: "Mit Spielern teilen", shareAppText: "Hallo Pickleball-Fans! 🏓 Vergesst nie wieder den Punktestand. Probiert diesen fantastischen, benutzerfreundlichen Punktezähler aus!", copied: "Kopiert!", serverTimeout: "Auszeit Aufschläger", receiverTimeout: "Auszeit Rückschläger" },
-          pt: { appTitle: "Pickleball", appSub: "Contador", tapToStart: "Toque para começar", newMatch: "Nova Partida", selectFormat: "Formato", singles: "Simples", doubles: "Duplas", stdTitle: "Padrão (11 Pts)", stdDescSingle: "Até 11 • Vence por 2", stdDescDouble: "Até 11 • Vence por 2", fourteenTitle: "Regra 14 Pts", fourteenDesc: "Até 15 • Rally", customFormat: "Personalizado", customDesc: "Crie regras", playTo: "Jogar até", winBy: "Vencer por", t1Name: "Jogador 1", t2Name: "Jogador 2", team1: "Equipe 1", team2: "Equipe 2", server: "Sacador", wonRally: "Ponto", serving: "Sacando", winner: "Venceu!", playAgain: "Jogar Novamente", undo: "Desfazer", reset: "Desistir", timeline: "Histórico", awaiting: "Aguardando...", suddenDeath: "Morte Súbita", nextPointWins: "Próximo ponto vence", install: "Instalar App", serveToWinOption: "14-14 Saque para Vencer", serveToWinDesc: "Deve sacar para vencer", suddenDeathServeDesc: "Deve sacar", switchEndsOption: "Troca de Lado", switchEndsOptionDesc: "Avisar na metade dos pontos", customServeToWin: "Saque para Pontuar", customServeToWinDesc: "Apenas o sacador pontua (0-0-2)", customServeToWinDescSingle: "Apenas o sacador pontua (0-0)", matchPoint: "Ponto do Jogo", cancel: "Cancelar", startMatch: "Iniciar", t1Label: "E1", t2Label: "E2", installAsApp: "Instalar App", designBy: "Amos © 2026", matchTitlePlaceholder: "Título (Opcional)", matchHistory: "Histórico", clearHistory: "Limpar Histórico", reviewMatch: "Revisar", noHistory: "Sem partidas.", untitledMatch: "Amistoso", confirmClear: "Apagar tudo?", yesClear: "Sim", showResults: "Resultados", installStepsIOS: 'Compartilhar -> Tela de Início.', installStepsAndroid: 'Menu -> Instalar.', gotIt: 'Entendi!', infoTitle: 'Info', infoHowToTitle: 'Como Usar', infoHowTo1: '1. Configuração: Escolha formato, regras, tempos e troca de lado.', infoHowTo2: '2. Placar: Toque para pontuar. Use Desfazer para erros.', infoHowTo3: '3. Quadra: Verifique as posições e gire a quadra conforme sua visão.', infoHowTo4: '4. Voz: Ative o alto-falante para anúncios de pontuação.', infoHowTo5: '5. Compartilhar: Veja o histórico, estatísticas e exporte imagens.', infoHowTo6: '6. Segredo: Toque "Em algum lugar" 5 vezes para um "Easter Egg"', infoData: 'Dados locais. Sem nuvem.', infoUsage: 'Open source. Crédito Amos.', infoFooter: 'Feito com ❤️.', retreatTitle: 'Desistência?', t1Retreat: 'E1 Desistiu', t2Retreat: 'E2 Desistiu', quitMatch: 'Sair', quitConfirm: 'Voltar ao menu?', yesQuit: 'Sim', winByRetreat: 'Vence por desistência!', loading: 'Carregando...', switchEnds: "Troca de lado!", switchEndsDesc: "Troquem de lado na quadra.", resumeMatch: "Continuar Partida", resumeDesc: "Continuar partida pendente?", stats: "Estatísticas", totalMatches: "Total Partidas", avgDuration: "Duração Média", share: "Compartilhar", edit: "Editar", winRate: "Taxa Vitória E1", time: "Tempo", firstServer: "Primeiro Saque", sideOut: "Troca de serviço", secondServer: "Segundo saque", totalPoints: "Pontos Totais", winDist: "Distribuição de Vitórias", formatStats: "Estatísticas de Formato", enableTimeouts: "Ativar Pedidos de Tempo", timeoutsDesc: "1 tempo por equipe", customTimeoutsDesc: "Tempos por equipe (0-3)", callTimeout: "Pedir Tempo", courtPosTitle: "Posição na Quadra", courtPosDesc: "Posições do sacador e receptor", receiver: "Recebedor", generatingImage: "Gerando Imagem", t1P1: "E1 L. Jogador", t1P2: "E1 R. Jogador", t2P1: "E2 L. Jogador", t2P2: "E2 R. Jogador", oddCourt: "(Esquerda)", evenCourt: "(Direita)", point: "Ponto", resetMatch: "Reiniciar", resetTitle: "Reiniciar Partida?", resetWarning: "O progresso atual não será salvo.", resetSettings: "Alterar Jogadores/Configurações", resetPoints: "Apenas Reiniciar Pontos", menu: "Menu", shareApp: "Compartilhar App", shareAppTitle: "Compartilhar com Jogadores", shareAppText: "Olá fãs de Pickleball! 🏓 Diga adeus a perder a conta do placar. Conheça este contador de pontos incrível e fácil de usar!", copied: "Copiado!", serverTimeout: "Tempo do sacador", receiverTimeout: "Tempo do recebedor" },
+          pt: { appTitle: "Pickleball", appSub: "Contador", tapToStart: "Toque para começar", newMatch: "Nova Partida", selectFormat: "Formato", singles: "Simples", doubles: "Duplas", stdTitle: "Padrão (11 Pts)", stdDescSingle: "Até 11 • Vence por 2", stdDescDouble: "Até 11 • Vence por 2", fourteenTitle: "Regra 14 Pts", fourteenDesc: "Até 15 • Rally", customFormat: "Personalizado", customDesc: "Crie regras", playTo: "Jogar até", winBy: "Vencer por", t1Name: "Jogador 1", t2Name: "Jogador 2", team1: "Equipe 1", team2: "Equipe 2", server: "Sacador", wonRally: "Ponto", serving: "Sacando", winner: "Venceu!", playAgain: "Jogar Novamente", undo: "Desfazer", reset: "Desistir", timeline: "Histórico", awaiting: "Aguardando...", suddenDeath: "Morte Súbita", nextPointWins: "Próximo ponto vence", install: "Instalar App", serveToWinOption: "14-14 Saque para Vencer", serveToWinDesc: "Deve sacar para vencer", suddenDeathServeDesc: "Deve sacar", switchEndsOption: "Troca de Lado", switchEndsOptionDesc: "Avisar na metade dos pontos", customServeToWin: "Saque para Pontuar", customServeToWinDesc: "Apenas o sacador pontua (0-0-2)", customServeToWinDescSingle: "Apenas o sacador pontua (0-0)", matchPoint: "Ponto do Jogo", cancel: "Cancelar", startMatch: "Iniciar", t1Label: "E1", t2Label: "E2", installAsApp: "Instalar App", designBy: "Amos © 2026", matchTitlePlaceholder: "Título (Opcional)", matchHistory: "Histórico", clearHistory: "Limpar Histórico", reviewMatch: "Revisar", noHistory: "Sem partidas.", untitledMatch: "Amistoso", confirmClear: "Apagar tudo?", yesClear: "Sim", showResults: "Resultados", installStepsIOS: 'Compartilhar -> Tela de Início.', installStepsAndroid: 'Menu -> Instalar.', gotIt: 'Entendi!', infoTitle: 'Info', infoHowToTitle: 'Como Usar', infoHowTo1: '1. Configuração: Escolha formato, regras, tempos e troca de lado.', infoHowTo2: '2. Placar: Toque para pontuar. Use Desfazer para erros.', infoHowTo3: '3. Quadra: Verifique as posições e gire a quadra conforme sua visão.', infoHowTo4: '4. Voz: Ative o alto-falante para anúncios de pontuação.', infoHowTo5: '5. Compartilhar: Veja o histórico, estatísticas e exporte imagens.', infoHowTo6: '6. Segredo: Toque "Em algum lugar" 5 vezes para um "Easter Egg"', infoData: 'Dados locais. Sem nuvem.', infoUsage: 'Open source. Crédito Amos.', infoFooter: 'Feito com ❤️.', retreatTitle: 'Desistência?', t1Retreat: 'E1 Desistiu', t2Retreat: 'E2 Desistiu', quitMatch: 'Sair', quitConfirm: 'Voltar ao menu?', yesQuit: 'Sim', winByRetreat: 'Vence por desistência!', loading: 'Carregando...', switchEnds: "Troca de lado!", switchEndsDesc: "Troquem de lado na quadra.", resumeMatch: "Continuar Partida", resumeDesc: "Continuar partida pendente?", stats: "Estatísticas", totalMatches: "Total Partidas", avgDuration: "Duração Média", share: "Compartir", edit: "Editar", winRate: "Taxa Vitória E1", time: "Tempo", firstServer: "Primeiro Saque", sideOut: "Troca de serviço", secondServer: "Segundo saque", totalPoints: "Pontos Totais", winDist: "Distribuição de Vitórias", formatStats: "Estatísticas de Formato", enableTimeouts: "Ativar Pedidos de Tempo", timeoutsDesc: "1 tempo por equipe", customTimeoutsDesc: "Tempos por equipe (0-3)", callTimeout: "Pedir Tempo", courtPosTitle: "Posição na Quadra", courtPosDesc: "Posições do sacador e receptor", receiver: "Recebedor", generatingImage: "Gerando Imagem", t1P1: "E1 L. Jogador", t1P2: "E1 R. Jogador", t2P1: "E2 L. Jogador", t2P2: "E2 R. Jogador", oddCourt: "(Esquerda)", evenCourt: "(Direita)", point: "Ponto", resetMatch: "Reiniciar", resetTitle: "Reiniciar Partida?", resetWarning: "O progresso atual não será salvo.", resetSettings: "Alterar Jogadores/Configurações", resetPoints: "Apenas Reiniciar Pontos", menu: "Menu", shareApp: "Compartilhar App", shareAppTitle: "Compartilhar com Jogadores", shareAppText: "Olá fãs de Pickleball! 🏓 Diga adeus a perder a conta do placar. Conheça este contador de pontos incrível e fácil de usar!", copied: "Copiado!", serverTimeout: "Tempo do sacador", receiverTimeout: "Tempo do recebedor" },
           vi: { appTitle: "Pickleball", appSub: "Bộ Đếm Điểm", tapToStart: "Chạm để bắt đầu", newMatch: "Tạo Trận Mới", selectFormat: "Chọn thể thức & luật", singles: "Đánh đơn", doubles: "Đánh đôi", stdTitle: "Tiêu chuẩn (11 Điểm)", stdDescSingle: "Luật 0-0 • Đánh đến 11 • Thắng cách biệt 2", stdDescDouble: "Luật 0-0-2 • Đánh đến 11 • Thắng cách biệt 2", fourteenTitle: "Luật 14 Điểm", fourteenDesc: "Điểm trực tiếp • Đánh đến 15", customFormat: "Tùy chỉnh", customDesc: "Tự đặt điểm và luật thắng", playTo: "Đánh Đến", winBy: "Thắng Cách Biệt", t1Name: "Người chơi 1", t2Name: "Người chơi 2", team1: "Đội 1", team2: "Đội 2", server: "Giao bóng", wonRally: "Ghi điểm", serving: "Đang giao bóng", winner: "Thắng Trận!", playAgain: "Chơi Lại", undo: "Hoàn tác", reset: "Rút lui", timeline: "Lịch sử Điểm", awaiting: "Đang chờ giao bóng...", suddenDeath: "Điểm Quyết Định", nextPointWins: "Điểm tiếp theo sẽ thắng", install: "Cài đặt Ứng dụng", serveToWinOption: "14-14 Giao Bóng Để Thắng", serveToWinDesc: "Phải cầm giao bóng để thắng ở tỷ số 14-14", suddenDeathServeDesc: "Phải giao bóng để thắng", switchEndsOption: "Đổi Sân", switchEndsOptionDesc: "Nhắc đổi sân khi được nửa số điểm", customServeToWin: "Giao Bóng Để Ghi Điểm", customServeToWinDesc: "Chỉ đội giao bóng mới ghi điểm (Luật 0-0-2)", customServeToWinDescSingle: "Chỉ đội giao bóng mới ghi điểm (Luật 0-0)", matchPoint: "Match Point", cancel: "Hủy", startMatch: "Bắt đầu", t1Label: "Đ1", t2Label: "Đ2", installAsApp: "Cài đặt làm ứng dụng", designBy: "Thiết kế bởi Amos © 2026", matchTitlePlaceholder: "Tên Trận Đấu (Tùy chọn)", matchHistory: "Lịch Sử Trận Đấu", clearHistory: "Xóa Lịch Sử", reviewMatch: "Xem Lại Lịch Sử", noHistory: "Chưa có trận nào.", untitledMatch: "Trận Giao Hữu", confirmClear: "Xóa toàn bộ lịch sử?", yesClear: "Vâng, Xóa Hết", showResults: "Xem Kết Quả", installStepsIOS: 'Nhấn biểu tượng Chia sẻ ở dưới, chọn "Thêm vào MH chính".', installStepsAndroid: 'Mở menu trình duyệt và chọn "Cài đặt ứng dụng".', gotIt: 'Đã hiểu!', infoTitle: 'Thông tin', infoHowToTitle: 'Cách Sử Dụng', infoHowTo1: '1. Thiết lập: Chọn thể thức, luật, Hết giờ hoặc Đổi sân.', infoHowTo2: '2. Ghi điểm: Nhấn vào đội để ghi điểm. Dùng Hoàn tác nếu sai.', infoHowTo3: '3. Sân: Kiểm tra vị trí. Xoay sân cho đúng góc nhìn.', infoHowTo4: '4. Giọng nói: Bật loa để đọc điểm tự động.', infoHowTo5: '5. Chia sẻ: Lưu lịch sử, xem thống kê và xuất hình ảnh.', infoHowTo6: '6. Bí mật: Nhấn "Tạo Trận Mới" 5 lần để mở khóa Arcade!', infoData: 'Tất cả dữ liệu lưu trên máy bạn. Không dùng đám mây.', infoUsage: 'Dự án nguồn mở. Miễn phí sử dụng (Amos).', infoFooter: 'Thiết kế với ❤️ cho cộng đồng Pickleball.', retreatTitle: 'Ai rút lui?', t1Retreat: 'Đội 1 Rút lui', t2Retreat: 'Đội 2 Rút lui', quitMatch: 'Thoát', quitConfirm: 'Trở về menu chính?', yesQuit: 'Vâng, Thoát', winByRetreat: 'Thắng do đối thủ rút lui!', loading: 'Đang tải...', switchEnds: "Đổi Sân!", switchEndsDesc: "Hai đội hãy đổi sân ngay bây giờ.", resumeMatch: "Tiếp Tục Trận", resumeDesc: "Bạn có một trận chưa đấu xong. Tiếp tục?", stats: "Thống Kê", totalMatches: "Tổng Trận", avgDuration: "TG Trung Bình", share: "Chia sẻ", edit: "Sửa", winRate: "Tỉ Lệ Thắng Đ1", time: "Thời gian", firstServer: "Giao Bóng 1", sideOut: "Đổi giao bóng", secondServer: "Giao bóng 2", totalPoints: "Tổng Điểm", winDist: "Phân Bố Thắng", formatStats: "Thống Kê Thể Thức", enableTimeouts: "Bật Hội Ý", timeoutsDesc: "1 lần hội ý mỗi đội", customTimeoutsDesc: "Hội ý mỗi đội (0-3)", callTimeout: "Xin Hội Ý", courtPosTitle: "Hướng Dẫn Sân", courtPosDesc: "Vị trí giao và nhận bóng", receiver: "Đỡ bóng", generatingImage: "Đang Tạo Hình", t1P1: "Đ1 Trái", t1P2: "Đ1 Phải", t2P1: "Đ2 Trái", t2P2: "Đ2 Phải", oddCourt: "(Lẻ)", evenCourt: "(Chẵn)", point: "Điểm", resetMatch: "Đặt lại", resetTitle: "Đặt lại Trận đấu?", resetWarning: "Tiến trình hiện tại sẽ không được lưu.", resetSettings: "Đổi Người chơi/Cài đặt", resetPoints: "Chỉ đặt lại điểm", menu: "Menu", shareApp: "Chia sẻ App", shareAppTitle: "Chia sẻ với Người chơi", shareAppText: "Chào người hâm mộ Pickleball! 🏓 Không còn lo quên điểm số nữa. Hãy thử Bộ Đếm Điểm Pickleball tuyệt vời và dễ sử dụng này!", copied: "Đã sao chép!", serverTimeout: "Bên giao bóng hội ý", receiverTimeout: "Bên đỡ bóng hội ý" },
           th: { appTitle: "Pickleball", appSub: "ตัวนับคะแนน", tapToStart: "แตะเพื่อเริ่ม", newMatch: "สร้างแมตช์ใหม่", selectFormat: "เลือกรูปแบบและกฎ", singles: "เดี่ยว", doubles: "คู่", stdTitle: "มาตรฐาน (11 แต้ม)", stdDescSingle: "กฎ 0-0 • เล่นถึง 11 • ชนะห่าง 2", stdDescDouble: "กฎ 0-0-2 • เล่นถึง 11 • ชนะห่าง 2", fourteenTitle: "กฎ 14 แต้ม", fourteenDesc: "แรลลี่สกอร์ • เล่นถึง 15", customFormat: "กำหนดเอง", customDesc: "ตั้งคะแนนและกฎการชนะเอง", playTo: "เล่นถึง", winBy: "ชนะห่าง", t1Name: "ผู้เล่น 1", t2Name: "ผู้เล่น 2", team1: "ทีม 1", team2: "ทีม 2", server: "เสิร์ฟ", wonRally: "ได้แต้ม", serving: "กำลังเสิร์ฟ", winner: "ชนะการแข่งขัน!", playAgain: "เล่นอีกครั้ง", undo: "ย้อนกลับ", reset: "ยอมแพ้", timeline: "ไทม์ไลน์", awaiting: "รอเสิร์ฟแรก...", suddenDeath: "ซัดเดนเดธ", nextPointWins: "แต้มต่อไปชนะ", install: "ติดตั้งแอป", serveToWinOption: "14-14 ต้องเสิร์ฟเพื่อชนะ", serveToWinDesc: "ต้องเป็นฝ่ายเสิร์ฟเพื่อปิดเกมที่ 14-14", suddenDeathServeDesc: "ต้องเสิร์ฟเพื่อชนะ", switchEndsOption: "สลับฝั่ง", switchEndsOptionDesc: "เตือนให้สลับฝั่งเมื่อถึงครึ่งทาง", customServeToWin: "เสิร์ฟเพื่อทำแต้ม", customServeToWinDesc: "เฉพาะฝ่ายเสิร์ฟถึงจะได้แต้ม (กฎ 0-0-2)", customServeToWinDescSingle: "เฉพาะฝ่ายเสิร์ฟถึงจะได้แต้ม (กฎ 0-0)", matchPoint: "แมตช์พอยต์", cancel: "ยกเลิก", startMatch: "เริ่มการแข่งขัน", t1Label: "ท1", t2Label: "ท2", installAsApp: "ติดตั้งเป็นแอปหลัก", designBy: "ออกแบบโดย Amos © 2026", matchTitlePlaceholder: "ชื่อการแข่งขัน (ไม่บังคับ)", matchHistory: "ประวัติการแข่งขัน", clearHistory: "ล้างประวัติ", reviewMatch: "ดูไทม์ไลน์", noHistory: "ยังไม่มีการแข่งขัน", untitledMatch: "กระชับมิตร", confirmClear: "ล้างประวัติการแข่งขันทั้งหมดหรือไม่?", yesClear: "ใช่ ล้างทั้งหมด", showResults: "ดูผลลัพธ์", installStepsIOS: 'แตะไอคอนแชร์ด้านล่าง แล้วเลือก "เพิ่มไปยังหน้าจอโฮม"', installStepsAndroid: 'เปิดเมนูเบราว์เซอร์ แล้วเลือก "ติดตั้งแอป"', gotIt: 'เข้าใจแล้ว!', infoTitle: 'ข้อมูล', infoHowToTitle: 'วิธีใช้งาน', infoHowTo1: '1. ตั้งค่า: เลือกรูปแบบ กฎ เวลานอก และการสลับฝั่ง', infoHowTo2: '2. การนับคะแนน: แตะที่ทีมเพื่อเพิ่มคะแนน ใช้ "ย้อนกลับ" หากผิดพลาด', infoHowTo3: '3. แผนผังสนาม: ดูตำแหน่งผู้เล่น หมุนสนามตามมุมมองของคุณได้', infoHowTo4: '4. เสียง: เปิดไอคอนลำโพงเพื่อประกาศคะแนนอัตโนมัติ', infoHowTo5: '5. แชร์: บันทึกประวัติ ดูสถิติ และส่งออกรูปภาพ', infoHowTo6: '6. ความลับ: แตะ "สร้างแมตช์ใหม่" 5 ครั้งเพื่อปลดล็อก Arcade!', infoData: 'ข้อมูลทั้งหมดถูกเก็บไว้ในเครื่องของคุณ ไม่มีระบบคลาวด์', infoUsage: 'โปรเจกต์โอเพนซอร์ส ใช้ฟรี (Amos)', infoFooter: 'ออกแบบด้วย ❤️ เพื่อชุมชน Pickleball', retreatTitle: 'ใครยอมแพ้?', t1Retreat: 'ทีม 1 ยอมแพ้', t2Retreat: 'ทีม 2 ยอมแพ้', quitMatch: 'ออกจากการแข่งขัน', quitConfirm: 'กลับสู่เมนูหลัก? การแข่งขันนี้จะไม่ถูกบันทึก', yesQuit: 'ใช่ ออกเลย', winByRetreat: 'ชนะผ่าน!', loading: 'กำลังโหลด...', switchEnds: "สลับฝั่ง!", switchEndsDesc: "ผู้เล่นควรสลับฝั่งสนามในขณะนี้", resumeMatch: "เล่นต่อ", resumeDesc: "คุณมีการแข่งขันที่ยังไม่จบ ต้องการเล่นต่อหรือไม่?", stats: "สถิติ", totalMatches: "แข่งขันทั้งหมด", avgDuration: "เวลาเฉลี่ย", share: "แชร์", edit: "แก้ไข", winRate: "อัตราชนะ ท1", time: "เวลา", firstServer: "เสิร์ฟแรก", sideOut: "เปลี่ยนเสิร์ฟ", secondServer: "เสิร์ฟที่สอง", totalPoints: "คะแนนรวม", winDist: "การกระจายชัยชนะ", formatStats: "สถิติรูปแบบ", enableTimeouts: "เปิดใช้เวลานอก", timeoutsDesc: "ขอเวลานอกได้ 1 ครั้งต่อทีม", customTimeoutsDesc: "เวลานอกต่อทีม (0-3)", callTimeout: "ขอเวลานอก", courtPosTitle: "ตำแหน่งในสนาม", courtPosDesc: "ตำแหน่งเริ่มต้นของคนเสิร์ฟและรับเสิร์ฟ", receiver: "ผู้รับเสิร์ฟ", generatingImage: "กำลังสร้างรูปภาพ", t1P1: "ท1 ผู้เล่นซ้าย", t1P2: "ท1 ผู้เล่นขวา", t2P1: "ท2 ผู้เล่นซ้าย", t2P2: "ท2 ผู้เล่นขวา", oddCourt: "(ฝั่งซ้าย)", evenCourt: "(ฝั่งขวา)", point: "แต้ม", resetMatch: "รีเซ็ต", resetTitle: "รีเซ็ตการแข่งขัน?", resetWarning: "ความคืบหน้าปัจจุบันจะไม่ถูกบันทึก", resetSettings: "เปลี่ยนผู้เล่น/การตั้งค่า", resetPoints: "รีเซ็ตคะแนนเท่านั้น", menu: "เมนู", shareApp: "แชร์แอป", shareAppTitle: "แชร์กับผู้เล่น", shareAppText: "สวัสดีแฟนๆ Pickleball! 🏓 หมดปัญหาการลืมคะแนน ลองใช้ตัวนับคะแนน Pickleball ที่ยอดเยี่ยมและใช้งานง่ายนี้สิ!", copied: "คัดลอกแล้ว!", serverTimeout: "เวลานอกฝ่ายเสิร์ฟ", receiverTimeout: "เวลานอกฝ่ายรับ" }
         };
@@ -416,6 +281,7 @@
             };
             return map[code] || 'en-US';
         };
+
         // =========================================================================
         // ARCADE MODE: 8 MINI-GAMES
         // =========================================================================
@@ -739,7 +605,7 @@
             );
         };
         // =========================================================================
-        
+
         function PickleballApp() {
           const [appState, setAppState] = useState('splash'); 
           const [closingScreen, setClosingScreen] = useState(null); 
@@ -756,14 +622,12 @@
           const [recoverGameData, setRecoverGameData] = useState(null);
           const [editingMatchId, setEditingMatchId] = useState(null);
           
-          // Timeouts state
           const [enableTimeouts, setEnableTimeouts] = useState(0);
           const [enableTimeoutsSetup, setEnableTimeoutsSetup] = useState(0);
           const [t1Timeouts, setT1Timeouts] = useState(2);
           const [t2Timeouts, setT2Timeouts] = useState(2);
           const [showTimeoutConfirm, setShowTimeoutConfirm] = useState(null);
           
-          // Arcade State
           const [secretGame, setSecretGame] = useState(null); 
           
           const [lang, setLang] = useState('en');
@@ -774,7 +638,6 @@
           const [installPrompt, setInstallPrompt] = useState(null);
           const [isInstalled, setIsInstalled] = useState(false);
 
-          // Player Name State
           const [matchTitleInput, setMatchTitleInput] = useState('');
           const [t1PLeftInput, setT1PLeftInput] = useState('');
           const [t1PRightInput, setT1PRightInput] = useState('');
@@ -785,7 +648,6 @@
           const [startingServer, setStartingServer] = useState(1);
           const [initialServer, setInitialServer] = useState(1);
 
-          // Active Game State
           const [currentMatchId, setCurrentMatchId] = useState(null);
           const [matchTitle, setMatchTitle] = useState('');
           const [gameMode, setGameMode] = useState('double'); 
@@ -825,18 +687,15 @@
           const [savedMatches, setSavedMatches] = useState([]);
           
           const [isExporting, setIsExporting] = useState(false);
-          
           const [showResetModal, setShowResetModal] = useState(false);
           const [showShareAppModal, setShowShareAppModal] = useState(false);
           const [linkCopied, setLinkCopied] = useState(false);
 
           const timelineScrollRef = useRef(null);
           const wakeLockRef = useRef(null);
-
           const t = dict[lang] || dict.en;
           const getT = (key) => t[key] || defaultLang[key];
 
-          // Pre-load voices on startup so they are ready when we need them
           useEffect(() => {
               if ('speechSynthesis' in window) {
                   window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
@@ -844,29 +703,22 @@
               }
           }, []);
 
-          // Force scroll to top on screen transitions and modal openings
           useEffect(() => {
               const scrollTimer = setTimeout(() => {
-                  window.scrollTo(0, 0);
-                  document.documentElement.scrollTop = 0;
-                  document.body.scrollTop = 0;
+                  window.scrollTo(0, 0); document.documentElement.scrollTop = 0; document.body.scrollTop = 0;
               }, 50);
               return () => clearTimeout(scrollTimer);
           }, [appState, pendingGame]);
 
           const isModalOpen = !!(pendingGame || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || (recoverGameData && appState !== 'splash') || showWinnerOverlay || secretGame || showTimeoutConfirm || isExporting || showResetModal || showShareAppModal);
 
-          // Lock body scrolling when a modal is open
           useEffect(() => {
-              if (isModalOpen) {
-                  document.body.style.overflow = 'hidden';
-              } else {
-                  document.body.style.overflow = '';
-              }
+              if (isModalOpen) document.body.style.overflow = 'hidden';
+              else document.body.style.overflow = '';
               return () => { document.body.style.overflow = ''; };
           }, [isModalOpen]);
 
-          const closeScreenToMenu = (screenName) => {
+        const closeScreenToMenu = (screenName) => {
               setClosingScreen(screenName);
               setTimeout(() => {
                   setClosingScreen(null);
@@ -922,14 +774,12 @@
 
           useEffect(() => {
             let timer;
-            // Pauses the match timer if activeTimeoutRemaining > 0
             if (appState === 'game' && !winner && !showRetreatModal && !showBackConfirm && !showSwitchModal && !showTimeoutConfirm && activeTimeoutRemaining === 0) {
               timer = setInterval(() => setElapsedTime(prev => prev + 1), 1000);
             }
             return () => clearInterval(timer);
           }, [appState, winner, showRetreatModal, showBackConfirm, showSwitchModal, showTimeoutConfirm, activeTimeoutRemaining]);
 
-          // Timeout 60-second Countdown Hook
           useEffect(() => {
             let timer;
             if (activeTimeoutRemaining > 0) {
@@ -984,10 +834,8 @@
 
           useEffect(() => {
             const baseColor = isDark ? '#1c1917' : '#fafaf9'; 
-            // Blended modal overlay color for OS status bar:
             const modalColor = isDark ? '#110f0e' : '#969695'; 
             const themeColor = isModalOpen ? modalColor : baseColor;
-            
             const metaThemeColor = document.getElementById('theme-color-meta');
             if (metaThemeColor) metaThemeColor.setAttribute('content', themeColor);
             document.documentElement.style.setProperty('--app-bg', baseColor);
@@ -997,460 +845,6 @@
             if (!navigator.vibrate) return;
             if (type === 'point') navigator.vibrate(50);
             if (type === 'win') navigator.vibrate([200, 100, 200]);
-          };
-
-          // =========================================================================
-          // METHOD #1: NATIVE CANVAS IMAGE GENERATION
-          // =========================================================================
-          const shareMatch = async (match) => {
-            setIsExporting(true);
-
-            setTimeout(async () => {
-                try {
-                    const canvas = document.createElement('canvas');
-                    const width = 1080;
-                    const height = 1350; // Instagram Portrait Aspect Ratio 4:5
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-
-                    // --- 1. Backgrounds ---
-                    const bg = isDark ? '#1c1917' : '#fafaf9';
-                    const textMain = isDark ? '#e7e5e4' : '#292524';
-                    const textSub = isDark ? '#78716c' : '#a8a29e';
-                    const accentGreen = '#10b981';
-                    const accentRed = '#f43f5e';
-                    
-                    ctx.fillStyle = bg;
-                    ctx.fillRect(0, 0, width, height);
-
-                    // Grid Pattern
-                    ctx.fillStyle = isDark ? 'rgba(120,113,108,0.1)' : 'rgba(120,113,108,0.15)';
-                    for(let x=0; x<width; x+=40) {
-                        for(let y=0; y<height; y+=40) {
-                            ctx.beginPath(); ctx.arc(x, y, 1.5, 0, Math.PI*2); ctx.fill();
-                        }
-                    }
-
-                    // Center Glowing Orb
-                    const gradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, 600);
-                    gradient.addColorStop(0, 'rgba(16,185,129,0.15)');
-                    gradient.addColorStop(1, 'transparent');
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(0, 0, width, height);
-
-                    // Utility to draw SVG Strings onto Canvas
-                    const drawSvg = (svgString, x, y, w, h) => {
-                        return new Promise((resolve) => {
-                            const img = new Image();
-                            const svg = new Blob([svgString], {type: 'image/svg+xml;charset=utf-8'});
-                            const DOMURL = window.URL || window.webkitURL || window;
-                            const url = DOMURL.createObjectURL(svg);
-                            img.onload = () => {
-                                ctx.drawImage(img, x, y, w, h);
-                                DOMURL.revokeObjectURL(url);
-                                resolve();
-                            };
-                            img.onerror = (e) => {
-                                console.error("SVG Render Error", e);
-                                DOMURL.revokeObjectURL(url);
-                                resolve();
-                            };
-                            img.src = url;
-                        });
-                    };
-
-                    // --- 2. Top Trophy Icon ---
-                    const trophyColor = '#10b981'; // Unencoded for Blob usage
-                    const trophySvg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="${trophyColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>`;
-                    await drawSvg(trophySvg, width/2 - 50, 100, 100, 100);
-
-                    // --- 3. Match Title & Date ---
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'top';
-                    ctx.fillStyle = textMain;
-                    ctx.font = '900 48px "Noto Sans", sans-serif';
-                    ctx.letterSpacing = '6px';
-                    ctx.fillText((match.title || 'FRIENDLY MATCH').toUpperCase(), width/2, 250);
-
-                    ctx.fillStyle = textSub;
-                    ctx.font = '500 28px "Noto Sans", sans-serif';
-                    ctx.letterSpacing = '0px';
-                    ctx.fillText(match.date, width/2, 320);
-
-                    // --- 4. Team Names ---
-                    const drawNames = (nameStr, x, y) => {
-                        ctx.fillStyle = textSub;
-                        ctx.font = '900 34px "Noto Sans", sans-serif';
-                        ctx.letterSpacing = '4px';
-                        if (match.mode === 'double' && nameStr.includes(' & ')) {
-                            const parts = nameStr.split(' & ');
-                            ctx.fillText(parts[0].toUpperCase(), x, y - 45);
-                            
-                            // Center Dot
-                            ctx.beginPath();
-                            ctx.arc(x, y + 15, 6, 0, Math.PI*2);
-                            ctx.fillStyle = isDark ? '#57534e' : '#d6d3d1';
-                            ctx.fill();
-
-                            ctx.fillStyle = textSub;
-                            ctx.fillText(parts[1].toUpperCase(), x, y + 45);
-                        } else {
-                            ctx.fillText(nameStr.toUpperCase(), x, y + 15);
-                        }
-                    };
-                    drawNames(match.t1Name, width/2 - 250, 500);
-                    drawNames(match.t2Name, width/2 + 250, 500);
-
-                    // --- 5. Massive Scores ---
-                    ctx.font = '900 280px "Noto Sans", sans-serif';
-                    ctx.letterSpacing = '0px';
-                    ctx.textBaseline = 'middle';
-                    
-                    ctx.fillStyle = match.winner === 1 ? accentGreen : textMain;
-                    ctx.fillText(match.t1Score, width/2 - 250, 800);
-                    
-                    ctx.fillStyle = match.winner === 2 ? accentRed : textMain;
-                    ctx.fillText(match.t2Score, width/2 + 250, 800);
-
-                    // Center Hyphen (Visually aligned to the center of the numbers)
-                    ctx.fillStyle = isDark ? '#57534e' : '#d6d3d1';
-                    ctx.beginPath();
-                    ctx.roundRect(width/2 - 40, 800 - 10, 80, 20, 10);
-                    ctx.fill();
-
-                    // --- 6. Winner Badges ---
-                    const drawWinnerBadge = async (color, x, y) => {
-                        const hexColor = color === 'green' ? accentGreen : accentRed;
-                        const iconColor = color === 'green' ? '#d1fae5' : '#ffe4e6'; // Unencoded for Blob usage
-                        const badgeSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>`;
-                        
-                        const badgeW = 280;
-                        const badgeH = 80;
-                        const badgeX = x - badgeW/2;
-                        const badgeY = y - badgeH/2;
-
-                        // Pill background
-                        ctx.fillStyle = hexColor;
-                        ctx.beginPath();
-                        ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 40);
-                        ctx.fill();
-
-                        // Icon
-                        await drawSvg(badgeSvg, badgeX + 40, badgeY + 22, 36, 36);
-
-                        // Text
-                        ctx.fillStyle = '#ffffff';
-                        ctx.font = '700 28px "Noto Sans", sans-serif'; // Adjusted to Bold (700) from Black (900)
-                        ctx.letterSpacing = '4px';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText("WINNER", badgeX + 165, badgeY + badgeH/2 + 2);
-                    };
-
-                    if (match.winner === 1) await drawWinnerBadge('green', width/2 - 250, 1050);
-                    if (match.winner === 2) await drawWinnerBadge('red', width/2 + 250, 1050);
-
-                    // --- 7. Footer Pill ---
-                    const modeText = match.mode === 'single' ? getT('singles') : getT('doubles');
-                    const rulesText = match.rules === 'standard' ? getT('stdTitle') : match.rules === '14-point' ? getT('fourteenTitle') : getT('customFormat');
-                    const timeText = formatTime(match.elapsedTime || 0);
-                    const footerText = `${modeText}   •   ${rulesText}   •   ${timeText}`;
-
-                    ctx.font = '500 26px "Noto Sans", sans-serif';
-                    ctx.letterSpacing = '0px';
-                    const footerWidth = ctx.measureText(footerText).width + 120;
-                    
-                    ctx.fillStyle = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
-                    ctx.beginPath();
-                    ctx.roundRect(width/2 - footerWidth/2, 1180 - 35, footerWidth, 70, 35);
-                    ctx.fill();
-
-                    ctx.fillStyle = textSub;
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(footerText, width/2, 1180);
-
-                    // URL
-                    ctx.font = '800 20px "Noto Sans", sans-serif';
-                    ctx.letterSpacing = '3px';
-                    ctx.fillStyle = isDark ? '#57534e' : '#a8a29e';
-                    ctx.fillText("HTTPS://PICKLEBALL-POINT-COUNTER.PAGES.DEV", width/2, 1280);
-
-                    // --- 8. Generate File and Share ---
-                    canvas.toBlob(async (blob) => {
-                        if (!blob) { setIsExporting(false); return; }
-                        
-                        const file = new File([blob], `pickleball_${Date.now()}.png`, { type: 'image/png' });
-                        
-                        const winName = match.winner === 1 ? match.t1Name : match.t2Name;
-                        const loseName = match.winner === 1 ? match.t2Name : match.t1Name;
-                        const winScore = match.winner === 1 ? match.t1Score : match.t2Score;
-                        const loseScore = match.winner === 1 ? match.t2Score : match.t1Score;
-                        
-                        const titleText = `🏆 ${winName} wins ${winScore}-${loseScore} against ${loseName}!\nScore tracked via Pickleball Point Counter: https://pickleball-point-counter.pages.dev`;
-                        
-                        const shareData = { title: 'Pickleball Result', text: titleText, files: [file] };
-
-                        if (navigator.canShare && navigator.canShare(shareData)) {
-                            navigator.share(shareData).catch(e => console.log('Share cancelled', e));
-                        } else {
-                            const link = document.createElement('a');
-                            link.download = file.name;
-                            link.href = URL.createObjectURL(blob);
-                            link.click();
-                        }
-                        setIsExporting(false);
-                    }, 'image/png');
-
-                } catch (e) {
-                    console.error(e);
-                    setIsExporting(false);
-                    alert("Image generation failed.");
-                }
-            }, 50); // tiny delay just to render loading spinner
-          };
-
-          // --- Text-to-Speech Helpers ---
-          const applyFemaleVoice = (utterance, langTag) => {
-              utterance.lang = langTag;
-              const voices = window.speechSynthesis.getVoices();
-              if (voices.length > 0) {
-                  const langVoices = voices.filter(v => v.lang.startsWith(langTag) || v.lang.startsWith(langTag.split('-')[0]));
-                  if (langVoices.length > 0) {
-                      let femaleVoice = langVoices.find(v => /female|woman|samantha|zira|karen|victoria|tessa|moira|veena|monica|ting-ting|kyoko|yuri/i.test(v.name));
-                      if (!femaleVoice) {
-                          femaleVoice = langVoices.find(v => !/male|man|boy|david|alex|daniel|tom|kevin|oliver|aaron|arthur/i.test(v.name));
-                      }
-                      utterance.voice = femaleVoice ? femaleVoice : langVoices[0];
-                  }
-              }
-          };
-
-          const detectLanguage = (text, defaultLangTag) => {
-              if (/[\u4e00-\u9fa5]/.test(text)) return 'zh-CN'; // Chinese
-              if (/[\u3040-\u30ff]/.test(text)) return 'ja-JP'; // Japanese
-              if (/[\uac00-\ud7af]/.test(text)) return 'ko-KR'; // Korean
-              if (/[\u0e00-\u0e7f]/.test(text)) return 'th-TH'; // Thai
-              return defaultLangTag;
-          };
-
-          const announceText = (text1, text2) => {
-            if (!soundEnabled || !('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            
-            const langTag = getLangTag(lang);
-
-            setTimeout(() => {
-                if (text1) {
-                    const u1 = new SpeechSynthesisUtterance(text1);
-                    applyFemaleVoice(u1, langTag);
-                    let hasEnded = false;
-                    u1.onend = () => {
-                        if (hasEnded) return;
-                        hasEnded = true;
-                        if (text2) {
-                            setTimeout(() => {
-                                const u2 = new SpeechSynthesisUtterance(text2);
-                                applyFemaleVoice(u2, langTag);
-                                window.speechSynthesis.speak(u2);
-                            }, 500); 
-                        }
-                    };
-                    
-                    setTimeout(() => {
-                        if (!hasEnded) {
-                            hasEnded = true;
-                            if (text2) {
-                                const u2 = new SpeechSynthesisUtterance(text2);
-                                applyFemaleVoice(u2, langTag);
-                                window.speechSynthesis.speak(u2);
-                            }
-                        }
-                    }, 1250); 
-                    
-                    window.speechSynthesis.speak(u1);
-                } else if (text2) {
-                    const u2 = new SpeechSynthesisUtterance(text2);
-                    applyFemaleVoice(u2, langTag);
-                    window.speechSynthesis.speak(u2);
-                }
-            }, 50);
-          };
-
-          const handleSoundClick = () => {
-            toggleSound();
-          };
-          
-          const handleSecretClick = () => {
-              secretClickCount.current += 1;
-              if (secretClickCount.current >= 5) {
-                  setSecretGame('menu');
-                  secretClickCount.current = 0;
-                  triggerHaptic('win');
-              }
-          };
-
-          const toggleSound = () => {
-            const newSound = !soundEnabled;
-            setSoundEnabled(newSound);
-            localStorage.setItem('pb_sound_pref', newSound.toString());
-          };
-
-          const handleLanguageChange = (code) => {
-            setLang(code);
-            setShowLangMenu(false);
-            localStorage.setItem('pb_lang_pref', code);
-          };
-
-          const clearHistory = () => {
-            setSavedMatches([]);
-            localStorage.removeItem('pb_history_matches');
-            setShowClearConfirm(false);
-          };
-
-          const handleInstallClick = async () => {
-            if (installPrompt) {
-              installPrompt.prompt();
-              const { outcome } = await installPrompt.userChoice;
-              if (outcome === 'accepted') {
-                  setInstallPrompt(null);
-                  setIsInstalled(true);
-              }
-            } else {
-              setShowInstallInstructions(true);
-            }
-          };
-
-          const toggleTheme = () => {
-            const newTheme = !isDark;
-            setIsDark(newTheme);
-            localStorage.setItem('pb_theme_pref', newTheme ? 'dark' : 'light');
-          };
-
-          const handleRuleSelect = (mode, rules) => {
-            setMatchTitleInput(''); 
-            setT1PLeftInput(''); setT1PRightInput(''); 
-            setT2PLeftInput(''); setT2PRightInput('');
-            setCustomPlayTo(11); setCustomWinBy(2); setEnableSwitchEnds(false); setServeToWinAt14(false); setStartingServer(1); setEnableTimeoutsSetup(0); setPendingGame({ mode, rules });
-          };
-
-          const resumeGame = (data) => {
-            setCurrentMatchId(data.currentMatchId); setMatchTitle(data.matchTitle); setGameMode(data.gameMode);
-            setRuleSet(data.ruleSet); setPlayTo(data.playTo); setWinByMargin(data.winByMargin);
-            setT1PLeft(data.t1PLeft || getT('t1Name')); setT1PRight(data.t1PRight || '');
-            setT2PLeft(data.t2PLeft || getT('t2Name')); setT2PRight(data.t2PRight || '');
-            setTeam1Score(data.team1Score);
-            setTeam2Score(data.team2Score); setServingTeam(data.servingTeam); setServerNumber(data.serverNumber);
-            setServeToWinAt14(data.serveToWinAt14); setEnableSwitchEnds(data.enableSwitchEnds || false); setHasSwitchedEnds(data.hasSwitchedEnds);
-            const loadedTimeouts = data.enableTimeouts === true ? 2 : (data.enableTimeouts || 0); setEnableTimeouts(loadedTimeouts); setT1Timeouts(data.t1Timeouts ?? loadedTimeouts); setT2Timeouts(data.t2Timeouts ?? loadedTimeouts);
-            setCourtRotation(data.courtRotation || 0);
-            setInitialServer(data.initialServer || 1);
-            setElapsedTime(data.elapsedTime); setHistory(data.history || []); setStateHistory(data.stateHistory || []);
-            setWinner(null); setWinReason('score'); setShowWinnerOverlay(false);
-            setAppState('game'); setRecoverGameData(null);
-          };
-
-          const startGame = (mode, rules, title, p1_left, p1_right, p2_left, p2_right, cPlayTo, cWinBy, enableSwitch, startServ, useTimeouts) => {
-            let pTo = 11; let wBy = 2;
-            if (rules === '14-point') { pTo = 15; wBy = 1; }
-            if (rules === 'custom') { pTo = cPlayTo; wBy = cWinBy; }
-            
-            setCurrentMatchId(Date.now()); setMatchTitle(title); setGameMode(mode); setRuleSet(rules);
-            setPlayTo(pTo); setWinByMargin(wBy); setEnableSwitchEnds(enableSwitch);
-            
-            if (mode === 'single') {
-                setT1PLeft(p1_left || getT('t1Name')); setT1PRight('');
-                setT2PLeft(p2_left || getT('t2Name')); setT2PRight('');
-            } else {
-                setT1PLeft(p1_left || getT('t1P1')); setT1PRight(p1_right || getT('t1P2'));
-                setT2PLeft(p2_left || getT('t2P1')); setT2PRight(p2_right || getT('t2P2'));
-            }
-
-            setInitialServer(startServ);
-            setTeam1Score(0); setTeam2Score(0); setServingTeam(startServ); setServerNumber(mode === 'double' ? 2 : 1);
-            setEnableTimeouts(useTimeouts); setT1Timeouts(useTimeouts); setT2Timeouts(useTimeouts);
-            setWinner(null); setWinReason('score'); setShowWinnerOverlay(false);
-            setHistory([]); setStateHistory([]); setHasSwitchedEnds(false); setElapsedTime(0); setCourtRotation(0);
-            setActiveTimeoutRemaining(0);
-            
-            setAppState('game');
-            window.scrollTo(0, 0); // Force scroll immediately when game starts
-
-            setTimeout(() => {
-                const isServeToScore = rules === 'standard' || (rules === 'custom' && serveToWinAt14);
-                const srvNum = mode === 'double' ? 2 : 1; 
-                const initialAnnounce = `0, 0${mode === 'double' && isServeToScore ? `, ${srvNum}` : ''}`;
-                announceText(null, initialAnnounce);
-            }, 200);
-          };
-
-          const saveStateForUndo = () => {
-            setStateHistory(prev => [...prev, { team1Score, team2Score, servingTeam, serverNumber, winner, winReason, hasSwitchedEnds, history: [...history], t1Timeouts, t2Timeouts, courtRotation }]);
-          };
-
-          const handleUndo = () => {
-            if (stateHistory.length === 0) return;
-            
-            if (winner !== null) {
-                setSavedMatches(prev => {
-                    const updated = prev.filter(m => m.id !== currentMatchId);
-                    localStorage.setItem('pb_history_matches', JSON.stringify(updated));
-                    return updated;
-                });
-                setShowWinnerOverlay(false);
-            }
-
-            const prev = stateHistory[stateHistory.length - 1];
-            setTeam1Score(prev.team1Score); setTeam2Score(prev.team2Score); setServingTeam(prev.servingTeam);
-            setServerNumber(prev.serverNumber); setWinner(prev.winner); setWinReason(prev.winReason || 'score');
-            if (prev.t1Timeouts !== undefined) setT1Timeouts(prev.t1Timeouts);
-            if (prev.t2Timeouts !== undefined) setT2Timeouts(prev.t2Timeouts);
-            if (prev.courtRotation !== undefined) setCourtRotation(prev.courtRotation);
-            setHistory(prev.history); setHasSwitchedEnds(prev.hasSwitchedEnds || false);
-            setStateHistory(s => s.slice(0, -1));
-            setActiveTimeoutRemaining(0);
-            setIsTimelineLocked(true); setPreviewSnapshot(null); // Auto-lock on undo
-          };
-
-          const handleResetPointsOnly = () => {
-              setTeam1Score(0);
-              setTeam2Score(0);
-              setServingTeam(initialServer);
-              setServerNumber(gameMode === 'double' ? 2 : 1);
-              setWinner(null);
-              setWinReason('score');
-              setShowWinnerOverlay(false);
-              setHistory([]);
-              setStateHistory([]);
-              setHasSwitchedEnds(false);
-              setElapsedTime(0);
-              setCourtRotation(0);
-              setT1Timeouts(enableTimeouts);
-              setT2Timeouts(enableTimeouts);
-              setShowResetModal(false);
-              setActiveTimeoutRemaining(0);
-
-              setTimeout(() => {
-                  const isServeToScore = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14);
-                  const srvNum = gameMode === 'double' ? 2 : 1; 
-                  const initialAnnounce = `0, 0${gameMode === 'double' && isServeToScore ? `, ${srvNum}` : ''}`;
-                  announceText(null, initialAnnounce);
-              }, 200);
-          };
-
-          const handleChangeSettings = () => {
-              setShowResetModal(false);
-              setMatchTitleInput(matchTitle);
-              setT1PLeftInput(t1PLeft);
-              setT1PRightInput(t1PRight);
-              setT2PLeftInput(t2PLeft);
-              setT2PRightInput(t2PRight);
-              setCustomPlayTo(playTo);
-              setCustomWinBy(winByMargin);
-              setServeToWinAt14(serveToWinAt14);
-              setEnableSwitchEnds(enableSwitchEnds);
-              setEnableTimeoutsSetup(enableTimeouts);
-              setStartingServer(initialServer);
-              setPendingGame({ mode: gameMode, rules: ruleSet });
           };
 
           const generateSnapshot = (currentHistory, t1, t2, sTeam, sNum) => {
@@ -1530,6 +924,108 @@
               };
           };
 
+          const resumeGame = (data) => {
+            setCurrentMatchId(data.currentMatchId); setMatchTitle(data.matchTitle); setGameMode(data.gameMode);
+            setRuleSet(data.ruleSet); setPlayTo(data.playTo); setWinByMargin(data.winByMargin);
+            setT1PLeft(data.t1PLeft || getT('t1Name')); setT1PRight(data.t1PRight || '');
+            setT2PLeft(data.t2PLeft || getT('t2Name')); setT2PRight(data.t2PRight || '');
+            setTeam1Score(data.team1Score);
+            setTeam2Score(data.team2Score); setServingTeam(data.servingTeam); setServerNumber(data.serverNumber);
+            setServeToWinAt14(data.serveToWinAt14); setEnableSwitchEnds(data.enableSwitchEnds || false); setHasSwitchedEnds(data.hasSwitchedEnds);
+            const loadedTimeouts = data.enableTimeouts === true ? 2 : (data.enableTimeouts || 0); setEnableTimeouts(loadedTimeouts); setT1Timeouts(data.t1Timeouts ?? loadedTimeouts); setT2Timeouts(data.t2Timeouts ?? loadedTimeouts);
+            setCourtRotation(data.courtRotation || 0);
+            setInitialServer(data.initialServer || 1);
+            setElapsedTime(data.elapsedTime); setHistory(data.history || []); setStateHistory(data.stateHistory || []);
+            setWinner(null); setWinReason('score'); setShowWinnerOverlay(false);
+            setAppState('game'); setRecoverGameData(null);
+          };
+
+          const startGame = (mode, rules, title, p1_left, p1_right, p2_left, p2_right, cPlayTo, cWinBy, enableSwitch, startServ, useTimeouts) => {
+            let pTo = 11; let wBy = 2;
+            if (rules === '14-point') { pTo = 15; wBy = 1; }
+            if (rules === 'custom') { pTo = cPlayTo; wBy = cWinBy; }
+            
+            setCurrentMatchId(Date.now()); setMatchTitle(title); setGameMode(mode); setRuleSet(rules);
+            setPlayTo(pTo); setWinByMargin(wBy); setEnableSwitchEnds(enableSwitch);
+            
+            if (mode === 'single') {
+                setT1PLeft(p1_left || getT('t1Name')); setT1PRight('');
+                setT2PLeft(p2_left || getT('t2Name')); setT2PRight('');
+            } else {
+                setT1PLeft(p1_left || getT('t1P1')); setT1PRight(p1_right || getT('t1P2'));
+                setT2PLeft(p2_left || getT('t2P1')); setT2PRight(p2_right || getT('t2P2'));
+            }
+
+            setInitialServer(startServ);
+            setTeam1Score(0); setTeam2Score(0); setServingTeam(startServ); setServerNumber(mode === 'double' ? 2 : 1);
+            setEnableTimeouts(useTimeouts); setT1Timeouts(useTimeouts); setT2Timeouts(useTimeouts);
+            setWinner(null); setWinReason('score'); setShowWinnerOverlay(false);
+            setHistory([]); setStateHistory([]); setHasSwitchedEnds(false); setElapsedTime(0); setCourtRotation(0);
+            setActiveTimeoutRemaining(0);
+            setIsTimelineLocked(true); setPreviewSnapshot(null);
+            
+            setAppState('game');
+            window.scrollTo(0, 0); 
+
+            setTimeout(() => {
+                const isServeToScore = rules === 'standard' || (rules === 'custom' && serveToWinAt14);
+                const srvNum = mode === 'double' ? 2 : 1; 
+                const initialAnnounce = `0, 0${mode === 'double' && isServeToScore ? `, ${srvNum}` : ''}`;
+                announceText(null, initialAnnounce);
+            }, 200);
+          };
+
+          const saveStateForUndo = () => {
+            setStateHistory(prev => [...prev, { team1Score, team2Score, servingTeam, serverNumber, winner, winReason, hasSwitchedEnds, history: [...history], t1Timeouts, t2Timeouts, courtRotation }]);
+          };
+
+          const handleUndo = () => {
+            if (stateHistory.length === 0) return;
+            if (winner !== null) {
+                setSavedMatches(prev => {
+                    const updated = prev.filter(m => m.id !== currentMatchId);
+                    localStorage.setItem('pb_history_matches', JSON.stringify(updated));
+                    return updated;
+                });
+                setShowWinnerOverlay(false);
+            }
+
+            const prev = stateHistory[stateHistory.length - 1];
+            setTeam1Score(prev.team1Score); setTeam2Score(prev.team2Score); setServingTeam(prev.servingTeam);
+            setServerNumber(prev.serverNumber); setWinner(prev.winner); setWinReason(prev.winReason || 'score');
+            if (prev.t1Timeouts !== undefined) setT1Timeouts(prev.t1Timeouts);
+            if (prev.t2Timeouts !== undefined) setT2Timeouts(prev.t2Timeouts);
+            if (prev.courtRotation !== undefined) setCourtRotation(prev.courtRotation);
+            setHistory(prev.history); setHasSwitchedEnds(prev.hasSwitchedEnds || false);
+            setStateHistory(s => s.slice(0, -1));
+            setActiveTimeoutRemaining(0);
+            setIsTimelineLocked(true); setPreviewSnapshot(null);
+          };
+
+          const handleResetPointsOnly = () => {
+              setTeam1Score(0); setTeam2Score(0); setServingTeam(initialServer); setServerNumber(gameMode === 'double' ? 2 : 1);
+              setWinner(null); setWinReason('score'); setShowWinnerOverlay(false);
+              setHistory([]); setStateHistory([]); setHasSwitchedEnds(false); setElapsedTime(0); setCourtRotation(0);
+              setT1Timeouts(enableTimeouts); setT2Timeouts(enableTimeouts);
+              setShowResetModal(false); setActiveTimeoutRemaining(0);
+              setIsTimelineLocked(true); setPreviewSnapshot(null);
+
+              setTimeout(() => {
+                  const isServeToScore = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14);
+                  const srvNum = gameMode === 'double' ? 2 : 1; 
+                  const initialAnnounce = `0, 0${gameMode === 'double' && isServeToScore ? `, ${srvNum}` : ''}`;
+                  announceText(null, initialAnnounce);
+              }, 200);
+          };
+
+          const handleChangeSettings = () => {
+              setShowResetModal(false);
+              setMatchTitleInput(matchTitle); setT1PLeftInput(t1PLeft); setT1PRightInput(t1PRight);
+              setT2PLeftInput(t2PLeft); setT2PRightInput(t2PRight); setCustomPlayTo(playTo); setCustomWinBy(winByMargin);
+              setServeToWinAt14(serveToWinAt14); setEnableSwitchEnds(enableSwitchEnds); setEnableTimeoutsSetup(enableTimeouts);
+              setStartingServer(initialServer); setPendingGame({ mode: gameMode, rules: ruleSet });
+          };
+
           const handleRetreat = (retreatingTeam) => {
             saveStateForUndo();
             const winningTeam = retreatingTeam === 1 ? 2 : 1;
@@ -1545,21 +1041,14 @@
              const evType = team === 1 ? 'T1_TIMEOUT' : 'T2_TIMEOUT';
              setHistory(prev => {
                  const newHist = [...prev, { id: Date.now(), type: evType, team, point: null }];
-                 // Attach snapshot immediately
                  newHist[newHist.length - 1].snapshot = generateSnapshot(newHist, team1Score, team2Score, servingTeam, serverNumber);
                  return newHist;
              });
              setShowTimeoutConfirm(null);
              triggerHaptic('point');
 
-             // Announce timeout in the current language
-             if (team === servingTeam) {
-                 announceText(getT('serverTimeout'));
-             } else {
-                 announceText(getT('receiverTimeout'));
-             }
-             
-             // Start 60-second countdown
+             if (team === servingTeam) announceText(getT('serverTimeout'));
+             else announceText(getT('receiverTimeout'));
              setActiveTimeoutRemaining(60);
           };
 
@@ -1570,7 +1059,7 @@
 
             if (hasWinner) {
               setWinner(winTeam); setShowWinnerOverlay(true); triggerHaptic('win');
-              setIsTimelineLocked(false); setPreviewSnapshot(null); // Auto-unlock on win
+              setIsTimelineLocked(false); setPreviewSnapshot(null); 
               
               if (soundEnabled && 'speechSynthesis' in window) {
                   window.speechSynthesis.cancel();
@@ -1578,25 +1067,18 @@
                   const appLangTag = getLangTag(lang);
                   const nameLangTag = detectLanguage(winnerName, appLangTag);
                   
-                  const u1 = new SpeechSynthesisUtterance("Game over.");
-                  applyFemaleVoice(u1, appLangTag);
-                  
-                  const u2 = new SpeechSynthesisUtterance(winnerName);
-                  applyFemaleVoice(u2, nameLangTag);
-                  
-                  const u3 = new SpeechSynthesisUtterance(getT('winner'));
-                  applyFemaleVoice(u3, appLangTag);
+                  const u1 = new SpeechSynthesisUtterance("Game over."); applyFemaleVoice(u1, appLangTag);
+                  const u2 = new SpeechSynthesisUtterance(winnerName); applyFemaleVoice(u2, nameLangTag);
+                  const u3 = new SpeechSynthesisUtterance(getT('winner')); applyFemaleVoice(u3, appLangTag);
                   
                   u1.onend = () => { setTimeout(() => window.speechSynthesis.speak(u2), 200); };
                   u2.onend = () => { setTimeout(() => window.speechSynthesis.speak(u3), 200); };
-                  
                   setTimeout(() => window.speechSynthesis.speak(u1), 50);
               }
             } else {
               const isSingle = gameMode === 'single';
               const isSuddenDeathAnnounce = ruleSet === '14-point' && serveToWinAt14 && t1 === 14 && t2 === 14;
               const showSrvNum = gameMode === 'double' && isServeToScore && !isSuddenDeathAnnounce;
-              
               const scoreAnnounce = newServTeam === 1 
                 ? `${t1}, ${t2}${showSrvNum ? `, ${newServNum}` : ''}` 
                 : `${t2}, ${t1}${showSrvNum ? `, ${newServNum}` : ''}`;
@@ -1604,15 +1086,10 @@
               const lastEvent = newHistory[newHistory.length-1];
               
               if (lastEvent) {
-                  if (lastEvent.type === 'FAULT') {
-                      announceText(getT('secondServer'), scoreAnnounce);
-                  } else if (lastEvent.type === 'SIDEOUT') {
-                      announceText(getT('sideOut'), scoreAnnounce);
-                  } else if (lastEvent.type.includes('POINT') && isServeToScore) {
-                      announceText(getT('point') || 'Point', scoreAnnounce);
-                  } else {
-                      announceText(null, scoreAnnounce);
-                  }
+                  if (lastEvent.type === 'FAULT') announceText(getT('secondServer'), scoreAnnounce);
+                  else if (lastEvent.type === 'SIDEOUT') announceText(getT('sideOut'), scoreAnnounce);
+                  else if (lastEvent.type.includes('POINT') && isServeToScore) announceText(getT('point') || 'Point', scoreAnnounce);
+                  else announceText(null, scoreAnnounce);
               } else {
                   announceText(null, scoreAnnounce);
               }
@@ -1622,21 +1099,15 @@
           const handleRallyWin = (winningTeam) => {
             if (winner || activeTimeoutRemaining > 0) return;
             triggerHaptic('point');
-            setIsTimelineLocked(true); setPreviewSnapshot(null); // Auto-lock on score
+            setIsTimelineLocked(true); setPreviewSnapshot(null); 
             saveStateForUndo();
 
             let newT1 = team1Score; let newT2 = team2Score; let newServTeam = servingTeam; let newServNum = serverNumber; let evType = '';
             
-            let isServeToScoreMode = false;
-            let isStrictSuddenDeath = false;
-            if (ruleSet === 'standard') {
-              isServeToScoreMode = true;
-            } else if (ruleSet === 'custom' && serveToWinAt14) {
-              isServeToScoreMode = true;
-            } else if (ruleSet === '14-point' && serveToWinAt14 && team1Score === 14 && team2Score === 14) {
-              isServeToScoreMode = true;
-              isStrictSuddenDeath = true;
-            }
+            let isServeToScoreMode = false; let isStrictSuddenDeath = false;
+            if (ruleSet === 'standard') isServeToScoreMode = true;
+            else if (ruleSet === 'custom' && serveToWinAt14) isServeToScoreMode = true;
+            else if (ruleSet === '14-point' && serveToWinAt14 && team1Score === 14 && team2Score === 14) { isServeToScoreMode = true; isStrictSuddenDeath = true; }
 
             const grantPoint = () => { if (winningTeam === 1) { newT1 += 1; evType = 'T1_POINT'; } else { newT2 += 1; evType = 'T2_POINT'; } };
             const grantSideout = () => {
@@ -1651,23 +1122,17 @@
               if (winningTeam === servingTeam) grantPoint(); else grantSideout();
             } else {
               grantPoint();
-              if (winningTeam !== servingTeam) {
-                newServTeam = winningTeam; 
-                newServNum = 1; 
-              }
+              if (winningTeam !== servingTeam) { newServTeam = winningTeam; newServNum = 1; }
             }
 
             setTeam1Score(newT1); setTeam2Score(newT2); setServingTeam(newServTeam); setServerNumber(newServNum);
             const newHist = [...history, { id: Date.now(), type: evType, team: winningTeam, point: evType === 'T1_POINT' ? newT1 : (evType === 'T2_POINT' ? newT2 : null) }];
             
-            // Attach snapshot using the newly calculated state and the new history array
             newHist[newHist.length - 1].snapshot = generateSnapshot(newHist, newT1, newT2, newServTeam, newServNum);
             setHistory(newHist);
             
             const switchPt = Math.ceil(playTo / 2);
-            if (enableSwitchEnds && !hasSwitchedEnds && (newT1 === switchPt || newT2 === switchPt)) {
-              setShowSwitchModal(true); setHasSwitchedEnds(true);
-            }
+            if (enableSwitchEnds && !hasSwitchedEnds && (newT1 === switchPt || newT2 === switchPt)) { setShowSwitchModal(true); setHasSwitchedEnds(true); }
             
             checkWin(newT1, newT2, newServTeam, newServNum, newHist, isServeToScoreMode);
           };
@@ -1683,186 +1148,6 @@
             const s = (sec % 60).toString().padStart(2, '0');
             return `${m}:${s}`;
           };
-
-          const isSuddenDeath = ruleSet === '14-point' && team1Score === 14 && team2Score === 14;
-          const isServeToScoreModeUI = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14) || (ruleSet === '14-point' && serveToWinAt14 && team1Score === 14 && team2Score === 14);
-          const showServerNumberUI = gameMode === 'double' && isServeToScoreModeUI && !isSuddenDeath;
-          const serverLabel = showServerNumberUI ? `S${serverNumber}` : 'S';
-
-          const textMain = isDark ? 'text-stone-100' : 'text-stone-800';
-          const textSub = isDark ? 'text-stone-400' : 'text-stone-500';
-          const bgMain = isDark ? 'bg-stone-900' : 'bg-stone-50';
-          const bgCard = isDark ? 'bg-stone-800' : 'bg-white';
-          const borderSub = isDark ? 'border-stone-700' : 'border-stone-200';
-          const accentRed = isDark ? 'text-rose-400' : 'text-rose-700';
-          const accentGreen = isDark ? 'text-emerald-400' : 'text-emerald-700';
-          const bgAccentRed = isDark ? 'bg-rose-900/30 border-rose-700' : 'bg-rose-50 border-rose-200';
-          const bgAccentGreen = isDark ? 'bg-emerald-900/30 border-emerald-700' : 'bg-emerald-50 border-emerald-200';
-
-          // --- NEW STATS CALCULATIONS ---
-          const totalMatchesCount = savedMatches.length;
-          const t1WinsCount = savedMatches.filter(m => m.winner === 1).length;
-          const t2WinsCount = savedMatches.filter(m => m.winner === 2).length;
-          const t1WinPct = totalMatchesCount ? Math.round((t1WinsCount / totalMatchesCount) * 100) : 0;
-          const t2WinPct = totalMatchesCount ? Math.round((t2WinsCount / totalMatchesCount) * 100) : 0;
-          
-          const totalT1Points = savedMatches.reduce((acc, m) => acc + (m.t1Score || 0), 0);
-          const totalT2Points = savedMatches.reduce((acc, m) => acc + (m.t2Score || 0), 0);
-          const maxPoints = Math.max(totalT1Points, totalT2Points);
-          const t1PointHeight = maxPoints ? (totalT1Points / maxPoints) * 100 : 0;
-          const t2PointHeight = maxPoints ? (totalT2Points / maxPoints) * 100 : 0;
-
-          const singlesCount = savedMatches.filter(m => m.mode === 'single').length;
-          const doublesCount = savedMatches.filter(m => m.mode === 'double').length;
-          
-          // --- COURT POSITIONING LOGIC ---
-          let simT1Score = 0;
-          let simT2Score = 0;
-          let t1Swaps = 0;
-          let t2Swaps = 0;
-          let simServeTeam = startingServer;
-          let simServNum = gameMode === 'double' ? 2 : 1;
-
-          for (let i = 0; i < history.length; i++) {
-              const ev = history[i];
-              
-              let isServeToScoreLoop = false;
-              let isStrictSuddenDeathLoop = false;
-              if (ruleSet === 'standard') isServeToScoreLoop = true;
-              else if (ruleSet === 'custom' && serveToWinAt14) isServeToScoreLoop = true;
-              else if (ruleSet === '14-point' && serveToWinAt14 && simT1Score === 14 && simT2Score === 14) {
-                  isServeToScoreLoop = true;
-                  isStrictSuddenDeathLoop = true;
-              }
-              
-              if (ev.type === 'T1_POINT') {
-                  simT1Score++;
-                  if (isServeToScoreLoop) {
-                      if (simServeTeam === 1) t1Swaps++;
-                  } else {
-                      if (simServeTeam === 1) t1Swaps++;
-                      else { simServeTeam = 1; simServNum = 1; }
-                  }
-              } else if (ev.type === 'T2_POINT') {
-                  simT2Score++;
-                  if (isServeToScoreLoop) {
-                      if (simServeTeam === 2) t2Swaps++;
-                  } else {
-                      if (simServeTeam === 2) t2Swaps++;
-                      else { simServeTeam = 2; simServNum = 1; }
-                  }
-              } else if (ev.type === 'FAULT') {
-                  if (gameMode === 'double' && !isStrictSuddenDeathLoop) {
-                      simServNum = 2;
-                  }
-              } else if (ev.type === 'SIDEOUT') {
-                  simServeTeam = simServeTeam === 1 ? 2 : 1;
-                  simServNum = 1;
-              }
-          }
-
-          const currentT1Left = (t1Swaps % 2 === 0) ? t1PLeft : t1PRight;
-          const currentT1Right = (t1Swaps % 2 === 0) ? t1PRight : t1PLeft;
-          const currentT2Left = (t2Swaps % 2 === 0) ? t2PLeft : t2PRight;
-          const currentT2Right = (t2Swaps % 2 === 0) ? t2PRight : t2PLeft;
-
-          let courtServerPos = '';
-          let courtReceiverPos = '';
-
-          if (gameMode === 'single') {
-              const currentScore = servingTeam === 1 ? team1Score : team2Score;
-              courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
-          } else {
-              let isServeToScoreCurrent = false;
-              let isStrictSuddenDeathCurrent = false;
-              if (ruleSet === 'standard') isServeToScoreCurrent = true;
-              else if (ruleSet === 'custom' && serveToWinAt14) isServeToScoreCurrent = true;
-              else if (ruleSet === '14-point' && serveToWinAt14 && team1Score === 14 && team2Score === 14) {
-                  isServeToScoreCurrent = true;
-                  isStrictSuddenDeathCurrent = true;
-              }
-
-              if (isServeToScoreCurrent) {
-                  let isFirstTurnOfMatch = true;
-                  for (let i = 0; i < history.length; i++) {
-                      if (history[i].type === 'SIDEOUT' || (!isServeToScoreCurrent && (history[i].type === 'T1_POINT' || history[i].type === 'T2_POINT'))) { 
-                          isFirstTurnOfMatch = false;
-                          break;
-                      }
-                  }
-                  if (isStrictSuddenDeathCurrent) isFirstTurnOfMatch = false;
-
-                  let ptsWonThisTurn = 0;
-                  for (let i = history.length - 1; i >= 0; i--) {
-                      if (history[i].type === 'SIDEOUT') break;
-                      if (history[i].type === `T${servingTeam}_POINT`) ptsWonThisTurn++;
-                  }
-
-                  if (isFirstTurnOfMatch) {
-                      courtServerPos = ptsWonThisTurn % 2 === 0 ? 'Right' : 'Left';
-                  } else {
-                      if (serverNumber === 1) {
-                          courtServerPos = ptsWonThisTurn % 2 === 0 ? 'Right' : 'Left';
-                      } else {
-                          courtServerPos = ptsWonThisTurn % 2 === 0 ? 'Left' : 'Right';
-                      }
-                  }
-              } else {
-                  const currentScore = servingTeam === 1 ? team1Score : team2Score;
-                  courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
-              }
-          }
-
-          if (servingTeam === 1) {
-              courtServerPos = courtServerPos === 'Right' ? 'bottom-right' : 'bottom-left';
-              courtReceiverPos = courtServerPos === 'bottom-right' ? 'top-left' : 'top-right'; 
-          } else {
-              courtServerPos = courtServerPos === 'Right' ? 'top-left' : 'top-right';
-              courtReceiverPos = courtServerPos === 'top-left' ? 'bottom-right' : 'bottom-left'; 
-          }
-          // --- GHOST COURT OVERRIDES ---
-          let displayServerPos = courtServerPos;
-          let displayReceiverPos = courtReceiverPos;
-          let displayT1Left = currentT1Left;
-          let displayT1Right = currentT1Right;
-          let displayT2Left = currentT2Left;
-          let displayT2Right = currentT2Right;
-
-          if (previewSnapshot) {
-              displayServerPos = previewSnapshot.serverPos;
-              displayReceiverPos = previewSnapshot.receiverPos;
-              displayT1Left = previewSnapshot.positions.t1Left;
-              displayT1Right = previewSnapshot.positions.t1Right;
-              displayT2Left = previewSnapshot.positions.t2Left;
-              displayT2Right = previewSnapshot.positions.t2Right;
-          }
-
-          const renderPlayerBadge = (name, role) => {
-              if (!name) return null;
-              let bg = 'bg-stone-500/20 text-stone-400 dark:text-stone-300 border border-stone-400/20'; // Faded partner
-              let scale = 1;
-              let zIndex = 0;
-              
-              if (role === 'server') {
-                  bg = 'bg-amber-400 text-amber-950 shadow-lg ring-2 ring-white';
-                  scale = 1.1;
-                  zIndex = 10;
-              } else if (role === 'receiver') {
-                  bg = 'bg-white text-emerald-800 shadow-md ring-2 ring-emerald-400/50';
-                  scale = 1.05;
-                  zIndex = 10;
-              }
-
-              return (
-                  <div 
-                      className={`px-2 py-1 rounded shadow-sm max-w-[90%] truncate text-[8px] md:text-[9px] font-black tracking-wider uppercase transition-all duration-500 ease-in-out ${bg}`}
-                      style={{ transform: `rotate(${-courtRotation}deg) scale(${scale})`, zIndex }}
-                  >
-                      {name}
-                  </div>
-              );
-          };
-
           const renderTimeline = (timelineData, useScrollRef = false, isHistoryTab = false, matchId = null) => (
             <div className={`mt-6 muji-card p-5 rounded-xl`}>
               <div className="flex justify-between items-center mb-4">
@@ -1953,7 +1238,6 @@
             const handleDisplayModeChange = (e) => setIsInstalled(e.matches);
             mediaQuery.addEventListener('change', handleDisplayModeChange);
             
-            // Look for the early prompt caught in HTML
             if (window.globalInstallPrompt) {
                 setInstallPrompt(window.globalInstallPrompt);
             }
@@ -2005,7 +1289,6 @@
                 .muji-scrollbar { scrollbar-width: thin; scrollbar-color: ${isDark ? '#57534e #292524' : '#d6d3d1 #f5f5f4'}; }
               `}</style>
               
-              {/* --- IOS NOTCH FILLER --- */}
               <div 
                 className={`fixed top-0 left-0 w-full z-40 pointer-events-none transition-colors duration-300 ${bgMain}`} 
                 style={{ height: 'env(safe-area-inset-top)' }}
@@ -2027,7 +1310,6 @@
                     {appState === 'game' && <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${bgCard} ${borderSub} border shadow-sm text-xs font-bold ${textSub}`}><Timer size={14}/> {formatTime(elapsedTime)}</div>}
                   </div>
                   
-                  {/* --- ALWAYS VISIBLE GLOBAL MENU --- */}
                   <div className={`flex items-center gap-2 pointer-events-auto`}>
                     <button onClick={handleSoundClick} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform relative z-10`}>
                       {soundEnabled ? <Volume2 size={18} className={accentGreen} /> : <VolumeX size={18} className={textSub} />}
@@ -2165,7 +1447,6 @@
                     <div className="w-8"></div>
                   </header>
                   
-                  {/* --- SUMMARY CARDS --- */}
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                     <div className={`muji-card p-6 flex flex-col items-center text-center`}>
                       <HistoryIcon size={24} className={`mb-2 ${textSub}`} />
@@ -2184,10 +1465,8 @@
                     </div>
                   </div>
 
-                  {/* --- DETAILED ANALYTICS CHARTS --- */}
                   {savedMatches.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Pie Chart: Win Distribution */}
                       <div className={`muji-card p-6`}>
                           <h3 className={`text-[10px] font-bold uppercase tracking-widest ${textSub} mb-6`}>{getT('winDist')}</h3>
                           <div className="relative w-32 h-32 mx-auto rounded-full" style={{ background: totalMatchesCount === 0 ? (isDark ? '#44403c' : '#e7e5e4') : `conic-gradient(#10b981 ${t1WinPct}%, #f43f5e 0)` }}>
@@ -2201,7 +1480,6 @@
                           </div>
                       </div>
 
-                      {/* Bar Chart: Total Points */}
                       <div className={`muji-card p-6 flex flex-col`}>
                           <h3 className={`text-[10px] font-bold uppercase tracking-widest ${textSub} mb-4`}>{getT('totalPoints')}</h3>
                           <div className="flex-1 flex items-end justify-center gap-8 h-32 mt-2 border-b border-stone-200 dark:border-stone-700/50 pb-0">
@@ -2220,7 +1498,6 @@
                           </div>
                       </div>
 
-                      {/* Horizontal Bar: Game Formats */}
                       <div className={`muji-card p-6 md:col-span-2`}>
                            <h3 className={`text-[10px] font-bold uppercase tracking-widest ${textSub} mb-6`}>{getT('formatStats')}</h3>
                            <div className="space-y-5">
@@ -2261,7 +1538,6 @@
                       <div className="space-y-4">
                         <div><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('matchTitlePlaceholder')}</label><input type="text" placeholder={getT('untitledMatch')} value={matchTitleInput} onChange={(e) => setMatchTitleInput(e.target.value)} className={`w-full px-4 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} focus:outline-none focus:ring-2 focus:ring-emerald-500/50`} /></div>
                         
-                        {/* Player Inputs for Singles vs Doubles */}
                         {pendingGame.mode === 'single' ? (
                             <div className="flex gap-3">
                               <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('t1Name')}</label><input type="text" placeholder={getT('t1Name')} value={t1PLeftInput} onChange={(e) => setT1PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
@@ -2269,13 +1545,11 @@
                             </div>
                         ) : (
                             <div className="space-y-3">
-                              {/* Team 1 Swap Row */}
                               <div className="flex items-end gap-1.5 sm:gap-2">
                                 <div className="flex-1 min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t1P1')} <span className="opacity-70 lowercase text-[8px]">{getT('oddCourt')}</span></label><input type="text" placeholder={getT('t1P1')} value={t1PLeftInput} onChange={(e) => setT1PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
                                 <button onClick={() => { const temp = t1PLeftInput; setT1PLeftInput(t1PRightInput); setT1PRightInput(temp); }} className={`mb-1 p-2 rounded-full ${bgMain} border ${borderSub} text-stone-400 hover:text-emerald-500 hover:border-emerald-500/30 transition-all active:scale-95 shrink-0`} title="Swap Players"><ArrowRightLeft size={16} /></button>
                                 <div className="flex-1 min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t1P2')} <span className="opacity-70 lowercase text-[8px]">{getT('evenCourt')}</span></label><input type="text" placeholder={getT('t1P2')} value={t1PRightInput} onChange={(e) => setT1PRightInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
                               </div>
-                              {/* Team 2 Swap Row */}
                               <div className="flex items-end gap-1.5 sm:gap-2">
                                 <div className="flex-1 min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t2P1')} <span className="opacity-70 lowercase text-[8px]">{getT('oddCourt')}</span></label><input type="text" placeholder={getT('t2P1')} value={t2PLeftInput} onChange={(e) => setT2PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
                                 <button onClick={() => { const temp = t2PLeftInput; setT2PLeftInput(t2PRightInput); setT2PRightInput(temp); }} className={`mb-1 p-2 rounded-full ${bgMain} border ${borderSub} text-stone-400 hover:text-emerald-500 hover:border-emerald-500/30 transition-all active:scale-95 shrink-0`} title="Swap Players"><ArrowRightLeft size={16} /></button>
@@ -2390,7 +1664,6 @@
                                         </button>
                                         <div className="w-[180px] h-[240px] md:w-[220px] md:h-[280px] bg-emerald-600 rounded-[3px] border-[3px] border-white/90 shadow-md relative flex flex-col overflow-hidden pointer-events-none">
                                             
-                                            {/* Dashed Cross-Court Laser */}
                                             <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
                                                 {historyPreviewSnapshot.serverPos === 'bottom-right' || historyPreviewSnapshot.serverPos === 'top-left' ? (
                                                     <line x1="75%" y1="85%" x2="25%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" />
@@ -2399,14 +1672,12 @@
                                                 )}
                                             </svg>
                                             
-                                            {/* Point Score Overlay */}
                                             <div className="absolute inset-0 z-0 flex flex-col items-center justify-center opacity-30 text-white font-black text-6xl tracking-widest">
                                                 <span className="mb-2">{historyPreviewSnapshot.t2Score}</span>
                                                 <div className="w-12 h-1 bg-white/50 my-1 rounded-full"></div>
                                                 <span className="mt-2">{historyPreviewSnapshot.t1Score}</span>
                                             </div>
 
-                                            {/* T2 Backcourt */}
                                             <div className="flex-1 relative border-b border-white/50 z-20">
                                                 <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
                                                 <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">
@@ -2422,10 +1693,8 @@
                                                     )}
                                                 </div>
                                             </div>
-                                            {/* Kitchens */}
                                             <div className="h-6 md:h-8 border-b-2 border-white/80 bg-emerald-500 z-20"></div>
                                             <div className="h-6 md:h-8 border-b border-white/50 bg-emerald-500 z-20"></div>
-                                            {/* T1 Backcourt */}
                                             <div className="flex-1 relative z-20">
                                                 <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
                                                 <div className="absolute bottom-1 left-0 w-1/2 flex justify-center items-center h-full">
@@ -2505,10 +1774,7 @@
 
                   <main className="flex-1 flex flex-col justify-center relative mt-2">
                     
-                    {/* --- PERFECT SCOREBOARD ALIGNMENT --- */}
                     <div className={`flex justify-center items-center gap-4 md:gap-8 mt-10 mb-8 relative z-10`}>
-                      
-                      {/* TEAM 1 */}
                       <div className="flex flex-col items-center relative w-24 md:w-32">
                         <span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest truncate w-[150%] text-center ${textSub}`}>{t1Name}</span>
                         <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${servingTeam === 1 && !winner ? accentGreen : textMain}`}>{team1Score}</span>
@@ -2521,10 +1787,8 @@
                         )}
                       </div>
                       
-                      {/* HYPHEN */}
                       <span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span>
                       
-                      {/* TEAM 2 */}
                       <div className="flex flex-col items-center relative w-24 md:w-32">
                         <span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest truncate w-[150%] text-center ${textSub}`}>{t2Name}</span>
                         <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${servingTeam === 2 && !winner ? accentRed : textMain}`}>{team2Score}</span>
@@ -2537,7 +1801,6 @@
                         )}
                       </div>
                       
-                      {/* SERVER */}
                       {showServerNumberUI && (
                           <>
                               <span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span>
@@ -2549,12 +1812,15 @@
                       )}
                     </div>
 
-                    {/* MINI COURT BELOW SCORES */}
                     <div className={`flex justify-center w-full mt-6 md:mt-8 ${isSuddenDeath && !winner ? 'mb-4' : 'mb-6 md:mb-8'} relative z-10`}>
                         <div className="relative flex items-center justify-center w-[240px] h-[240px] md:w-[280px] md:h-[280px]">
                             
-                            {/* ROTATING COURT CONTAINER */}
-                            {previewSnapshot && (
+                            <div 
+                                className="w-[180px] h-[240px] md:w-[220px] md:h-[280px] bg-emerald-600 rounded-[3px] border-[3px] border-white/90 shadow-md relative flex flex-col overflow-hidden pointer-events-none transition-transform duration-500 ease-in-out"
+                                style={{ transform: `rotate(${courtRotation}deg)` }}
+                            >
+                                
+                                {previewSnapshot && (
                                     <div className="absolute inset-0 z-0 flex flex-col items-center justify-center opacity-30 text-white font-black text-6xl tracking-widest" style={{ transform: `rotate(${-courtRotation}deg)` }}>
                                         <span className="mb-2">{previewSnapshot.t2Score}</span>
                                         <div className="w-12 h-1 bg-white/50 my-1 rounded-full"></div>
@@ -2562,16 +1828,14 @@
                                     </div>
                                 )}
                                 
-                                {/* Dashed Cross-Court Laser */}
                                 <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
-                                    {courtServerPos === 'bottom-right' || courtServerPos === 'top-left' ? (
+                                    {displayServerPos === 'bottom-right' || displayServerPos === 'top-left' ? (
                                         <line x1="75%" y1="85%" x2="25%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" />
                                     ) : (
                                         <line x1="25%" y1="85%" x2="75%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" />
                                     )}
                                 </svg>
 
-                                {/* T2 Backcourt */}
                                 <div className="flex-1 relative border-b border-white/50 z-20">
                                     <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
                                     <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">
@@ -2587,11 +1851,8 @@
                                         )}
                                     </div>
                                 </div>
-                                {/* T2 Kitchen */}
                                 <div className="h-6 md:h-8 border-b-2 border-white/80 bg-emerald-500 z-20"></div>
-                                {/* T1 Kitchen */}
                                 <div className="h-6 md:h-8 border-b border-white/50 bg-emerald-500 z-20"></div>
-                                {/* T1 Backcourt */}
                                 <div className="flex-1 relative z-20">
                                     <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
                                     <div className="absolute bottom-1 left-0 w-1/2 flex justify-center items-center h-full">
@@ -2609,7 +1870,6 @@
                                 </div>
                             </div>
                             
-                            {/* ROTATION CONTROLS */}
                             <div className="absolute top-1/2 -translate-y-1/2 -left-[50px] md:-left-[60px] pointer-events-auto z-20">
                                 <button onClick={() => setCourtRotation(r => r - 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md`}>
                                     <RotateCcw size={18} />
@@ -2635,7 +1895,6 @@
                    <div className="mt-auto relative z-10">
                       <div className="grid grid-cols-2 gap-4 h-40 md:h-48 relative">
                         
-                        {/* Timeout Overlay Shield */}
                         {activeTimeoutRemaining > 0 && (
                           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-stone-900/60 dark:bg-black/60 backdrop-blur-sm rounded-xl border border-stone-700 shadow-2xl">
                              <Timer size={32} className="text-amber-400 mb-2 animate-pulse" />
@@ -2665,7 +1924,6 @@
                 </div>
               )}
 
-              {/* --- IN-GAME OVERLAYS & MODALS --- */}
               {showResetModal && (
                 <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
                   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowResetModal(false)}></div>
@@ -2866,7 +2124,6 @@
                 </div>
               )}
 
-              {/* --- CLEAR HISTORY CONFIRM --- */}
               {showClearConfirm && (
                 <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
                   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowClearConfirm(false)}></div>
@@ -2881,7 +2138,6 @@
                 </div>
               )}
 
-              {/* --- LOADING OVERLAY FOR EXPORT --- */}
               {isExporting && (
                   <div className="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-black/70 backdrop-blur-md text-white animate-screen-enter">
                       <div className="w-16 h-16 border-8 border-emerald-500 border-t-transparent rounded-full animate-spin mb-6"></div>
@@ -2889,7 +2145,6 @@
                   </div>
               )}
                 
-              {/* --- SECRET ARCADE MODE --- */}
               {secretGame && (
                   <div className="fixed inset-0 z-[200] bg-stone-900 text-stone-100 flex flex-col animate-screen-enter select-none">
                       <div className="p-4 flex justify-between items-center border-b border-stone-800 bg-stone-950">
@@ -2922,8 +2177,6 @@
         root.render(<PickleballApp />);
     </script>
 
-    <!-- Cloudflare Web Analytics -->
     <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "5fd8a324f87a433fa80d77d57da97860"}'></script>
-    <!-- End Cloudflare Web Analytics -->
 </body>
 </html>
