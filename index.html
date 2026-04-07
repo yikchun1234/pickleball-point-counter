@@ -363,6 +363,8 @@
         const ChevronLeft = (props) => <IconWrapper iconObj={lucide.icons.ChevronLeft} {...props} />;
         const Activity = (props) => <IconWrapper iconObj={lucide.icons.Activity} {...props} />;
         const Grid = (props) => <IconWrapper iconObj={lucide.icons.Grid} {...props} />;
+        const Lock = (props) => <IconWrapper iconObj={lucide.icons.Lock} {...props} />;
+        const Unlock = (props) => <IconWrapper iconObj={lucide.icons.Unlock} {...props} />;
         const ArrowUp = (props) => <IconWrapper iconObj={lucide.icons.ArrowUp} {...props} />;
         const Target = (props) => <IconWrapper iconObj={lucide.icons.Target} {...props} />;
         const MousePointer2 = (props) => <IconWrapper iconObj={lucide.icons.MousePointer2} {...props} />;
@@ -810,6 +812,10 @@
           const [elapsedTime, setElapsedTime] = useState(0);
           const [courtRotation, setCourtRotation] = useState(0);
           const [activeTimeoutRemaining, setActiveTimeoutRemaining] = useState(0);
+          const [isTimelineLocked, setIsTimelineLocked] = useState(true);
+          const [previewSnapshot, setPreviewSnapshot] = useState(null);
+          const [historyPreviewSnapshot, setHistoryPreviewSnapshot] = useState(null);
+          const [historyPreviewMatchId, setHistoryPreviewMatchId] = useState(null);
           
           const [showHistory, setShowHistory] = useState(false);
           const [history, setHistory] = useState([]); 
@@ -951,7 +957,9 @@
                 id: currentMatchId, title: matchTitle || getT('untitledMatch'),
                 date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
                 mode: gameMode, rules: ruleSet, t1Score: team1Score, t2Score: team2Score,
-                t1Name, t2Name, winner, winReason, elapsedTime, history: [...history]
+                t1Name, t2Name, winner, winReason, elapsedTime, history: [...history],
+                players: { t1PLeft, t1PRight, t2PLeft, t2PRight },
+                initialServer
               };
               setSavedMatches(prev => {
                 const existingIndex = prev.findIndex(m => m.id === currentMatchId);
@@ -1398,6 +1406,7 @@
             setHistory(prev.history); setHasSwitchedEnds(prev.hasSwitchedEnds || false);
             setStateHistory(s => s.slice(0, -1));
             setActiveTimeoutRemaining(0);
+            setIsTimelineLocked(true); setPreviewSnapshot(null); // Auto-lock on undo
           };
 
           const handleResetPointsOnly = () => {
@@ -1442,6 +1451,83 @@
               setPendingGame({ mode: gameMode, rules: ruleSet });
           };
 
+          const generateSnapshot = (currentHistory, t1, t2, sTeam, sNum) => {
+              let simT1Score = 0, simT2Score = 0, t1Swaps = 0, t2Swaps = 0;
+              let simServeTeam = initialServer;
+              let simServNum = gameMode === 'double' ? 2 : 1;
+
+              for (let i = 0; i < currentHistory.length; i++) {
+                  const ev = currentHistory[i];
+                  let isServeToScoreLoop = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14) || (ruleSet === '14-point' && serveToWinAt14 && simT1Score === 14 && simT2Score === 14);
+                  if (ev.type === 'T1_POINT') {
+                      simT1Score++;
+                      if (isServeToScoreLoop) { if (simServeTeam === 1) t1Swaps++; } 
+                      else { if (simServeTeam === 1) t1Swaps++; else { simServeTeam = 1; simServNum = 1; } }
+                  } else if (ev.type === 'T2_POINT') {
+                      simT2Score++;
+                      if (isServeToScoreLoop) { if (simServeTeam === 2) t2Swaps++; } 
+                      else { if (simServeTeam === 2) t2Swaps++; else { simServeTeam = 2; simServNum = 1; } }
+                  } else if (ev.type === 'FAULT') {
+                      if (gameMode === 'double' && !(ruleSet === '14-point' && serveToWinAt14 && simT1Score === 14 && simT2Score === 14)) simServNum = 2;
+                  } else if (ev.type === 'SIDEOUT') {
+                      simServeTeam = simServeTeam === 1 ? 2 : 1; simServNum = 1;
+                  }
+              }
+
+              const currentT1Left = (t1Swaps % 2 === 0) ? t1PLeft : t1PRight;
+              const currentT1Right = (t1Swaps % 2 === 0) ? t1PRight : t1PLeft;
+              const currentT2Left = (t2Swaps % 2 === 0) ? t2PLeft : t2PRight;
+              const currentT2Right = (t2Swaps % 2 === 0) ? t2PRight : t2PLeft;
+
+              let courtServerPos = ''; let courtReceiverPos = '';
+
+              if (gameMode === 'single') {
+                  const currentScore = sTeam === 1 ? t1 : t2;
+                  courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
+              } else {
+                  let isServeToScoreCurrent = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14) || (ruleSet === '14-point' && serveToWinAt14 && t1 === 14 && t2 === 14);
+                  if (isServeToScoreCurrent) {
+                      let isFirstTurnOfMatch = true;
+                      for (let i = 0; i < currentHistory.length; i++) {
+                          if (currentHistory[i].type === 'SIDEOUT' || (!isServeToScoreCurrent && (currentHistory[i].type === 'T1_POINT' || currentHistory[i].type === 'T2_POINT'))) { 
+                              isFirstTurnOfMatch = false; break; 
+                          }
+                      }
+                      if (ruleSet === '14-point' && serveToWinAt14 && t1 === 14 && t2 === 14) isFirstTurnOfMatch = false;
+
+                      let ptsWonThisTurn = 0;
+                      for (let i = currentHistory.length - 1; i >= 0; i--) {
+                          if (currentHistory[i].type === 'SIDEOUT') break;
+                          if (currentHistory[i].type === `T${sTeam}_POINT`) ptsWonThisTurn++;
+                      }
+
+                      if (isFirstTurnOfMatch) {
+                          courtServerPos = ptsWonThisTurn % 2 === 0 ? 'Right' : 'Left';
+                      } else {
+                          courtServerPos = ptsWonThisTurn % 2 === 0 ? (sNum === 1 ? 'Right' : 'Left') : (sNum === 1 ? 'Left' : 'Right');
+                      }
+                  } else {
+                      const currentScore = sTeam === 1 ? t1 : t2;
+                      courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
+                  }
+              }
+
+              if (sTeam === 1) {
+                  courtServerPos = courtServerPos === 'Right' ? 'bottom-right' : 'bottom-left';
+                  courtReceiverPos = courtServerPos === 'bottom-right' ? 'top-left' : 'top-right'; 
+              } else {
+                  courtServerPos = courtServerPos === 'Right' ? 'top-left' : 'top-right';
+                  courtReceiverPos = courtServerPos === 'top-left' ? 'bottom-right' : 'bottom-left'; 
+              }
+
+              return {
+                  t1Score: t1, t2Score: t2, servingTeam: sTeam, serverNumber: sNum,
+                  elapsedTimeAtEvent: elapsedTime,
+                  positions: { t1Left: currentT1Left, t1Right: currentT1Right, t2Left: currentT2Left, t2Right: currentT2Right },
+                  serverPos: courtServerPos, receiverPos: courtReceiverPos
+              };
+          };
+
           const handleRetreat = (retreatingTeam) => {
             saveStateForUndo();
             const winningTeam = retreatingTeam === 1 ? 2 : 1;
@@ -1455,7 +1541,12 @@
              else setT2Timeouts(t => t - 1);
              
              const evType = team === 1 ? 'T1_TIMEOUT' : 'T2_TIMEOUT';
-             setHistory(prev => [...prev, { id: Date.now(), type: evType, team, point: null }]);
+             setHistory(prev => {
+                 const newHist = [...prev, { id: Date.now(), type: evType, team, point: null }];
+                 // Attach snapshot immediately
+                 newHist[newHist.length - 1].snapshot = generateSnapshot(newHist, team1Score, team2Score, servingTeam, serverNumber);
+                 return newHist;
+             });
              setShowTimeoutConfirm(null);
              triggerHaptic('point');
 
@@ -1477,6 +1568,7 @@
 
             if (hasWinner) {
               setWinner(winTeam); setShowWinnerOverlay(true); triggerHaptic('win');
+              setIsTimelineLocked(false); setPreviewSnapshot(null); // Auto-unlock on win
               
               if (soundEnabled && 'speechSynthesis' in window) {
                   window.speechSynthesis.cancel();
@@ -1528,6 +1620,7 @@
           const handleRallyWin = (winningTeam) => {
             if (winner || activeTimeoutRemaining > 0) return;
             triggerHaptic('point');
+            setIsTimelineLocked(true); setPreviewSnapshot(null); // Auto-lock on score
             saveStateForUndo();
 
             let newT1 = team1Score; let newT2 = team2Score; let newServTeam = servingTeam; let newServNum = serverNumber; let evType = '';
@@ -1564,6 +1657,9 @@
 
             setTeam1Score(newT1); setTeam2Score(newT2); setServingTeam(newServTeam); setServerNumber(newServNum);
             const newHist = [...history, { id: Date.now(), type: evType, team: winningTeam, point: evType === 'T1_POINT' ? newT1 : (evType === 'T2_POINT' ? newT2 : null) }];
+            
+            // Attach snapshot using the newly calculated state and the new history array
+            newHist[newHist.length - 1].snapshot = generateSnapshot(newHist, newT1, newT2, newServTeam, newServNum);
             setHistory(newHist);
             
             const switchPt = Math.ceil(playTo / 2);
@@ -1722,6 +1818,22 @@
               courtServerPos = courtServerPos === 'Right' ? 'top-left' : 'top-right';
               courtReceiverPos = courtServerPos === 'top-left' ? 'bottom-right' : 'bottom-left'; 
           }
+          // --- GHOST COURT OVERRIDES ---
+          let displayServerPos = courtServerPos;
+          let displayReceiverPos = courtReceiverPos;
+          let displayT1Left = currentT1Left;
+          let displayT1Right = currentT1Right;
+          let displayT2Left = currentT2Left;
+          let displayT2Right = currentT2Right;
+
+          if (previewSnapshot) {
+              displayServerPos = previewSnapshot.serverPos;
+              displayReceiverPos = previewSnapshot.receiverPos;
+              displayT1Left = previewSnapshot.positions.t1Left;
+              displayT1Right = previewSnapshot.positions.t1Right;
+              displayT2Left = previewSnapshot.positions.t2Left;
+              displayT2Right = previewSnapshot.positions.t2Right;
+          }
 
           const renderPlayerBadge = (name, role) => {
               if (!name) return null;
@@ -1749,9 +1861,17 @@
               );
           };
 
-          const renderTimeline = (timelineData, useScrollRef = false) => (
+          const renderTimeline = (timelineData, useScrollRef = false, isHistoryTab = false, matchId = null) => (
             <div className={`mt-6 muji-card p-5 rounded-xl`}>
-              <div className={`text-[10px] font-bold uppercase tracking-widest mb-4 ${textSub}`}>{getT('timeline')}</div>
+              <div className="flex justify-between items-center mb-4">
+                <div className={`text-[10px] font-bold uppercase tracking-widest ${textSub} flex items-center gap-2`}>
+                   {getT('timeline')} 
+                   {previewSnapshot && <span className="text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded">PREVIEWING</span>}
+                </div>
+                <button onClick={() => { setIsTimelineLocked(!isTimelineLocked); if (!isTimelineLocked) setPreviewSnapshot(null); }} className={`p-1.5 rounded-md border ${isTimelineLocked ? 'bg-stone-100 dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-400' : 'bg-amber-100 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700 text-amber-600 dark:text-amber-400'} transition-colors`}>
+                  {isTimelineLocked ? <Lock size={14} /> : <Unlock size={14} />}
+                </button>
+              </div>
               <div ref={useScrollRef ? timelineScrollRef : null} className="overflow-x-auto pb-4 pt-2 muji-scrollbar relative scroll-smooth">
                 {timelineData.length === 0 && <div className={`text-xs italic ${textSub} px-2`}>{getT('awaiting')}</div>}
                 {timelineData.length > 0 && (
@@ -1765,7 +1885,18 @@
                     </div>
                     <div className="flex items-center">
                         {timelineData.map((event) => (
-                          <div key={event.id} className="flex flex-col items-center justify-center w-8 gap-3 relative z-10">
+                          <div key={event.id} onClick={() => { 
+                              if (isHistoryTab) {
+                                  if (event.snapshot) {
+                                      setHistoryPreviewSnapshot(event.snapshot);
+                                      setHistoryPreviewMatchId(matchId);
+                                  } else {
+                                      alert("Time travel function not enabled for games recorded before this update.");
+                                  }
+                              } else {
+                                  if (!isTimelineLocked && event.snapshot) setPreviewSnapshot(event.snapshot); 
+                              }
+                          }} className={`flex flex-col items-center justify-center w-8 gap-3 relative z-10 ${(isHistoryTab && event.snapshot) || (!isTimelineLocked && event.snapshot) ? 'cursor-pointer hover:scale-110 transition-transform' : 'cursor-default'}`}>
                             <div className="h-6 flex items-center justify-center w-full">
                               {event.type === 'T1_POINT' ? (
                                   <div className={`w-5 h-5 rounded-full bg-emerald-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[10px] font-bold text-white transition-transform hover:scale-110 cursor-default shadow-sm z-10`}>
@@ -2247,7 +2378,73 @@
                                 <div className="text-center"><span className={`text-[10px] font-bold uppercase tracking-widest ${textSub} block mb-1 truncate max-w-[60px]`} title={match.t2Name}>{match.t2Name}</span><span className={`text-3xl font-black ${match.winner === 2 ? accentRed : textMain}`}>{match.t2Score}</span></div>
                               </div>
                             </div>
-                            {renderTimeline(match.history)}
+
+                            {/* --- HISTORY TIME-TRAVEL MINI COURT --- */}
+                            {historyPreviewMatchId === match.id && historyPreviewSnapshot && match.players && (
+                                <div className="flex justify-center w-full mt-4 mb-6 relative z-10 animate-screen-enter">
+                                    <div className="relative flex flex-col items-center justify-center w-[240px] h-[240px] md:w-[280px] md:h-[280px]">
+                                        <button onClick={() => { setHistoryPreviewSnapshot(null); setHistoryPreviewMatchId(null); }} className={`absolute -top-4 -right-2 p-2 ${bgCard} border ${borderSub} ${textSub} hover:text-rose-500 rounded-full transition-colors z-30 shadow-md active:scale-95`}>
+                                            <X size={16} />
+                                        </button>
+                                        <div className="w-[180px] h-[240px] md:w-[220px] md:h-[280px] bg-emerald-600 rounded-[3px] border-[3px] border-white/90 shadow-md relative flex flex-col overflow-hidden pointer-events-none">
+                                            
+                                            {/* Dashed Cross-Court Laser */}
+                                            <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+                                                {historyPreviewSnapshot.serverPos === 'bottom-right' || historyPreviewSnapshot.serverPos === 'top-left' ? (
+                                                    <line x1="75%" y1="85%" x2="25%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" />
+                                                ) : (
+                                                    <line x1="25%" y1="85%" x2="75%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" />
+                                                )}
+                                            </svg>
+                                            
+                                            {/* Point Score Overlay */}
+                                            <div className="absolute inset-0 z-0 flex flex-col items-center justify-center opacity-30 text-white font-black text-6xl tracking-widest">
+                                                <span className="mb-2">{historyPreviewSnapshot.t2Score}</span>
+                                                <div className="w-12 h-1 bg-white/50 my-1 rounded-full"></div>
+                                                <span className="mt-2">{historyPreviewSnapshot.t1Score}</span>
+                                            </div>
+
+                                            {/* T2 Backcourt */}
+                                            <div className="flex-1 relative border-b border-white/50 z-20">
+                                                <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
+                                                <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">
+                                                    {(match.mode === 'double' || historyPreviewSnapshot.serverPos === 'top-left' || historyPreviewSnapshot.receiverPos === 'top-left') && renderPlayerBadge(
+                                                        match.mode === 'single' ? match.players.t2PLeft : historyPreviewSnapshot.positions.t2Right, 
+                                                        historyPreviewSnapshot.serverPos === 'top-left' ? 'server' : historyPreviewSnapshot.receiverPos === 'top-left' ? 'receiver' : 'partner'
+                                                    )}
+                                                </div>
+                                                <div className="absolute top-1 right-0 w-1/2 flex justify-center items-center h-full">
+                                                    {(match.mode === 'double' || historyPreviewSnapshot.serverPos === 'top-right' || historyPreviewSnapshot.receiverPos === 'top-right') && renderPlayerBadge(
+                                                        match.mode === 'single' ? match.players.t2PLeft : historyPreviewSnapshot.positions.t2Left, 
+                                                        historyPreviewSnapshot.serverPos === 'top-right' ? 'server' : historyPreviewSnapshot.receiverPos === 'top-right' ? 'receiver' : 'partner'
+                                                    )}
+                                                </div>
+                                            </div>
+                                            {/* Kitchens */}
+                                            <div className="h-6 md:h-8 border-b-2 border-white/80 bg-emerald-500 z-20"></div>
+                                            <div className="h-6 md:h-8 border-b border-white/50 bg-emerald-500 z-20"></div>
+                                            {/* T1 Backcourt */}
+                                            <div className="flex-1 relative z-20">
+                                                <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
+                                                <div className="absolute bottom-1 left-0 w-1/2 flex justify-center items-center h-full">
+                                                    {(match.mode === 'double' || historyPreviewSnapshot.serverPos === 'bottom-left' || historyPreviewSnapshot.receiverPos === 'bottom-left') && renderPlayerBadge(
+                                                        match.mode === 'single' ? match.players.t1PLeft : historyPreviewSnapshot.positions.t1Left, 
+                                                        historyPreviewSnapshot.serverPos === 'bottom-left' ? 'server' : historyPreviewSnapshot.receiverPos === 'bottom-left' ? 'receiver' : 'partner'
+                                                    )}
+                                                </div>
+                                                <div className="absolute bottom-1 right-0 w-1/2 flex justify-center items-center h-full">
+                                                    {(match.mode === 'double' || historyPreviewSnapshot.serverPos === 'bottom-right' || historyPreviewSnapshot.receiverPos === 'bottom-right') && renderPlayerBadge(
+                                                        match.mode === 'single' ? match.players.t1PLeft : historyPreviewSnapshot.positions.t1Right, 
+                                                        historyPreviewSnapshot.serverPos === 'bottom-right' ? 'server' : historyPreviewSnapshot.receiverPos === 'bottom-right' ? 'receiver' : 'partner'
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {renderTimeline(match.history, false, true, match.id)}
                           </div>
                         ))}
                       </div>
@@ -2355,10 +2552,13 @@
                         <div className="relative flex items-center justify-center w-[240px] h-[240px] md:w-[280px] md:h-[280px]">
                             
                             {/* ROTATING COURT CONTAINER */}
-                            <div 
-                                className="w-[180px] h-[240px] md:w-[220px] md:h-[280px] bg-emerald-600 rounded-[3px] border-[3px] border-white/90 shadow-md relative flex flex-col overflow-hidden pointer-events-none transition-transform duration-500 ease-in-out"
-                                style={{ transform: `rotate(${courtRotation}deg)` }}
-                            >
+                            {previewSnapshot && (
+                                    <div className="absolute inset-0 z-0 flex flex-col items-center justify-center opacity-30 text-white font-black text-6xl tracking-widest" style={{ transform: `rotate(${-courtRotation}deg)` }}>
+                                        <span className="mb-2">{previewSnapshot.t2Score}</span>
+                                        <div className="w-12 h-1 bg-white/50 my-1 rounded-full"></div>
+                                        <span className="mt-2">{previewSnapshot.t1Score}</span>
+                                    </div>
+                                )}
                                 
                                 {/* Dashed Cross-Court Laser */}
                                 <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
@@ -2373,15 +2573,15 @@
                                 <div className="flex-1 relative border-b border-white/50 z-20">
                                     <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
                                     <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">
-                                        {(gameMode === 'double' || courtServerPos === 'top-left' || courtReceiverPos === 'top-left') && renderPlayerBadge(
-                                            gameMode === 'single' ? t2PLeft : currentT2Right, // Viewer's top-left is T2's right side
-                                            courtServerPos === 'top-left' ? 'server' : courtReceiverPos === 'top-left' ? 'receiver' : 'partner'
+                                        {(gameMode === 'double' || displayServerPos === 'top-left' || displayReceiverPos === 'top-left') && renderPlayerBadge(
+                                            gameMode === 'single' ? t2PLeft : displayT2Right, 
+                                            displayServerPos === 'top-left' ? 'server' : displayReceiverPos === 'top-left' ? 'receiver' : 'partner'
                                         )}
                                     </div>
                                     <div className="absolute top-1 right-0 w-1/2 flex justify-center items-center h-full">
-                                        {(gameMode === 'double' || courtServerPos === 'top-right' || courtReceiverPos === 'top-right') && renderPlayerBadge(
-                                            gameMode === 'single' ? t2PLeft : currentT2Left, // Viewer's top-right is T2's left side
-                                            courtServerPos === 'top-right' ? 'server' : courtReceiverPos === 'top-right' ? 'receiver' : 'partner'
+                                        {(gameMode === 'double' || displayServerPos === 'top-right' || displayReceiverPos === 'top-right') && renderPlayerBadge(
+                                            gameMode === 'single' ? t2PLeft : displayT2Left, 
+                                            displayServerPos === 'top-right' ? 'server' : displayReceiverPos === 'top-right' ? 'receiver' : 'partner'
                                         )}
                                     </div>
                                 </div>
@@ -2393,15 +2593,15 @@
                                 <div className="flex-1 relative z-20">
                                     <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
                                     <div className="absolute bottom-1 left-0 w-1/2 flex justify-center items-center h-full">
-                                        {(gameMode === 'double' || courtServerPos === 'bottom-left' || courtReceiverPos === 'bottom-left') && renderPlayerBadge(
-                                            gameMode === 'single' ? t1PLeft : currentT1Left, 
-                                            courtServerPos === 'bottom-left' ? 'server' : courtReceiverPos === 'bottom-left' ? 'receiver' : 'partner'
+                                        {(gameMode === 'double' || displayServerPos === 'bottom-left' || displayReceiverPos === 'bottom-left') && renderPlayerBadge(
+                                            gameMode === 'single' ? t1PLeft : displayT1Left, 
+                                            displayServerPos === 'bottom-left' ? 'server' : displayReceiverPos === 'bottom-left' ? 'receiver' : 'partner'
                                         )}
                                     </div>
                                     <div className="absolute bottom-1 right-0 w-1/2 flex justify-center items-center h-full">
-                                        {(gameMode === 'double' || courtServerPos === 'bottom-right' || courtReceiverPos === 'bottom-right') && renderPlayerBadge(
-                                            gameMode === 'single' ? t1PLeft : currentT1Right, 
-                                            courtServerPos === 'bottom-right' ? 'server' : courtReceiverPos === 'bottom-right' ? 'receiver' : 'partner'
+                                        {(gameMode === 'double' || displayServerPos === 'bottom-right' || displayReceiverPos === 'bottom-right') && renderPlayerBadge(
+                                            gameMode === 'single' ? t1PLeft : displayT1Right, 
+                                            displayServerPos === 'bottom-right' ? 'server' : displayReceiverPos === 'bottom-right' ? 'receiver' : 'partner'
                                         )}
                                     </div>
                                 </div>
