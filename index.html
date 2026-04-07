@@ -635,6 +635,36 @@
           const [soundEnabled, setSoundEnabled] = useState(true);
           const [installPrompt, setInstallPrompt] = useState(null);
           const [isInstalled, setIsInstalled] = useState(false);
+          useEffect(() => {
+              // 1. Robust check for iOS, Android, and Desktop PWAs
+              const checkStandalone = () => {
+                  return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+                         (window.matchMedia && window.matchMedia('(display-mode: fullscreen)').matches) ||
+                         (window.matchMedia && window.matchMedia('(display-mode: minimal-ui)').matches) ||
+                         window.navigator.standalone === true ||
+                         document.referrer.includes('android-app://');
+              };
+              
+              setIsInstalled(checkStandalone());
+              
+              // 2. Listen for display mode changes (if they install it while the app is open)
+              if (window.matchMedia) {
+                  window.matchMedia('(display-mode: standalone)').addEventListener('change', (e) => {
+                      if (e.matches) setIsInstalled(true);
+                  });
+              }
+              
+              // 3. Catch the native browser install prompt
+              const handleBeforeInstall = (e) => { 
+                  e.preventDefault(); 
+                  setInstallPrompt(e); 
+              };
+              
+              window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+              if (window.globalInstallPrompt) setInstallPrompt(window.globalInstallPrompt);
+
+              return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+          }, []);
 
           const [matchTitleInput, setMatchTitleInput] = useState('');
           const [t1PLeftInput, setT1PLeftInput] = useState('');
