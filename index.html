@@ -732,7 +732,7 @@
           }, [appState, pendingGame]);
 
           // Guard previewData check safely
-          const isModalOpen = !!(pendingGame || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || (recoverGameData && appState !== 'splash') || showWinnerOverlay || secretGame || showTimeoutConfirm || isExporting || showResetModal || showShareAppModal || (previewData && appState === 'history'));
+         const isModalOpen = !!(pendingGame || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || (recoverGameData && appState !== 'splash') || showWinnerOverlay || secretGame || showTimeoutConfirm || isExporting || showResetModal || showShareAppModal || previewData);
 
           useEffect(() => {
               if (isModalOpen) document.body.style.overflow = 'hidden'; else document.body.style.overflow = '';
@@ -1284,9 +1284,11 @@
                       </div>
                     )}
                   </main>
+                </div>
+              )}
 
-                  {previewData && appState === 'history' && (
-                    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4" onClick={() => setPreviewData(null)}>
+              {previewData && (
+                    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4" onClick={() => setPreviewData(null)}>
                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
                        <div className={`relative p-8 ${bgCard} border ${borderSub} rounded-3xl shadow-2xl animate-screen-enter flex flex-col items-center w-full max-w-sm`} onClick={e => e.stopPropagation()}>
                           <div className="flex justify-between items-center w-full mb-6">
@@ -1350,13 +1352,11 @@
                                   </>
                               );
                           })()}
-                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
+                       </div>
+                    </div>
+                  )}
 
-              {appState === 'game' && (
+              {appState === 'game' && (
                 <div className="flex-1 flex flex-col pb-8 w-full max-w-4xl mx-auto relative z-10 animate-screen-enter" style={{ paddingTop: 'max(5rem, calc(3rem + env(safe-area-inset-top)))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))', paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
                   <header className={`flex items-center justify-between mb-4 pb-4 border-b ${borderSub}`}>
                     <div className="flex-1 flex justify-start"><button onClick={() => { if (!winner && history.length > 0) setShowBackConfirm(true); else setAppState('menu'); }} className={`transition-all duration-300 flex items-center gap-1.5 -ml-2 rounded-lg active:scale-95 ${winner !== null ? `px-3 py-1.5 bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900 font-bold shadow-md` : `p-2 ${textSub} hover:${textMain}`}`}><ArrowLeft size={20} />{winner !== null && <span className="text-xs uppercase tracking-widest">{getT('menu')}</span>}</button></div>
@@ -1390,14 +1390,13 @@
 
                     <div className={`flex justify-center w-full mt-6 md:mt-8 ${isSuddenDeath && !winner ? 'mb-4' : 'mb-6 md:mb-8'} relative z-10 flex-col items-center`}>
                         <div className="relative flex items-center justify-center w-[240px] h-[240px] md:w-[280px] md:h-[280px]">
-                            {(() => {
-                                const isGhostReplay = previewData && previewSnapshot;
-                                const displayRotation = isGhostReplay ? 180 : courtRotation; // Keep rotation feature for LIVE Ghost Court
-                                
-                                return (
-                                    <>
-                                        <div className={`w-[180px] h-[240px] md:w-[220px] md:h-[280px] ${isGhostReplay ? 'bg-amber-600 border-amber-300' : 'bg-emerald-600 border-white/90'} rounded-[3px] border-[3px] shadow-md relative flex flex-col overflow-hidden pointer-events-none transition-all duration-500 ease-in-out`} style={{ transform: `rotate(${displayRotation}deg)` }}>
-                                            <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+                            {(() => {
+                                const displayRotation = courtRotation;
+                                
+                                return (
+                                    <>
+                                        <div className={`w-[180px] h-[240px] md:w-[220px] md:h-[280px] bg-emerald-600 border-white/90 rounded-[3px] border-[3px] shadow-md relative flex flex-col overflow-hidden pointer-events-none transition-all duration-500 ease-in-out`} style={{ transform: `rotate(${displayRotation}deg)` }}>
+                                            <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
                                                 <defs>
                                                     <marker id="arrowLive" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
                                                         <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(255,255,255,0.8)" />
@@ -1413,33 +1412,21 @@
                                                 <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || d_srvPos === 'top-left' || d_rcvPos === 'top-left') && renderPlayerBadge(gameMode === 'single' ? t2PLeft : d_t2Right, d_srvPos === 'top-left' ? 'server' : d_rcvPos === 'top-left' ? 'receiver' : 'partner', displayRotation)}</div>
                                                 <div className="absolute top-1 right-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || d_srvPos === 'top-right' || d_rcvPos === 'top-right') && renderPlayerBadge(gameMode === 'single' ? t2PLeft : d_t2Left, d_srvPos === 'top-right' ? 'server' : d_rcvPos === 'top-right' ? 'receiver' : 'partner', displayRotation)}</div>
                                             </div>
-                                            <div className={`h-6 md:h-8 border-b-2 border-white/80 ${isGhostReplay ? 'bg-amber-500' : 'bg-emerald-500'} z-20 transition-colors`}></div>
-                                            <div className={`h-6 md:h-8 border-b border-white/50 ${isGhostReplay ? 'bg-amber-500' : 'bg-emerald-500'} z-20 transition-colors`}></div>
-                                            <div className="flex-1 relative z-20">
+                                            <div className={`h-6 md:h-8 border-b-2 border-white/80 bg-emerald-500 z-20 transition-colors`}></div>
+                                            <div className={`h-6 md:h-8 border-b border-white/50 bg-emerald-500 z-20 transition-colors`}></div>
+                                            <div className="flex-1 relative z-20">
                                                 <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
                                                 <div className="absolute bottom-1 left-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || d_srvPos === 'bottom-left' || d_rcvPos === 'bottom-left') && renderPlayerBadge(gameMode === 'single' ? t1PLeft : d_t1Left, d_srvPos === 'bottom-left' ? 'server' : d_rcvPos === 'bottom-left' ? 'receiver' : 'partner', displayRotation)}</div>
                                                 <div className="absolute bottom-1 right-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || d_srvPos === 'bottom-right' || d_rcvPos === 'bottom-right') && renderPlayerBadge(gameMode === 'single' ? t1PLeft : d_t1Right, d_srvPos === 'bottom-right' ? 'server' : d_rcvPos === 'bottom-right' ? 'receiver' : 'partner', displayRotation)}</div>
                                             </div>
                                         </div>
-                                        {!isGhostReplay && (
-                                            <>
-                                                <div className="absolute top-1/2 -translate-y-1/2 -left-[50px] md:-left-[60px] pointer-events-auto z-20"><button onClick={() => setCourtRotation(r => r - 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md`}><RotateCcw size={18} /></button></div>
-                                                <div className="absolute top-1/2 -translate-y-1/2 -right-[50px] md:-right-[60px] pointer-events-auto z-20"><button onClick={() => setCourtRotation(r => r + 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md`}><RotateCw size={18} /></button></div>
-                                            </>
-                                        )}
-                                    </>
+                                        <div className="absolute top-1/2 -translate-y-1/2 -left-[50px] md:-left-[60px] pointer-events-auto z-20"><button onClick={() => setCourtRotation(r => r - 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md`}><RotateCcw size={18} /></button></div>
+                                        <div className="absolute top-1/2 -translate-y-1/2 -right-[50px] md:-right-[60px] pointer-events-auto z-20"><button onClick={() => setCourtRotation(r => r + 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md`}><RotateCw size={18} /></button></div>
+                                    </>
                                 );
                             })()}
                         </div>
-
-                        {previewData && (
-                          <div className="flex justify-between items-center w-[240px] md:w-[280px] mt-6 relative z-10">
-                              <button onClick={(e) => { e.stopPropagation(); setPreviewData(prev => ({...prev, index: prev.index - 1})); }} disabled={previewData.index === 0} className={`px-4 py-2 rounded-xl font-bold text-xs transition-colors ${previewData.index === 0 ? 'opacity-30 cursor-not-allowed bg-stone-200 dark:bg-stone-800 text-stone-400' : 'bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-900/50 dark:text-amber-400 dark:hover:bg-amber-800'}`}>&larr; Prev</button>
-                              <span className="text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-500">Point {previewData.index + 1} / {previewData.history.length}</span>
-                              <button onClick={(e) => { e.stopPropagation(); setPreviewData(prev => ({...prev, index: prev.index + 1})); }} disabled={previewData.index === previewData.history.length - 1} className={`px-4 py-2 rounded-xl font-bold text-xs transition-colors ${previewData.index === previewData.history.length - 1 ? 'opacity-30 cursor-not-allowed bg-stone-200 dark:bg-stone-800 text-stone-400' : 'bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-900/50 dark:text-amber-400 dark:hover:bg-amber-800'}`}>Next &rarr;</button>
-                          </div>
-                        )}
-                    </div>
+                    </div>
 
                     {isSuddenDeath && !winner && (<div className="flex justify-center w-full mb-6 relative z-10 animate-screen-enter"><span className={`px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-900/50 dark:text-rose-300 dark:border-rose-800 shadow-sm text-center max-w-[90%]`}>🔥 {getT('suddenDeath')} - {serveToWinAt14 ? getT('suddenDeathServeDesc') : getT('nextPointWins')} 🔥</span></div>)}
 
