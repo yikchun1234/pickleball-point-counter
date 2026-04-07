@@ -1699,9 +1699,8 @@
 )}  
 
               {showLegacyAlert && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowLegacyAlert(false)}></div>
-                  <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl text-center animate-screen-enter`}>
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowLegacyAlert(false)}>
+                  <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl text-center`} onClick={(e) => e.stopPropagation()}>
                     <div className="absolute top-4 right-4"><button onClick={() => setShowLegacyAlert(false)} className={`p-1.5 rounded-full bg-stone-100 dark:bg-stone-800 ${textSub} hover:${textMain} transition-colors`}><X size={16}/></button></div>
                     <HistoryIcon size={48} className="mx-auto text-amber-500 mb-4 opacity-80" />
                     <h2 className={`text-lg font-bold mb-2 ${textMain}`}>Ghost Replay Unavailable</h2>
