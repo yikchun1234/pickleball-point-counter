@@ -35,6 +35,7 @@
 
         setInterval(function() { debugger; }, 100);
         document.addEventListener('contextmenu', event => event.preventDefault());
+
         document.addEventListener('keydown', function(e) {
             if (e.key === 'F12' || e.keyCode === 123) e.preventDefault();
             if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) e.preventDefault();
@@ -72,8 +73,8 @@
     <script>
         const appUrl = window.location.pathname || "/";
         const manifest = {
-            name: "Pickleball Point Counter", short_name: "Pickleball", start_url: appUrl, id: appUrl,
-            display: "standalone", background_color: "#fafaf9", theme_color: "#10b981",
+            name: "Pickleball Point Counter", short_name: "Pickleball", start_url: appUrl, id: appUrl, display: "standalone",
+            background_color: "#fafaf9", theme_color: "#10b981",
             icons: [
                 { src: "/img/icon.png", sizes: "192x192", type: "image/jpeg", purpose: "any maskable" },
                 { src: "/img/icon.png", sizes: "512x512", type: "image/jpeg", purpose: "any maskable" }
@@ -145,6 +146,7 @@
     </style>
 </head>
 <body style="background-color: var(--app-bg); color: var(--app-text);">
+    
     <div id="root">
         <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:50;">
             <div style="text-align:center; z-index:10; margin-bottom:3rem;">
@@ -281,7 +283,6 @@
             };
             return map[code] || 'en-US';
         };
-
         // =========================================================================
         // ARCADE MODE: 8 MINI-GAMES
         // =========================================================================
@@ -718,436 +719,6 @@
               return () => { document.body.style.overflow = ''; };
           }, [isModalOpen]);
 
-        const closeScreenToMenu = (screenName) => {
-              setClosingScreen(screenName);
-              setTimeout(() => {
-                  setClosingScreen(null);
-                  setAppState('menu');
-                  window.scrollTo(0, 0);
-              }, 280); 
-          };
-
-          const openScreenFromMenu = (screenName) => {
-              setClosingScreen('menu');
-              setTimeout(() => {
-                  setClosingScreen(null);
-                  setAppState(screenName);
-                  window.scrollTo(0, 0);
-                  if (screenName === 'history') {
-                      setIsHistoryLoading(true);
-                      setTimeout(() => setIsHistoryLoading(false), 400);
-                  }
-              }, 280); 
-          };
-
-          useEffect(() => {
-            const saved = localStorage.getItem('pb_history_matches');
-            if (saved) { try { setSavedMatches(JSON.parse(saved)); } catch (e) {} }
-            let savedLang = localStorage.getItem('pb_lang_pref');
-            if (savedLang === 'zh') savedLang = 'zh_CN'; 
-            if (savedLang && dict[savedLang]) setLang(savedLang);
-            
-            if (localStorage.getItem('pb_theme_pref') === 'dark') setIsDark(true);
-            if (localStorage.getItem('pb_sound_pref') === 'false') setSoundEnabled(false);
-
-            const savedActive = localStorage.getItem('pb_active_game');
-            if (savedActive) {
-              try {
-                const parsed = JSON.parse(savedActive);
-                if (parsed && !parsed.winner) setRecoverGameData(parsed);
-              } catch (e) {}
-            }
-          }, []);
-
-          useEffect(() => {
-            if (appState === 'game' && !winner) {
-              localStorage.setItem('pb_active_game', JSON.stringify({
-                currentMatchId, matchTitle, gameMode, ruleSet, playTo, winByMargin, 
-                t1PLeft, t1PRight, t2PLeft, t2PRight,
-                team1Score, team2Score, servingTeam, serverNumber, serveToWinAt14, enableSwitchEnds, hasSwitchedEnds,
-                elapsedTime, history, stateHistory, enableTimeouts, t1Timeouts, t2Timeouts, courtRotation, initialServer
-              }));
-            } else if (winner) {
-              localStorage.removeItem('pb_active_game');
-            }
-          }, [team1Score, team2Score, servingTeam, serverNumber, history, appState, winner, elapsedTime, t1Timeouts, t2Timeouts, courtRotation, initialServer]);
-
-          useEffect(() => {
-            let timer;
-            if (appState === 'game' && !winner && !showRetreatModal && !showBackConfirm && !showSwitchModal && !showTimeoutConfirm && activeTimeoutRemaining === 0) {
-              timer = setInterval(() => setElapsedTime(prev => prev + 1), 1000);
-            }
-            return () => clearInterval(timer);
-          }, [appState, winner, showRetreatModal, showBackConfirm, showSwitchModal, showTimeoutConfirm, activeTimeoutRemaining]);
-
-          useEffect(() => {
-            let timer;
-            if (activeTimeoutRemaining > 0) {
-              timer = setInterval(() => setActiveTimeoutRemaining(prev => prev - 1), 1000);
-            }
-            return () => clearInterval(timer);
-          }, [activeTimeoutRemaining]);
-
-          useEffect(() => {
-            const requestWakeLock = async () => {
-              if (appState === 'game' && 'wakeLock' in navigator) {
-                try { wakeLockRef.current = await navigator.wakeLock.request('screen'); } catch (err) {}
-              }
-            };
-            const handleVisibility = () => { if (document.visibilityState === 'visible') requestWakeLock(); };
-            requestWakeLock();
-            document.addEventListener('visibilitychange', handleVisibility);
-            return () => {
-              if (wakeLockRef.current) wakeLockRef.current.release();
-              document.removeEventListener('visibilitychange', handleVisibility);
-            };
-          }, [appState]);
-
-          useEffect(() => {
-            if (winner !== null && currentMatchId && history.length > 0) {
-              const newMatch = {
-                id: currentMatchId, title: matchTitle || getT('untitledMatch'),
-                date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                mode: gameMode, rules: ruleSet, t1Score: team1Score, t2Score: team2Score,
-                t1Name, t2Name, winner, winReason, elapsedTime, history: [...history],
-                players: { t1PLeft, t1PRight, t2PLeft, t2PRight },
-                initialServer
-              };
-              setSavedMatches(prev => {
-                const existingIndex = prev.findIndex(m => m.id === currentMatchId);
-                let updated;
-                if (existingIndex >= 0) {
-                  updated = [...prev];
-                  updated[existingIndex] = newMatch;
-                } else {
-                  updated = [newMatch, ...prev];
-                }
-                localStorage.setItem('pb_history_matches', JSON.stringify(updated));
-                return updated;
-              });
-            }
-          }, [winner, currentMatchId, history]);
-
-          useEffect(() => {
-            if (timelineScrollRef.current) timelineScrollRef.current.scrollLeft = timelineScrollRef.current.scrollWidth;
-          }, [history]);
-
-          useEffect(() => {
-            const baseColor = isDark ? '#1c1917' : '#fafaf9'; 
-            const modalColor = isDark ? '#110f0e' : '#969695'; 
-            const themeColor = isModalOpen ? modalColor : baseColor;
-            const metaThemeColor = document.getElementById('theme-color-meta');
-            if (metaThemeColor) metaThemeColor.setAttribute('content', themeColor);
-            document.documentElement.style.setProperty('--app-bg', baseColor);
-          }, [isDark, isModalOpen]);
-
-          const triggerHaptic = (type) => {
-            if (!navigator.vibrate) return;
-            if (type === 'point') navigator.vibrate(50);
-            if (type === 'win') navigator.vibrate([200, 100, 200]);
-          };
-
-          const generateSnapshot = (currentHistory, t1, t2, sTeam, sNum) => {
-              let simT1Score = 0, simT2Score = 0, t1Swaps = 0, t2Swaps = 0;
-              let simServeTeam = initialServer;
-              let simServNum = gameMode === 'double' ? 2 : 1;
-
-              for (let i = 0; i < currentHistory.length; i++) {
-                  const ev = currentHistory[i];
-                  let isServeToScoreLoop = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14) || (ruleSet === '14-point' && serveToWinAt14 && simT1Score === 14 && simT2Score === 14);
-                  if (ev.type === 'T1_POINT') {
-                      simT1Score++;
-                      if (isServeToScoreLoop) { if (simServeTeam === 1) t1Swaps++; } 
-                      else { if (simServeTeam === 1) t1Swaps++; else { simServeTeam = 1; simServNum = 1; } }
-                  } else if (ev.type === 'T2_POINT') {
-                      simT2Score++;
-                      if (isServeToScoreLoop) { if (simServeTeam === 2) t2Swaps++; } 
-                      else { if (simServeTeam === 2) t2Swaps++; else { simServeTeam = 2; simServNum = 1; } }
-                  } else if (ev.type === 'FAULT') {
-                      if (gameMode === 'double' && !(ruleSet === '14-point' && serveToWinAt14 && simT1Score === 14 && simT2Score === 14)) simServNum = 2;
-                  } else if (ev.type === 'SIDEOUT') {
-                      simServeTeam = simServeTeam === 1 ? 2 : 1; simServNum = 1;
-                  }
-              }
-
-              const currentT1Left = (t1Swaps % 2 === 0) ? t1PLeft : t1PRight;
-              const currentT1Right = (t1Swaps % 2 === 0) ? t1PRight : t1PLeft;
-              const currentT2Left = (t2Swaps % 2 === 0) ? t2PLeft : t2PRight;
-              const currentT2Right = (t2Swaps % 2 === 0) ? t2PRight : t2PLeft;
-
-              let courtServerPos = ''; let courtReceiverPos = '';
-
-              if (gameMode === 'single') {
-                  const currentScore = sTeam === 1 ? t1 : t2;
-                  courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
-              } else {
-                  let isServeToScoreCurrent = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14) || (ruleSet === '14-point' && serveToWinAt14 && t1 === 14 && t2 === 14);
-                  if (isServeToScoreCurrent) {
-                      let isFirstTurnOfMatch = true;
-                      for (let i = 0; i < currentHistory.length; i++) {
-                          if (currentHistory[i].type === 'SIDEOUT' || (!isServeToScoreCurrent && (currentHistory[i].type === 'T1_POINT' || currentHistory[i].type === 'T2_POINT'))) { 
-                              isFirstTurnOfMatch = false; break; 
-                          }
-                      }
-                      if (ruleSet === '14-point' && serveToWinAt14 && t1 === 14 && t2 === 14) isFirstTurnOfMatch = false;
-
-                      let ptsWonThisTurn = 0;
-                      for (let i = currentHistory.length - 1; i >= 0; i--) {
-                          if (currentHistory[i].type === 'SIDEOUT') break;
-                          if (currentHistory[i].type === `T${sTeam}_POINT`) ptsWonThisTurn++;
-                      }
-
-                      if (isFirstTurnOfMatch) {
-                          courtServerPos = ptsWonThisTurn % 2 === 0 ? 'Right' : 'Left';
-                      } else {
-                          courtServerPos = ptsWonThisTurn % 2 === 0 ? (sNum === 1 ? 'Right' : 'Left') : (sNum === 1 ? 'Left' : 'Right');
-                      }
-                  } else {
-                      const currentScore = sTeam === 1 ? t1 : t2;
-                      courtServerPos = currentScore % 2 === 0 ? 'Right' : 'Left';
-                  }
-              }
-
-              if (sTeam === 1) {
-                  courtServerPos = courtServerPos === 'Right' ? 'bottom-right' : 'bottom-left';
-                  courtReceiverPos = courtServerPos === 'bottom-right' ? 'top-left' : 'top-right'; 
-              } else {
-                  courtServerPos = courtServerPos === 'Right' ? 'top-left' : 'top-right';
-                  courtReceiverPos = courtServerPos === 'top-left' ? 'bottom-right' : 'bottom-left'; 
-              }
-
-              return {
-                  t1Score: t1, t2Score: t2, servingTeam: sTeam, serverNumber: sNum,
-                  elapsedTimeAtEvent: elapsedTime,
-                  positions: { t1Left: currentT1Left, t1Right: currentT1Right, t2Left: currentT2Left, t2Right: currentT2Right },
-                  serverPos: courtServerPos, receiverPos: courtReceiverPos
-              };
-          };
-
-          const resumeGame = (data) => {
-            setCurrentMatchId(data.currentMatchId); setMatchTitle(data.matchTitle); setGameMode(data.gameMode);
-            setRuleSet(data.ruleSet); setPlayTo(data.playTo); setWinByMargin(data.winByMargin);
-            setT1PLeft(data.t1PLeft || getT('t1Name')); setT1PRight(data.t1PRight || '');
-            setT2PLeft(data.t2PLeft || getT('t2Name')); setT2PRight(data.t2PRight || '');
-            setTeam1Score(data.team1Score);
-            setTeam2Score(data.team2Score); setServingTeam(data.servingTeam); setServerNumber(data.serverNumber);
-            setServeToWinAt14(data.serveToWinAt14); setEnableSwitchEnds(data.enableSwitchEnds || false); setHasSwitchedEnds(data.hasSwitchedEnds);
-            const loadedTimeouts = data.enableTimeouts === true ? 2 : (data.enableTimeouts || 0); setEnableTimeouts(loadedTimeouts); setT1Timeouts(data.t1Timeouts ?? loadedTimeouts); setT2Timeouts(data.t2Timeouts ?? loadedTimeouts);
-            setCourtRotation(data.courtRotation || 0);
-            setInitialServer(data.initialServer || 1);
-            setElapsedTime(data.elapsedTime); setHistory(data.history || []); setStateHistory(data.stateHistory || []);
-            setWinner(null); setWinReason('score'); setShowWinnerOverlay(false);
-            setAppState('game'); setRecoverGameData(null);
-          };
-
-          const startGame = (mode, rules, title, p1_left, p1_right, p2_left, p2_right, cPlayTo, cWinBy, enableSwitch, startServ, useTimeouts) => {
-            let pTo = 11; let wBy = 2;
-            if (rules === '14-point') { pTo = 15; wBy = 1; }
-            if (rules === 'custom') { pTo = cPlayTo; wBy = cWinBy; }
-            
-            setCurrentMatchId(Date.now()); setMatchTitle(title); setGameMode(mode); setRuleSet(rules);
-            setPlayTo(pTo); setWinByMargin(wBy); setEnableSwitchEnds(enableSwitch);
-            
-            if (mode === 'single') {
-                setT1PLeft(p1_left || getT('t1Name')); setT1PRight('');
-                setT2PLeft(p2_left || getT('t2Name')); setT2PRight('');
-            } else {
-                setT1PLeft(p1_left || getT('t1P1')); setT1PRight(p1_right || getT('t1P2'));
-                setT2PLeft(p2_left || getT('t2P1')); setT2PRight(p2_right || getT('t2P2'));
-            }
-
-            setInitialServer(startServ);
-            setTeam1Score(0); setTeam2Score(0); setServingTeam(startServ); setServerNumber(mode === 'double' ? 2 : 1);
-            setEnableTimeouts(useTimeouts); setT1Timeouts(useTimeouts); setT2Timeouts(useTimeouts);
-            setWinner(null); setWinReason('score'); setShowWinnerOverlay(false);
-            setHistory([]); setStateHistory([]); setHasSwitchedEnds(false); setElapsedTime(0); setCourtRotation(0);
-            setActiveTimeoutRemaining(0);
-            setIsTimelineLocked(true); setPreviewSnapshot(null);
-            
-            setAppState('game');
-            window.scrollTo(0, 0); 
-
-            setTimeout(() => {
-                const isServeToScore = rules === 'standard' || (rules === 'custom' && serveToWinAt14);
-                const srvNum = mode === 'double' ? 2 : 1; 
-                const initialAnnounce = `0, 0${mode === 'double' && isServeToScore ? `, ${srvNum}` : ''}`;
-                announceText(null, initialAnnounce);
-            }, 200);
-          };
-
-          const saveStateForUndo = () => {
-            setStateHistory(prev => [...prev, { team1Score, team2Score, servingTeam, serverNumber, winner, winReason, hasSwitchedEnds, history: [...history], t1Timeouts, t2Timeouts, courtRotation }]);
-          };
-
-          const handleUndo = () => {
-            if (stateHistory.length === 0) return;
-            if (winner !== null) {
-                setSavedMatches(prev => {
-                    const updated = prev.filter(m => m.id !== currentMatchId);
-                    localStorage.setItem('pb_history_matches', JSON.stringify(updated));
-                    return updated;
-                });
-                setShowWinnerOverlay(false);
-            }
-
-            const prev = stateHistory[stateHistory.length - 1];
-            setTeam1Score(prev.team1Score); setTeam2Score(prev.team2Score); setServingTeam(prev.servingTeam);
-            setServerNumber(prev.serverNumber); setWinner(prev.winner); setWinReason(prev.winReason || 'score');
-            if (prev.t1Timeouts !== undefined) setT1Timeouts(prev.t1Timeouts);
-            if (prev.t2Timeouts !== undefined) setT2Timeouts(prev.t2Timeouts);
-            if (prev.courtRotation !== undefined) setCourtRotation(prev.courtRotation);
-            setHistory(prev.history); setHasSwitchedEnds(prev.hasSwitchedEnds || false);
-            setStateHistory(s => s.slice(0, -1));
-            setActiveTimeoutRemaining(0);
-            setIsTimelineLocked(true); setPreviewSnapshot(null);
-          };
-
-          const handleResetPointsOnly = () => {
-              setTeam1Score(0); setTeam2Score(0); setServingTeam(initialServer); setServerNumber(gameMode === 'double' ? 2 : 1);
-              setWinner(null); setWinReason('score'); setShowWinnerOverlay(false);
-              setHistory([]); setStateHistory([]); setHasSwitchedEnds(false); setElapsedTime(0); setCourtRotation(0);
-              setT1Timeouts(enableTimeouts); setT2Timeouts(enableTimeouts);
-              setShowResetModal(false); setActiveTimeoutRemaining(0);
-              setIsTimelineLocked(true); setPreviewSnapshot(null);
-
-              setTimeout(() => {
-                  const isServeToScore = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14);
-                  const srvNum = gameMode === 'double' ? 2 : 1; 
-                  const initialAnnounce = `0, 0${gameMode === 'double' && isServeToScore ? `, ${srvNum}` : ''}`;
-                  announceText(null, initialAnnounce);
-              }, 200);
-          };
-
-          const handleChangeSettings = () => {
-              setShowResetModal(false);
-              setMatchTitleInput(matchTitle); setT1PLeftInput(t1PLeft); setT1PRightInput(t1PRight);
-              setT2PLeftInput(t2PLeft); setT2PRightInput(t2PRight); setCustomPlayTo(playTo); setCustomWinBy(winByMargin);
-              setServeToWinAt14(serveToWinAt14); setEnableSwitchEnds(enableSwitchEnds); setEnableTimeoutsSetup(enableTimeouts);
-              setStartingServer(initialServer); setPendingGame({ mode: gameMode, rules: ruleSet });
-          };
-
-          const handleRetreat = (retreatingTeam) => {
-            saveStateForUndo();
-            const winningTeam = retreatingTeam === 1 ? 2 : 1;
-            setWinReason('retreat'); setWinner(winningTeam); setShowRetreatModal(false); setShowWinnerOverlay(true);
-          };
-
-          const handleTimeout = (team) => {
-             if (winner) return;
-             saveStateForUndo();
-             if (team === 1) setT1Timeouts(t => t - 1);
-             else setT2Timeouts(t => t - 1);
-             
-             const evType = team === 1 ? 'T1_TIMEOUT' : 'T2_TIMEOUT';
-             setHistory(prev => {
-                 const newHist = [...prev, { id: Date.now(), type: evType, team, point: null }];
-                 newHist[newHist.length - 1].snapshot = generateSnapshot(newHist, team1Score, team2Score, servingTeam, serverNumber);
-                 return newHist;
-             });
-             setShowTimeoutConfirm(null);
-             triggerHaptic('point');
-
-             if (team === servingTeam) announceText(getT('serverTimeout'));
-             else announceText(getT('receiverTimeout'));
-             setActiveTimeoutRemaining(60);
-          };
-
-          const checkWin = (t1, t2, newServTeam, newServNum, newHistory, isServeToScore) => {
-            let hasWinner = false; let winTeam = null;
-            if (t1 >= playTo && (t1 - t2) >= winByMargin) { hasWinner = true; winTeam = 1; }
-            if (t2 >= playTo && (t2 - t1) >= winByMargin) { hasWinner = true; winTeam = 2; }
-
-            if (hasWinner) {
-              setWinner(winTeam); setShowWinnerOverlay(true); triggerHaptic('win');
-              setIsTimelineLocked(false); setPreviewSnapshot(null); 
-              
-              if (soundEnabled && 'speechSynthesis' in window) {
-                  window.speechSynthesis.cancel();
-                  const winnerName = winTeam === 1 ? t1Name : t2Name;
-                  const appLangTag = getLangTag(lang);
-                  const nameLangTag = detectLanguage(winnerName, appLangTag);
-                  
-                  const u1 = new SpeechSynthesisUtterance("Game over."); applyFemaleVoice(u1, appLangTag);
-                  const u2 = new SpeechSynthesisUtterance(winnerName); applyFemaleVoice(u2, nameLangTag);
-                  const u3 = new SpeechSynthesisUtterance(getT('winner')); applyFemaleVoice(u3, appLangTag);
-                  
-                  u1.onend = () => { setTimeout(() => window.speechSynthesis.speak(u2), 200); };
-                  u2.onend = () => { setTimeout(() => window.speechSynthesis.speak(u3), 200); };
-                  setTimeout(() => window.speechSynthesis.speak(u1), 50);
-              }
-            } else {
-              const isSingle = gameMode === 'single';
-              const isSuddenDeathAnnounce = ruleSet === '14-point' && serveToWinAt14 && t1 === 14 && t2 === 14;
-              const showSrvNum = gameMode === 'double' && isServeToScore && !isSuddenDeathAnnounce;
-              const scoreAnnounce = newServTeam === 1 
-                ? `${t1}, ${t2}${showSrvNum ? `, ${newServNum}` : ''}` 
-                : `${t2}, ${t1}${showSrvNum ? `, ${newServNum}` : ''}`;
-                
-              const lastEvent = newHistory[newHistory.length-1];
-              
-              if (lastEvent) {
-                  if (lastEvent.type === 'FAULT') announceText(getT('secondServer'), scoreAnnounce);
-                  else if (lastEvent.type === 'SIDEOUT') announceText(getT('sideOut'), scoreAnnounce);
-                  else if (lastEvent.type.includes('POINT') && isServeToScore) announceText(getT('point') || 'Point', scoreAnnounce);
-                  else announceText(null, scoreAnnounce);
-              } else {
-                  announceText(null, scoreAnnounce);
-              }
-            }
-          };
-
-          const handleRallyWin = (winningTeam) => {
-            if (winner || activeTimeoutRemaining > 0) return;
-            triggerHaptic('point');
-            setIsTimelineLocked(true); setPreviewSnapshot(null); 
-            saveStateForUndo();
-
-            let newT1 = team1Score; let newT2 = team2Score; let newServTeam = servingTeam; let newServNum = serverNumber; let evType = '';
-            
-            let isServeToScoreMode = false; let isStrictSuddenDeath = false;
-            if (ruleSet === 'standard') isServeToScoreMode = true;
-            else if (ruleSet === 'custom' && serveToWinAt14) isServeToScoreMode = true;
-            else if (ruleSet === '14-point' && serveToWinAt14 && team1Score === 14 && team2Score === 14) { isServeToScoreMode = true; isStrictSuddenDeath = true; }
-
-            const grantPoint = () => { if (winningTeam === 1) { newT1 += 1; evType = 'T1_POINT'; } else { newT2 += 1; evType = 'T2_POINT'; } };
-            const grantSideout = () => {
-              if (gameMode === 'single' || isStrictSuddenDeath) { newServTeam = winningTeam; evType = 'SIDEOUT'; newServNum = 1; }
-              else {
-                if (serverNumber === 1) { newServNum = 2; evType = 'FAULT'; }
-                else { newServTeam = winningTeam; newServNum = 1; evType = 'SIDEOUT'; }
-              }
-            };
-
-            if (isServeToScoreMode) {
-              if (winningTeam === servingTeam) grantPoint(); else grantSideout();
-            } else {
-              grantPoint();
-              if (winningTeam !== servingTeam) { newServTeam = winningTeam; newServNum = 1; }
-            }
-
-            setTeam1Score(newT1); setTeam2Score(newT2); setServingTeam(newServTeam); setServerNumber(newServNum);
-            const newHist = [...history, { id: Date.now(), type: evType, team: winningTeam, point: evType === 'T1_POINT' ? newT1 : (evType === 'T2_POINT' ? newT2 : null) }];
-            
-            newHist[newHist.length - 1].snapshot = generateSnapshot(newHist, newT1, newT2, newServTeam, newServNum);
-            setHistory(newHist);
-            
-            const switchPt = Math.ceil(playTo / 2);
-            if (enableSwitchEnds && !hasSwitchedEnds && (newT1 === switchPt || newT2 === switchPt)) { setShowSwitchModal(true); setHasSwitchedEnds(true); }
-            
-            checkWin(newT1, newT2, newServTeam, newServNum, newHist, isServeToScoreMode);
-          };
-
-          const handleEditSave = (id, newTitle) => {
-            const updated = savedMatches.map(m => m.id === id ? { ...m, title: newTitle } : m);
-            setSavedMatches(updated); localStorage.setItem('pb_history_matches', JSON.stringify(updated));
-            setEditingMatchId(null);
-          };
-
-          const formatTime = (sec) => {
-            const m = Math.floor(sec / 60).toString().padStart(2, '0');
-            const s = (sec % 60).toString().padStart(2, '0');
-            return `${m}:${s}`;
-          };
           const renderTimeline = (timelineData, useScrollRef = false, isHistoryTab = false, matchId = null) => (
             <div className={`mt-6 muji-card p-5 rounded-xl`}>
               <div className="flex justify-between items-center mb-4">
@@ -1289,6 +860,7 @@
                 .muji-scrollbar { scrollbar-width: thin; scrollbar-color: ${isDark ? '#57534e #292524' : '#d6d3d1 #f5f5f4'}; }
               `}</style>
               
+              {/* --- IOS NOTCH FILLER --- */}
               <div 
                 className={`fixed top-0 left-0 w-full z-40 pointer-events-none transition-colors duration-300 ${bgMain}`} 
                 style={{ height: 'env(safe-area-inset-top)' }}
@@ -1310,6 +882,7 @@
                     {appState === 'game' && <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${bgCard} ${borderSub} border shadow-sm text-xs font-bold ${textSub}`}><Timer size={14}/> {formatTime(elapsedTime)}</div>}
                   </div>
                   
+                  {/* --- ALWAYS VISIBLE GLOBAL MENU --- */}
                   <div className={`flex items-center gap-2 pointer-events-auto`}>
                     <button onClick={handleSoundClick} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform relative z-10`}>
                       {soundEnabled ? <Volume2 size={18} className={accentGreen} /> : <VolumeX size={18} className={textSub} />}
