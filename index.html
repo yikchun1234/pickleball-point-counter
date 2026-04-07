@@ -635,36 +635,6 @@
           const [soundEnabled, setSoundEnabled] = useState(true);
           const [installPrompt, setInstallPrompt] = useState(null);
           const [isInstalled, setIsInstalled] = useState(false);
-          useEffect(() => {
-              // 1. Robust check for iOS, Android, and Desktop PWAs
-              const checkStandalone = () => {
-                  return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
-                         (window.matchMedia && window.matchMedia('(display-mode: fullscreen)').matches) ||
-                         (window.matchMedia && window.matchMedia('(display-mode: minimal-ui)').matches) ||
-                         window.navigator.standalone === true ||
-                         document.referrer.includes('android-app://');
-              };
-              
-              setIsInstalled(checkStandalone());
-              
-              // 2. Listen for display mode changes (if they install it while the app is open)
-              if (window.matchMedia) {
-                  window.matchMedia('(display-mode: standalone)').addEventListener('change', (e) => {
-                      if (e.matches) setIsInstalled(true);
-                  });
-              }
-              
-              // 3. Catch the native browser install prompt
-              const handleBeforeInstall = (e) => { 
-                  e.preventDefault(); 
-                  setInstallPrompt(e); 
-              };
-              
-              window.addEventListener('beforeinstallprompt', handleBeforeInstall);
-              if (window.globalInstallPrompt) setInstallPrompt(window.globalInstallPrompt);
-
-              return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
-          }, []);
 
           const [matchTitleInput, setMatchTitleInput] = useState('');
           const [t1PLeftInput, setT1PLeftInput] = useState('');
@@ -721,6 +691,26 @@
 
           const t = dict[lang] || dict.en;
           const getT = (key) => t[key] || defaultLang[key];
+
+          useEffect(() => {
+              const checkStandalone = () => {
+                  return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+                         (window.matchMedia && window.matchMedia('(display-mode: fullscreen)').matches) ||
+                         (window.matchMedia && window.matchMedia('(display-mode: minimal-ui)').matches) ||
+                         window.navigator.standalone === true ||
+                         document.referrer.includes('android-app://');
+              };
+              setIsInstalled(checkStandalone());
+              if (window.matchMedia) {
+                  window.matchMedia('(display-mode: standalone)').addEventListener('change', (e) => {
+                      if (e.matches) setIsInstalled(true);
+                  });
+              }
+              const handleBeforeInstall = (e) => { e.preventDefault(); setInstallPrompt(e); };
+              window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+              if (window.globalInstallPrompt) setInstallPrompt(window.globalInstallPrompt);
+              return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+          }, []);
 
           useEffect(() => {
               if ('speechSynthesis' in window) {
@@ -1012,7 +1002,7 @@
             if (isServeToScoreMode) { if (winningTeam === servingTeam) grantPoint(); else grantSideout(); } else { grantPoint(); if (winningTeam !== servingTeam) { newServTeam = winningTeam; newServNum = 1; } }
 
             setTeam1Score(newT1); setTeam2Score(newT2); setServingTeam(newServTeam); setServerNumber(newServNum);
-            const snapshot = { team1Score, team2Score, servingTeam, serverNumber, elapsedTime, t1Left: currentT1Left, t1Right: currentT1Right, t2Left: currentT2Left, t2Right: currentT2Right, serverPos: courtServerPos, receiverPos: courtReceiverPos, isSnapshot: true };
+            const snapshot = { team1Score, team2Score, servingTeam, serverNumber, elapsedTime, t1Left: currentT1Left, t1Right: currentT1Right, t2Left: currentT2Left, t2Right: currentT2Right, serverPos: courtServerPos, receiverPos: courtReceiverPos, isSnapshot: true, courtRotation: courtRotation };
             const newHist = [...history, { id: Date.now(), type: evType, team: winningTeam, point: evType === 'T1_POINT' ? newT1 : (evType === 'T2_POINT' ? newT2 : null), snapshot }];
             setHistory(newHist); setIsTimelineLocked(true); setPreviewSnapshot(null);
             const switchPt = Math.ceil(playTo / 2); if (enableSwitchEnds && !hasSwitchedEnds && (newT1 === switchPt || newT2 === switchPt)) { setShowSwitchModal(true); setHasSwitchedEnds(true); }
@@ -1050,11 +1040,11 @@
           const maxPoints = Math.max(totalT1Points, totalT2Points); const t1PointHeight = maxPoints ? (totalT1Points / maxPoints) * 100 : 0; const t2PointHeight = maxPoints ? (totalT2Points / maxPoints) * 100 : 0;
           const singlesCount = savedMatches.filter(m => m.mode === 'single').length; const doublesCount = savedMatches.filter(m => m.mode === 'double').length;
 
-          const renderPlayerBadge = (name, role) => {
+          const renderPlayerBadge = (name, role, customRotation = courtRotation) => {
               if (!name) return null;
               let bg = 'bg-stone-500/20 text-stone-400 dark:text-stone-300 border border-stone-400/20'; let scale = 1; let zIndex = 0;
               if (role === 'server') { bg = 'bg-amber-400 text-amber-950 shadow-lg ring-2 ring-white'; scale = 1.1; zIndex = 10; } else if (role === 'receiver') { bg = 'bg-white text-emerald-800 shadow-md ring-2 ring-emerald-400/50'; scale = 1.05; zIndex = 10; }
-              return (<div className={`px-2 py-1 rounded shadow-sm max-w-[90%] truncate text-[8px] md:text-[9px] font-black tracking-wider uppercase transition-all duration-500 ease-in-out ${bg}`} style={{ transform: `rotate(${-courtRotation}deg) scale(${scale})`, zIndex }}>{name}</div>);
+              return (<div className={`px-2 py-1 rounded shadow-sm max-w-[90%] truncate text-[8px] md:text-[9px] font-black tracking-wider uppercase transition-all duration-500 ease-in-out ${bg}`} style={{ transform: `rotate(${-customRotation}deg) scale(${scale})`, zIndex }}>{name}</div>);
           };
 
           const handleDotClick = (event, isLive) => {
@@ -1298,7 +1288,6 @@
                              <span className={`text-3xl font-light text-stone-300 dark:text-stone-700`}>-</span>
                              <div className="text-center"><span className={`text-[10px] font-bold ${textSub} block uppercase tracking-widest mb-1`}>{previewSnapshot.servingTeam === 2 ? 'Server' : 'Receiver'}</span><span className={`text-5xl font-black ${previewSnapshot.servingTeam === 2 ? accentRed : textMain}`}>{previewSnapshot.team2Score}</span></div>
                           </div>
-                          
                           <div className="relative flex items-center justify-center w-[220px] h-[280px]">
                               <div className={`w-[180px] h-[240px] bg-amber-600 border-amber-300 rounded-[3px] border-[3px] shadow-lg relative flex flex-col overflow-hidden pointer-events-none transition-all duration-500 ease-in-out`} style={{ transform: `rotate(${previewSnapshot.courtRotation || 0}deg)` }}>
                                   <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
@@ -1306,15 +1295,15 @@
                                   </svg>
                                   <div className="flex-1 relative border-b border-white/50 z-20">
                                       <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
-                                      <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || previewSnapshot.serverPos === 'top-left' || previewSnapshot.receiverPos === 'top-left') && renderPlayerBadge(gameMode === 'single' ? t2PLeft : previewSnapshot.t2Right, previewSnapshot.serverPos === 'top-left' ? 'server' : previewSnapshot.receiverPos === 'top-left' ? 'receiver' : 'partner')}</div>
-                                      <div className="absolute top-1 right-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || previewSnapshot.serverPos === 'top-right' || previewSnapshot.receiverPos === 'top-right') && renderPlayerBadge(gameMode === 'single' ? t2PLeft : previewSnapshot.t2Left, previewSnapshot.serverPos === 'top-right' ? 'server' : previewSnapshot.receiverPos === 'top-right' ? 'receiver' : 'partner')}</div>
+                                      <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || previewSnapshot.serverPos === 'top-left' || previewSnapshot.receiverPos === 'top-left') && renderPlayerBadge(gameMode === 'single' ? t2PLeft : previewSnapshot.t2Right, previewSnapshot.serverPos === 'top-left' ? 'server' : previewSnapshot.receiverPos === 'top-left' ? 'receiver' : 'partner', previewSnapshot.courtRotation || 0)}</div>
+                                      <div className="absolute top-1 right-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || previewSnapshot.serverPos === 'top-right' || previewSnapshot.receiverPos === 'top-right') && renderPlayerBadge(gameMode === 'single' ? t2PLeft : previewSnapshot.t2Left, previewSnapshot.serverPos === 'top-right' ? 'server' : previewSnapshot.receiverPos === 'top-right' ? 'receiver' : 'partner', previewSnapshot.courtRotation || 0)}</div>
                                   </div>
                                   <div className={`h-6 md:h-8 border-b-2 border-white/80 bg-amber-500 z-20`}></div>
                                   <div className={`h-6 md:h-8 border-b border-white/50 bg-amber-500 z-20`}></div>
                                   <div className="flex-1 relative z-20">
                                       <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
-                                      <div className="absolute bottom-1 left-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || previewSnapshot.serverPos === 'bottom-left' || previewSnapshot.receiverPos === 'bottom-left') && renderPlayerBadge(gameMode === 'single' ? t1PLeft : previewSnapshot.t1Left, previewSnapshot.serverPos === 'bottom-left' ? 'server' : previewSnapshot.receiverPos === 'bottom-left' ? 'receiver' : 'partner')}</div>
-                                      <div className="absolute bottom-1 right-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || previewSnapshot.serverPos === 'bottom-right' || previewSnapshot.receiverPos === 'bottom-right') && renderPlayerBadge(gameMode === 'single' ? t1PLeft : previewSnapshot.t1Right, previewSnapshot.serverPos === 'bottom-right' ? 'server' : previewSnapshot.receiverPos === 'bottom-right' ? 'receiver' : 'partner')}</div>
+                                      <div className="absolute bottom-1 left-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || previewSnapshot.serverPos === 'bottom-left' || previewSnapshot.receiverPos === 'bottom-left') && renderPlayerBadge(gameMode === 'single' ? t1PLeft : previewSnapshot.t1Left, previewSnapshot.serverPos === 'bottom-left' ? 'server' : previewSnapshot.receiverPos === 'bottom-left' ? 'receiver' : 'partner', previewSnapshot.courtRotation || 0)}</div>
+                                      <div className="absolute bottom-1 right-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || previewSnapshot.serverPos === 'bottom-right' || previewSnapshot.receiverPos === 'bottom-right') && renderPlayerBadge(gameMode === 'single' ? t1PLeft : previewSnapshot.t1Right, previewSnapshot.serverPos === 'bottom-right' ? 'server' : previewSnapshot.receiverPos === 'bottom-right' ? 'receiver' : 'partner', previewSnapshot.courtRotation || 0)}</div>
                                   </div>
                               </div>
                           </div>
@@ -1325,49 +1314,9 @@
               )}
 
               {appState === 'game' && (
-              {previewSnapshot && appState === 'history' && (
-                <div className="fixed inset-0 z-[150] flex items-center justify-center p-4" onClick={() => setPreviewSnapshot(null)}>
-                   <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
-                   <div className={`relative p-8 ${bgCard} border ${borderSub} rounded-3xl shadow-2xl animate-screen-enter flex flex-col items-center w-full max-w-sm`} onClick={e => e.stopPropagation()}>
-                      <div className="flex justify-between items-center w-full mb-6">
-                         <h3 className={`text-lg font-bold tracking-widest uppercase ${textMain}`}>Ghost Replay</h3>
-                         <button onClick={() => setPreviewSnapshot(null)} className={`p-1.5 rounded-full bg-stone-100 dark:bg-stone-800 ${textSub} hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors`}><X size={16}/></button>
-                      </div>
-                      <div className="flex items-center justify-center gap-8 mb-8 w-full">
-                         <div className="text-center"><span className={`text-[10px] font-bold ${textSub} block uppercase tracking-widest mb-1`}>{previewSnapshot.servingTeam === 1 ? 'Server' : 'Receiver'}</span><span className={`text-5xl font-black ${previewSnapshot.servingTeam === 1 ? accentGreen : textMain}`}>{previewSnapshot.team1Score}</span></div>
-                         <span className={`text-3xl font-light text-stone-300 dark:text-stone-700`}>-</span>
-                         <div className="text-center"><span className={`text-[10px] font-bold ${textSub} block uppercase tracking-widest mb-1`}>{previewSnapshot.servingTeam === 2 ? 'Server' : 'Receiver'}</span><span className={`text-5xl font-black ${previewSnapshot.servingTeam === 2 ? accentRed : textMain}`}>{previewSnapshot.team2Score}</span></div>
-                      </div>
-                      
-                      <div className="relative flex items-center justify-center w-[220px] h-[280px]">
-                          <div className={`w-[180px] h-[240px] bg-amber-600 border-amber-300 rounded-[3px] border-[3px] shadow-lg relative flex flex-col overflow-hidden pointer-events-none transition-all duration-500 ease-in-out`} style={{ transform: `rotate(${previewSnapshot.courtRotation || 0}deg)` }}>
-                              <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
-                                  {previewSnapshot.serverPos === 'bottom-right' || previewSnapshot.serverPos === 'top-left' ? ( <line x1="75%" y1="85%" x2="25%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" /> ) : ( <line x1="25%" y1="85%" x2="75%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" /> )}
-                              </svg>
-                              <div className="flex-1 relative border-b border-white/50 z-20">
-                                  <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
-                                  <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || previewSnapshot.serverPos === 'top-left' || previewSnapshot.receiverPos === 'top-left') && renderPlayerBadge(gameMode === 'single' ? t2PLeft : previewSnapshot.t2Right, previewSnapshot.serverPos === 'top-left' ? 'server' : previewSnapshot.receiverPos === 'top-left' ? 'receiver' : 'partner')}</div>
-                                  <div className="absolute top-1 right-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || previewSnapshot.serverPos === 'top-right' || previewSnapshot.receiverPos === 'top-right') && renderPlayerBadge(gameMode === 'single' ? t2PLeft : previewSnapshot.t2Left, previewSnapshot.serverPos === 'top-right' ? 'server' : previewSnapshot.receiverPos === 'top-right' ? 'receiver' : 'partner')}</div>
-                              </div>
-                              <div className={`h-6 md:h-8 border-b-2 border-white/80 bg-amber-500 z-20`}></div>
-                              <div className={`h-6 md:h-8 border-b border-white/50 bg-amber-500 z-20`}></div>
-                              <div className="flex-1 relative z-20">
-                                  <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
-                                  <div className="absolute bottom-1 left-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || previewSnapshot.serverPos === 'bottom-left' || previewSnapshot.receiverPos === 'bottom-left') && renderPlayerBadge(gameMode === 'single' ? t1PLeft : previewSnapshot.t1Left, previewSnapshot.serverPos === 'bottom-left' ? 'server' : previewSnapshot.receiverPos === 'bottom-left' ? 'receiver' : 'partner')}</div>
-                                  <div className="absolute bottom-1 right-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || previewSnapshot.serverPos === 'bottom-right' || previewSnapshot.receiverPos === 'bottom-right') && renderPlayerBadge(gameMode === 'single' ? t1PLeft : previewSnapshot.t1Right, previewSnapshot.serverPos === 'bottom-right' ? 'server' : previewSnapshot.receiverPos === 'bottom-right' ? 'receiver' : 'partner')}</div>
-                              </div>
-                          </div>
-                      </div>
-                   </div>
-                </div>
-              )}
                 <div className="flex-1 flex flex-col pb-8 w-full max-w-4xl mx-auto relative z-10 animate-screen-enter" style={{ paddingTop: 'max(5rem, calc(3rem + env(safe-area-inset-top)))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))', paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
                   <header className={`flex items-center justify-between mb-4 pb-4 border-b ${borderSub}`}>
-                    <div className="flex-1 flex justify-start">
-                      <button onClick={() => { if (!winner && history.length > 0) setShowBackConfirm(true); else setAppState('menu'); }} className={`transition-all duration-300 flex items-center gap-1.5 -ml-2 rounded-lg active:scale-95 ${winner !== null ? `px-3 py-1.5 bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900 font-bold shadow-md` : `p-2 ${textSub} hover:${textMain}`}`}>
-                        <ArrowLeft size={20} />{winner !== null && <span className="text-xs uppercase tracking-widest">{getT('menu')}</span>}
-                      </button>
-                    </div>
+                    <div className="flex-1 flex justify-start"><button onClick={() => { if (!winner && history.length > 0) setShowBackConfirm(true); else setAppState('menu'); }} className={`transition-all duration-300 flex items-center gap-1.5 -ml-2 rounded-lg active:scale-95 ${winner !== null ? `px-3 py-1.5 bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900 font-bold shadow-md` : `p-2 ${textSub} hover:${textMain}`}`}><ArrowLeft size={20} />{winner !== null && <span className="text-xs uppercase tracking-widest">{getT('menu')}</span>}</button></div>
                     <div className="text-center flex-[2]"><h1 className={`text-sm font-bold ${textMain}`}>{matchTitle || getT('untitledMatch')}</h1><p className={`text-xs ${textSub} mt-1`}>{gameMode === 'single' ? getT('singles') : getT('doubles')} • {ruleSet === 'standard' ? getT('stdTitle') : ruleSet === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</p></div>
                     <div className="flex-1"></div>
                   </header>
@@ -1387,22 +1336,21 @@
                         <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${previewSnapshot ? 'text-amber-500' : (d_serveTeam === 1 && !winner ? accentGreen : textMain)}`}>{d_t1Score}</span>
                         {enableTimeouts > 0 && !winner && (<div className="absolute top-full mt-3 flex gap-2 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t1Timeouts > 0 && setShowTimeoutConfirm(1)} title={getT('callTimeout')}>{[...Array(enableTimeouts)].map((_, i) => (<div key={i} className={`w-2.5 h-2.5 rounded-full transition-colors ${t1Timeouts >= i + 1 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>))}</div>)}
                       </div>
-                      
                       <span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span>
-                      
                       <div className="flex flex-col items-center relative w-24 md:w-32">
                         <span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest truncate w-[150%] text-center ${textSub}`}>{t2Name}</span>
                         <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${previewSnapshot ? 'text-amber-500' : (d_serveTeam === 2 && !winner ? accentRed : textMain)}`}>{d_t2Score}</span>
                         {enableTimeouts > 0 && !winner && (<div className="absolute top-full mt-3 flex gap-2 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t2Timeouts > 0 && setShowTimeoutConfirm(2)} title={getT('callTimeout')}>{[...Array(enableTimeouts)].map((_, i) => (<div key={i} className={`w-2.5 h-2.5 rounded-full transition-colors ${t2Timeouts >= i + 1 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>))}</div>)}
                       </div>
-                      
                       {showServerNumberUI && (<><span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span><div className="flex flex-col items-center relative"><span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest ${textSub}`}>{getT('server')}</span><span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${winner ? textMain : 'text-amber-500'}`}>{d_serveNum}</span></div></>)}
                     </div>
 
                     <div className={`flex justify-center w-full mt-6 md:mt-8 ${isSuddenDeath && !winner ? 'mb-4' : 'mb-6 md:mb-8'} relative z-10`}>
                         <div className="relative flex items-center justify-center w-[240px] h-[240px] md:w-[280px] md:h-[280px]">
                             <div className={`w-[180px] h-[240px] md:w-[220px] md:h-[280px] ${previewSnapshot ? 'bg-amber-600 border-amber-300' : 'bg-emerald-600 border-white/90'} rounded-[3px] border-[3px] shadow-md relative flex flex-col overflow-hidden pointer-events-none transition-all duration-500 ease-in-out`} style={{ transform: `rotate(${courtRotation}deg)` }}>
-                                <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">{d_srvPos === 'bottom-right' || d_srvPos === 'top-left' ? ( <line x1="75%" y1="85%" x2="25%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" /> ) : ( <line x1="25%" y1="85%" x2="75%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" /> )}</svg>
+                                <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+                                    {d_srvPos === 'bottom-right' || d_srvPos === 'top-left' ? ( <line x1="75%" y1="85%" x2="25%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" /> ) : ( <line x1="25%" y1="85%" x2="75%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" /> )}
+                                </svg>
                                 <div className="flex-1 relative border-b border-white/50 z-20">
                                     <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
                                     <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || d_srvPos === 'top-left' || d_rcvPos === 'top-left') && renderPlayerBadge(gameMode === 'single' ? t2PLeft : d_t2Right, d_srvPos === 'top-left' ? 'server' : d_rcvPos === 'top-left' ? 'receiver' : 'partner')}</div>
