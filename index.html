@@ -1308,8 +1308,24 @@
 
           const showMenuButtons = appState === 'menu' && closingScreen !== 'menu';
 
+          useEffect(() => {
+            const handlePointerMove = (e) => {
+              const x = e.touches ? e.touches[0].clientX : e.clientX;
+              const y = e.touches ? e.touches[0].clientY : e.clientY;
+              document.documentElement.style.setProperty('--cursor-x', `${x}px`);
+              document.documentElement.style.setProperty('--cursor-y', `${y}px`);
+            };
+            document.documentElement.style.setProperty('--cursor-x', '-1000px');
+            document.documentElement.style.setProperty('--cursor-y', '-1000px');
+            window.addEventListener('mousemove', handlePointerMove);
+            window.addEventListener('touchmove', handlePointerMove, { passive: true });
+            return () => { window.removeEventListener('mousemove', handlePointerMove); window.removeEventListener('touchmove', handlePointerMove); };
+          }, []);
+
+          const showMenuButtons = appState === 'menu' && closingScreen !== 'menu';
+
           return (
-            <div className={`min-h-screen w-full flex flex-col ${textMain} ${bgMain} relative selection:bg-stone-300 selection:text-stone-900 transition-colors duration-300`}>
+            <div className={`min-h-screen w-full flex flex-col ${textMain} relative selection:bg-stone-300 selection:text-stone-900 transition-colors duration-300`} style={{ backgroundColor: 'transparent' }}>
               <style>{`
                 @keyframes zoomThroughMinimal { 0% { transform: scale(1) translateY(0); opacity: 1; } 100% { transform: scale(30) translateY(50px); opacity: 0; } }
                 .animate-zoom-minimal { animation: zoomThroughMinimal 0.9s cubic-bezier(0.8, 0, 0.2, 1) forwards; }
@@ -1317,8 +1333,11 @@
                 .animate-subtle-bounce { animation: subtle-bounce 4s infinite ease-in-out; }
                 .muji-shadow { box-shadow: 0 4px 20px rgba(0, 0, 0, ${isDark ? '0.3' : '0.05'}); }
                 .muji-card { background: ${isDark ? '#292524' : '#ffffff'}; border: 1px solid ${isDark ? '#44403c' : '#e7e5e4'}; border-radius: 12px; }
-                .bg-pattern-base { background-image: radial-gradient(${isDark ? '#44403c' : '#e7e5e4'} 1.5px, transparent 0); background-size: 24px 24px; }
-                .bg-pattern-zoomed { background-image: radial-gradient(${isDark ? '#a8a29e' : '#a8a29e'} 2.2px, transparent 0); background-size: 24px 24px; -webkit-mask-image: radial-gradient(circle 100px at var(--cursor-x) var(--cursor-y), black 10%, transparent 100%); mask-image: radial-gradient(circle 100px at var(--cursor-x) var(--cursor-y), black 10%, transparent 100%); }
+                
+                /* FIXED BACKGROUND PATTERN USING YOUR ORIGINAL CSS VARIABLES */
+                .bg-pattern-base { background-image: radial-gradient(var(--app-sub) 1.5px, transparent 0); background-size: 24px 24px; opacity: 0.15; }
+                .bg-pattern-zoomed { background-image: radial-gradient(var(--app-sub) 2px, transparent 0); background-size: 24px 24px; opacity: 0.35; -webkit-mask-image: radial-gradient(circle 120px at var(--cursor-x) var(--cursor-y), black 10%, transparent 100%); mask-image: radial-gradient(circle 120px at var(--cursor-x) var(--cursor-y), black 10%, transparent 100%); }
+                
                 .muji-scrollbar::-webkit-scrollbar { height: 8px; }
                 .muji-scrollbar::-webkit-scrollbar-track { background: ${isDark ? '#292524' : '#f5f5f4'}; border-radius: 8px; }
                 .muji-scrollbar::-webkit-scrollbar-thumb { background-color: ${isDark ? '#57534e' : '#d6d3d1'}; border-radius: 8px; border: 2px solid ${isDark ? '#292524' : '#f5f5f4'}; }
@@ -1326,7 +1345,7 @@
                 .muji-scrollbar { scrollbar-width: thin; scrollbar-color: ${isDark ? '#57534e #292524' : '#d6d3d1 #f5f5f4'}; }
               `}</style>
               
-              <div className={`fixed top-0 left-0 w-full z-40 pointer-events-none transition-colors duration-300 ${bgMain}`} style={{ height: 'env(safe-area-inset-top)' }}></div>
+              <div className="fixed top-0 left-0 w-full z-40 pointer-events-none transition-colors duration-300" style={{ height: 'env(safe-area-inset-top)', backgroundColor: 'var(--app-bg)' }}></div>
               <div className="fixed inset-0 pointer-events-none z-0 bg-pattern-base transition-colors duration-300"></div>
               <div className="fixed inset-0 pointer-events-none z-0 bg-pattern-zoomed transition-colors duration-300"></div>
 
