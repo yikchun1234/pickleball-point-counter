@@ -75,7 +75,7 @@
     <link id="apple-icon" rel="apple-touch-icon" sizes="512x512" href="/img/icon.png">
     
     <!-- 1. STANDARD PWA MANIFEST (Points to real file) -->
-    <link rel="manifest" href="/script/manifest.json">
+    <link id="manifest-link" rel="manifest" href="/script/manifest.json">
 
     <!-- PWA Event Catcher & Service Worker -->
     <script>
@@ -330,10 +330,51 @@
             );
         };
 
-        const Play = (props) => <IconWrapper iconObj={lucide.icons.Play} {...props} />;
-        const Users = (props) => <IconWrapper iconObj={lucide.icons.Users} {...props} />;
-        const User = (props) => <IconWrapper iconObj={lucide.icons.User} {...props} />;
-        const RotateCcw = (props) => <IconWrapper iconObj={lucide.icons.RotateCcw} {...props} />;
+        const safeIcon = (name) => typeof lucide !== 'undefined' && lucide.icons ? lucide.icons[name] : null;
+
+        const Play = (props) => <IconWrapper iconObj={safeIcon('Play')} {...props} />;
+        const Users = (props) => <IconWrapper iconObj={safeIcon('Users')} {...props} />;
+        const User = (props) => <IconWrapper iconObj={safeIcon('User')} {...props} />;
+        const RotateCcw = (props) => <IconWrapper iconObj={safeIcon('RotateCcw')} {...props} />;
+        const RotateCw = (props) => <IconWrapper iconObj={safeIcon('RotateCw')} {...props} />;
+        const Trophy = (props) => <IconWrapper iconObj={safeIcon('Trophy')} {...props} />;
+        const ArrowLeft = (props) => <IconWrapper iconObj={safeIcon('ArrowLeft')} {...props} />;
+        const Undo2 = (props) => <IconWrapper iconObj={safeIcon('Undo2')} {...props} />;
+        const Zap = (props) => <IconWrapper iconObj={safeIcon('Zap')} {...props} />;
+        const AlertTriangle = (props) => <IconWrapper iconObj={safeIcon('AlertTriangle')} {...props} />;
+        const ChevronRight = (props) => <IconWrapper iconObj={safeIcon('ChevronRight')} {...props} />;
+        const Moon = (props) => <IconWrapper iconObj={safeIcon('Moon')} {...props} />;
+        const Sun = (props) => <IconWrapper iconObj={safeIcon('Sun')} {...props} />;
+        const Globe = (props) => <IconWrapper iconObj={safeIcon('Globe')} {...props} />;
+        const Download = (props) => <IconWrapper iconObj={safeIcon('Download')} {...props} />;
+        const Github = (props) => <IconWrapper iconObj={safeIcon('Github')} {...props} />;
+        const HistoryIcon = (props) => <IconWrapper iconObj={safeIcon('History')} {...props} />;
+        const Trash2 = (props) => <IconWrapper iconObj={safeIcon('Trash2')} {...props} />;
+        const X = (props) => <IconWrapper iconObj={safeIcon('X')} {...props} />;
+        const InfoIcon = (props) => <IconWrapper iconObj={safeIcon('Info')} {...props} />;
+        const HardDrive = (props) => <IconWrapper iconObj={safeIcon('HardDrive')} {...props} />;
+        const Volume2 = (props) => <IconWrapper iconObj={safeIcon('Volume2')} {...props} />;
+        const VolumeX = (props) => <IconWrapper iconObj={safeIcon('VolumeX')} {...props} />;
+        const BarChart2 = (props) => <IconWrapper iconObj={safeIcon('BarChart2')} {...props} />;
+        const Edit2 = (props) => <IconWrapper iconObj={safeIcon('Edit2')} {...props} />;
+        const Share2 = (props) => <IconWrapper iconObj={safeIcon('Share2')} {...props} />;
+        const Timer = (props) => <IconWrapper iconObj={safeIcon('Timer')} {...props} />;
+        const Check = (props) => <IconWrapper iconObj={safeIcon('Check')} {...props} />;
+        const ChevronUp = (props) => <IconWrapper iconObj={safeIcon('ChevronUp')} {...props} />;
+        const ChevronDown = (props) => <IconWrapper iconObj={safeIcon('ChevronDown')} {...props} />;
+        const ChevronLeft = (props) => <IconWrapper iconObj={safeIcon('ChevronLeft')} {...props} />;
+        const Activity = (props) => <IconWrapper iconObj={safeIcon('Activity')} {...props} />;
+        const Grid = (props) => <IconWrapper iconObj={safeIcon('Grid')} {...props} />;
+        const Lock = (props) => <IconWrapper iconObj={safeIcon('Lock')} {...props} />;
+        const Unlock = (props) => <IconWrapper iconObj={safeIcon('Unlock')} {...props} />;
+        const ArrowUp = (props) => <IconWrapper iconObj={safeIcon('ArrowUp')} {...props} />;
+        const Target = (props) => <IconWrapper iconObj={safeIcon('Target')} {...props} />;
+        const MousePointer2 = (props) => <IconWrapper iconObj={safeIcon('MousePointer2')} {...props} />;
+        const Gamepad2 = (props) => <IconWrapper iconObj={safeIcon('Gamepad2')} {...props} />;
+        const RefreshCw = (props) => <IconWrapper iconObj={safeIcon('RefreshCw')} {...props} />;
+        const Home = (props) => <IconWrapper iconObj={safeIcon('Home')} {...props} />;
+        const QrCode = (props) => <IconWrapper iconObj={safeIcon('QrCode')} {...props} />;
+        const ArrowRightLeft = (props) => <IconWrapper iconObj={safeIcon('ArrowRightLeft')} {...props} />;
         const RotateCw = (props) => <IconWrapper iconObj={lucide.icons.RotateCw} {...props} />;
         const Trophy = (props) => <IconWrapper iconObj={lucide.icons.Trophy} {...props} />;
         const ArrowLeft = (props) => <IconWrapper iconObj={lucide.icons.ArrowLeft} {...props} />;
@@ -1342,7 +1383,7 @@
             const loadedTimeouts = data.enableTimeouts === true ? 2 : (data.enableTimeouts || 0); setEnableTimeouts(loadedTimeouts); setT1Timeouts(data.t1Timeouts ?? loadedTimeouts); setT2Timeouts(data.t2Timeouts ?? loadedTimeouts);
             setCourtRotation(data.courtRotation || 0);
             setInitialServer(data.initialServer || 1);
-            setElapsedTime(data.elapsedTime); setHistory(data.history); setStateHistory(data.stateHistory);
+            setElapsedTime(data.elapsedTime); setHistory(data.history || []); setStateHistory(data.stateHistory || []);
             setWinner(null); setWinReason('score'); setShowWinnerOverlay(false);
             setAppState('game'); setRecoverGameData(null);
           };
@@ -1873,8 +1914,8 @@
                 </button>
               </div>
               <div ref={useScrollRef ? timelineScrollRef : null} className="overflow-x-auto pb-4 pt-2 muji-scrollbar relative scroll-smooth">
-                {timelineData.length === 0 && <div className={`text-xs italic ${textSub} px-2`}>{getT('awaiting')}</div>}
-                {timelineData.length > 0 && (
+                {(timelineData || []).length === 0 && <div className={`text-xs italic ${textSub} px-2`}>{getT('awaiting')}</div>}
+                {(timelineData || []).length > 0 && (
                   <div className="flex min-w-max relative px-2">
                     <div className={`absolute top-[12px] left-14 right-0 h-px ${isDark ? 'bg-stone-700' : 'bg-stone-200'} z-0`}></div>
                     <div className={`absolute bottom-[12px] left-14 right-0 h-px ${isDark ? 'bg-stone-700' : 'bg-stone-200'} z-0`}></div>
@@ -1884,7 +1925,7 @@
                         <div className={`h-6 flex items-center text-[10px] font-bold uppercase ${accentRed}`}>{getT('t2Label')}</div>
                     </div>
                     <div className="flex items-center">
-                        {timelineData.map((event) => (
+                        {(timelineData || []).map((event) => (
                           <div key={event.id} onClick={() => { 
                               if (isHistoryTab) {
                                   if (event.snapshot) {
