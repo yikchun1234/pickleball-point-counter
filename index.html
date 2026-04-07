@@ -1325,6 +1325,43 @@
               )}
 
               {appState === 'game' && (
+              {/* --- GHOST REPLAY MODAL FOR HISTORY --- */}
+              {previewSnapshot && appState === 'history' && (
+                <div className="fixed inset-0 z-[150] flex items-center justify-center p-4" onClick={() => setPreviewSnapshot(null)}>
+                   <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
+                   <div className={`relative p-8 ${bgCard} border ${borderSub} rounded-3xl shadow-2xl animate-screen-enter flex flex-col items-center w-full max-w-sm`} onClick={e => e.stopPropagation()}>
+                      <div className="flex justify-between items-center w-full mb-6">
+                         <h3 className={`text-lg font-bold tracking-widest uppercase ${textMain}`}>Ghost Replay</h3>
+                         <button onClick={() => setPreviewSnapshot(null)} className={`p-1.5 rounded-full bg-stone-100 dark:bg-stone-800 ${textSub} hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors`}><X size={16}/></button>
+                      </div>
+                      <div className="flex items-center justify-center gap-8 mb-8 w-full">
+                         <div className="text-center"><span className={`text-[10px] font-bold ${textSub} block uppercase tracking-widest mb-1`}>{previewSnapshot.servingTeam === 1 ? 'Server' : 'Receiver'}</span><span className={`text-5xl font-black ${previewSnapshot.servingTeam === 1 ? accentGreen : textMain}`}>{previewSnapshot.team1Score}</span></div>
+                         <span className={`text-3xl font-light text-stone-300 dark:text-stone-700`}>-</span>
+                         <div className="text-center"><span className={`text-[10px] font-bold ${textSub} block uppercase tracking-widest mb-1`}>{previewSnapshot.servingTeam === 2 ? 'Server' : 'Receiver'}</span><span className={`text-5xl font-black ${previewSnapshot.servingTeam === 2 ? accentRed : textMain}`}>{previewSnapshot.team2Score}</span></div>
+                      </div>
+                      
+                      <div className="relative flex items-center justify-center w-[220px] h-[280px]">
+                          <div className={`w-[180px] h-[240px] bg-amber-600 border-amber-300 rounded-[3px] border-[3px] shadow-lg relative flex flex-col overflow-hidden pointer-events-none transition-all duration-500 ease-in-out`} style={{ transform: `rotate(${previewSnapshot.courtRotation || 0}deg)` }}>
+                              <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+                                  {previewSnapshot.serverPos === 'bottom-right' || previewSnapshot.serverPos === 'top-left' ? ( <line x1="75%" y1="85%" x2="25%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" /> ) : ( <line x1="25%" y1="85%" x2="75%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" /> )}
+                              </svg>
+                              <div className="flex-1 relative border-b border-white/50 z-20">
+                                  <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
+                                  <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">{(previewSnapshot.t1Right || previewSnapshot.serverPos === 'top-left' || previewSnapshot.receiverPos === 'top-left') && renderPlayerBadge(previewSnapshot.t1Right ? previewSnapshot.t2Right : previewSnapshot.t2Left, previewSnapshot.serverPos === 'top-left' ? 'server' : previewSnapshot.receiverPos === 'top-left' ? 'receiver' : 'partner')}</div>
+                                  <div className="absolute top-1 right-0 w-1/2 flex justify-center items-center h-full">{(previewSnapshot.t1Right || previewSnapshot.serverPos === 'top-right' || previewSnapshot.receiverPos === 'top-right') && renderPlayerBadge(previewSnapshot.t2Left, previewSnapshot.serverPos === 'top-right' ? 'server' : previewSnapshot.receiverPos === 'top-right' ? 'receiver' : 'partner')}</div>
+                              </div>
+                              <div className={`h-6 md:h-8 border-b-2 border-white/80 bg-amber-500 z-20`}></div>
+                              <div className={`h-6 md:h-8 border-b border-white/50 bg-amber-500 z-20`}></div>
+                              <div className="flex-1 relative z-20">
+                                  <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
+                                  <div className="absolute bottom-1 left-0 w-1/2 flex justify-center items-center h-full">{(previewSnapshot.t1Right || previewSnapshot.serverPos === 'bottom-left' || previewSnapshot.receiverPos === 'bottom-left') && renderPlayerBadge(previewSnapshot.t1Left, previewSnapshot.serverPos === 'bottom-left' ? 'server' : previewSnapshot.receiverPos === 'bottom-left' ? 'receiver' : 'partner')}</div>
+                                  <div className="absolute bottom-1 right-0 w-1/2 flex justify-center items-center h-full">{(previewSnapshot.t1Right || previewSnapshot.serverPos === 'bottom-right' || previewSnapshot.receiverPos === 'bottom-right') && renderPlayerBadge(previewSnapshot.t1Right ? previewSnapshot.t1Right : previewSnapshot.t1Left, previewSnapshot.serverPos === 'bottom-right' ? 'server' : previewSnapshot.receiverPos === 'bottom-right' ? 'receiver' : 'partner')}</div>
+                              </div>
+                          </div>
+                      </div>
+                   </div>
+                </div>
+              )}
                 <div className="flex-1 flex flex-col pb-8 w-full max-w-4xl mx-auto relative z-10 animate-screen-enter" style={{ paddingTop: 'max(5rem, calc(3rem + env(safe-area-inset-top)))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))', paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
                   <header className={`flex items-center justify-between mb-4 pb-4 border-b ${borderSub}`}>
                     <div className="flex-1 flex justify-start">
