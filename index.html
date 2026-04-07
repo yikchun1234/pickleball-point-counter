@@ -620,7 +620,8 @@
           const [isHistoryLoading, setIsHistoryLoading] = useState(false);
           const [showSwitchModal, setShowSwitchModal] = useState(false);
           const [recoverGameData, setRecoverGameData] = useState(null);
-          const [editingMatchId, setEditingMatchId] = useState(null);
+          const [editingMatchId, setEditingMatchId] = useState(null);
+          const [showLegacyAlert, setShowLegacyAlert] = useState(false);
           
           const [enableTimeouts, setEnableTimeouts] = useState(0);
           const [enableTimeoutsSetup, setEnableTimeoutsSetup] = useState(0);
@@ -732,7 +733,7 @@
           }, [appState, pendingGame]);
 
           // Guard previewData check safely
-         const isModalOpen = !!(pendingGame || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || (recoverGameData && appState !== 'splash') || showWinnerOverlay || secretGame || showTimeoutConfirm || isExporting || showResetModal || showShareAppModal || previewData);
+         const isModalOpen = !!(pendingGame || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || (recoverGameData && appState !== 'splash') || showWinnerOverlay || secretGame || showTimeoutConfirm || isExporting || showResetModal || showShareAppModal || showLegacyAlert || previewData);
 
           useEffect(() => {
               if (isModalOpen) document.body.style.overflow = 'hidden'; else document.body.style.overflow = '';
@@ -1057,10 +1058,10 @@
           };
 
           const handleDotClick = (index, event, timelineData, matchObj, isLive) => {
-              if (!event.snapshot) { alert("Time travel function not enabled for older games."); return; }
-              if (isLive && isTimelineLocked) return;
-              setPreviewData({ history: timelineData, index: index, match: matchObj });
-          };
+              if (!event.snapshot) { setShowLegacyAlert(true); return; }
+              if (isLive && isTimelineLocked) return;
+              setPreviewData({ history: timelineData, index: index, match: matchObj });
+          };
 
           const renderTimeline = (timelineData, matchObj = null, useScrollRef = false, isLive = false) => (
             <div className={`mt-6 muji-card p-5 rounded-xl`}>
@@ -1527,7 +1528,20 @@
                 </div>
               )}
               
-              {showBackConfirm && (
+              {showLegacyAlert && (
+                <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowLegacyAlert(false)}></div>
+                  <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl text-center animate-screen-enter`}>
+                    <div className="absolute top-4 right-4"><button onClick={() => setShowLegacyAlert(false)} className={`p-1.5 rounded-full bg-stone-100 dark:bg-stone-800 ${textSub} hover:${textMain} transition-colors`}><X size={16}/></button></div>
+                    <HistoryIcon size={48} className="mx-auto text-amber-500 mb-4 opacity-80" />
+                    <h2 className={`text-lg font-bold mb-2 ${textMain}`}>Ghost Replay Unavailable</h2>
+                    <p className={`text-sm mb-6 ${textSub}`}>This feature relies on court positioning data, which was not recorded for this older match.</p>
+                    <button onClick={() => setShowLegacyAlert(false)} className={`w-full py-3 rounded-xl font-bold text-white bg-amber-500 hover:bg-amber-600 shadow-md transition-colors`}>{getT('gotIt')}</button>
+                  </div>
+                </div>
+              )}
+
+              {showBackConfirm && (
                 <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
                   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowBackConfirm(false)}></div>
                   <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl text-center`}>
