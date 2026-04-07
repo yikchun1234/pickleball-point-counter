@@ -674,7 +674,7 @@
           const [courtRotation, setCourtRotation] = useState(0);
           const [activeTimeoutRemaining, setActiveTimeoutRemaining] = useState(0);
           
-          // Ghost Court Data Engine
+          // Upgraded Ghost Court Data Engine
           const [isTimelineLocked, setIsTimelineLocked] = useState(true);
           const [previewData, setPreviewData] = useState(null);
 
@@ -693,6 +693,7 @@
           const t = dict[lang] || dict.en;
           const getT = (key) => t[key] || defaultLang[key];
 
+          // SAFE INSTALL CHECK (Fixes Safari/iOS Crash)
           useEffect(() => {
               const checkStandalone = () => {
                   return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
@@ -702,10 +703,13 @@
                          document.referrer.includes('android-app://');
               };
               setIsInstalled(checkStandalone());
+              
               if (window.matchMedia) {
-                  window.matchMedia('(display-mode: standalone)').addEventListener('change', (e) => {
-                      if (e.matches) setIsInstalled(true);
-                  });
+                  const mq = window.matchMedia('(display-mode: standalone)');
+                  const handler = (e) => { if (e.matches) setIsInstalled(true); };
+                  // Use safe fallback for older iOS
+                  if (mq.addEventListener) mq.addEventListener('change', handler);
+                  else if (mq.addListener) mq.addListener(handler);
               }
               const handleBeforeInstall = (e) => { e.preventDefault(); setInstallPrompt(e); };
               window.addEventListener('beforeinstallprompt', handleBeforeInstall);
@@ -727,6 +731,7 @@
               return () => clearTimeout(scrollTimer);
           }, [appState, pendingGame]);
 
+          // Guard previewData check safely
           const isModalOpen = !!(pendingGame || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || (recoverGameData && appState !== 'splash') || showWinnerOverlay || secretGame || showTimeoutConfirm || isExporting || showResetModal || showShareAppModal || (previewData && appState === 'history'));
 
           useEffect(() => {
@@ -1292,12 +1297,14 @@
                           {(() => {
                               const m = previewData.match || {};
                               const snap = previewData.history[previewData.index].snapshot;
+                              if (!snap) return null;
+                              
                               const isSingle = m.mode === 'single';
                               const p_t1Left = m.t1PLeft || m.t1Name || t1Name;
                               const p_t1Right = m.t1PRight || '';
                               const p_t2Left = m.t2PLeft || m.t2Name || t2Name;
                               const p_t2Right = m.t2PRight || '';
-                              const histRotation = 180; // Hardcoded static rotation T1 on top
+                              const histRotation = 180; 
 
                               return (
                                   <>
@@ -1385,7 +1392,7 @@
                         <div className="relative flex items-center justify-center w-[240px] h-[240px] md:w-[280px] md:h-[280px]">
                             {(() => {
                                 const isGhostReplay = previewData && previewSnapshot;
-                                const displayRotation = isGhostReplay ? 180 : courtRotation;
+                                const displayRotation = isGhostReplay ? 180 : courtRotation; // Keep rotation feature for LIVE Ghost Court
                                 
                                 return (
                                     <>
@@ -1459,6 +1466,81 @@
                     </div>
                     <div className="mb-6">{renderTimeline(history, null, true, true)}</div>
                   </main>
+                </div>
+              )}
+
+              {pendingGame && (
+                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setPendingGame(null)}></div>
+                  <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden`}>
+                    <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50"><h2 className={`text-xl font-bold ${textMain}`}>{pendingGame.mode === 'single' ? getT('singles') : getT('doubles')} - {pendingGame.rules === 'standard' ? getT('stdTitle') : pendingGame.rules === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</h2></div>
+                    <div className="px-6 py-4 overflow-y-auto muji-scrollbar flex-1 overscroll-contain">
+                      <div className="space-y-4">
+                        <div><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('matchTitlePlaceholder')}</label><input type="text" placeholder={getT('untitledMatch')} value={matchTitleInput} onChange={(e) => setMatchTitleInput(e.target.value)} className={`w-full px-4 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} focus:outline-none focus:ring-2 focus:ring-emerald-500/50`} /></div>
+                        {pendingGame.mode === 'single' ? (
+                            <div className="flex gap-3">
+                              <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('t1Name')}</label><input type="text" placeholder={getT('t1Name')} value={t1PLeftInput} onChange={(e) => setT1PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
+                              <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('t2Name')}</label><input type="text" placeholder={getT('t2Name')} value={t2PLeftInput} onChange={(e) => setT2PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                              <div className="flex items-end gap-1.5 sm:gap-2">
+                                <div className="flex-1 min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t1P1')} <span className="opacity-70 lowercase text-[8px]">{getT('oddCourt')}</span></label><input type="text" placeholder={getT('t1P1')} value={t1PLeftInput} onChange={(e) => setT1PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
+                                <button onClick={() => { const temp = t1PLeftInput; setT1PLeftInput(t1PRightInput); setT1PRightInput(temp); }} className={`mb-1 p-2 rounded-full ${bgMain} border ${borderSub} text-stone-400 hover:text-emerald-500 hover:border-emerald-500/30 transition-all active:scale-95 shrink-0`} title="Swap Players"><ArrowRightLeft size={16} /></button>
+                                <div className="flex-1 min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t1P2')} <span className="opacity-70 lowercase text-[8px]">{getT('evenCourt')}</span></label><input type="text" placeholder={getT('t1P2')} value={t1PRightInput} onChange={(e) => setT1PRightInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
+                              </div>
+                              <div className="flex items-end gap-1.5 sm:gap-2">
+                                <div className="flex-1 min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t2P1')} <span className="opacity-70 lowercase text-[8px]">{getT('oddCourt')}</span></label><input type="text" placeholder={getT('t2P1')} value={t2PLeftInput} onChange={(e) => setT2PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
+                                <button onClick={() => { const temp = t2PLeftInput; setT2PLeftInput(t2PRightInput); setT2PRightInput(temp); }} className={`mb-1 p-2 rounded-full ${bgMain} border ${borderSub} text-stone-400 hover:text-emerald-500 hover:border-emerald-500/30 transition-all active:scale-95 shrink-0`} title="Swap Players"><ArrowRightLeft size={16} /></button>
+                                <div className="flex-1 min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t2P2')} <span className="opacity-70 lowercase text-[8px]">{getT('evenCourt')}</span></label><input type="text" placeholder={getT('t2P2')} value={t2PRightInput} onChange={(e) => setT2PRightInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
+                              </div>
+                            </div>
+                        )}
+                        <div className="flex flex-col gap-1.5 mt-2 mb-2">
+                          <label className={`block text-[10px] font-bold uppercase tracking-widest ${textSub}`}>{getT('firstServer')}</label>
+                          <div className={`flex rounded-xl border ${borderSub} p-1 ${bgMain}`}>
+                            <button onClick={() => setStartingServer(1)} className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${startingServer === 1 ? 'bg-emerald-500 text-white shadow-md' : `${textSub} hover:${textMain}`}`}>{pendingGame.mode === 'single' ? (t1PLeftInput || getT('team1')) : (t1PRightInput || getT('team1'))}</button>
+                            <button onClick={() => setStartingServer(2)} className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${startingServer === 2 ? 'bg-rose-500 text-white shadow-md' : `${textSub} hover:${textMain}`}`}>{pendingGame.mode === 'single' ? (t2PLeftInput || getT('team2')) : (t2PRightInput || getT('team2'))}</button>
+                          </div>
+                        </div>
+                        {pendingGame.rules === 'custom' && (
+                          <div className="flex gap-3">
+                            <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('playTo')}</label><input type="number" inputMode="numeric" pattern="[0-9]*" value={customPlayTo} onChange={(e) => setCustomPlayTo(parseInt(e.target.value)||11)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
+                            <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('winBy')}</label><select value={customWinBy} onChange={(e) => setCustomWinBy(parseInt(e.target.value))} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none cursor-pointer`}><option value={1}>1</option><option value={2}>2</option></select></div>
+                          </div>
+                        )}
+                        {(pendingGame.rules === '14-point' || pendingGame.rules === 'custom') && (
+                          <div className={`p-4 rounded-xl border ${borderSub} ${bgMain} flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform`} onClick={() => setServeToWinAt14(!serveToWinAt14)}>
+                            <div className="pr-4"><h3 className={`font-bold text-sm ${textMain}`}>{pendingGame.rules === '14-point' ? getT('serveToWinOption') : getT('customServeToWin')}</h3><p className={`text-xs mt-1 ${textSub}`}>{pendingGame.rules === '14-point' ? getT('serveToWinDesc') : (pendingGame.mode === 'single' ? getT('customServeToWinDescSingle') : getT('customServeToWinDesc'))}</p></div>
+                            <button className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${serveToWinAt14 ? 'bg-emerald-500' : 'bg-stone-300 dark:bg-stone-600'}`}><div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-300 ${serveToWinAt14 ? 'translate-x-6' : 'translate-x-0'}`} /></button>
+                          </div>
+                        )}
+                        {pendingGame.rules === 'custom' ? (
+                          <div className={`p-4 rounded-xl border ${borderSub} ${bgMain} flex items-center justify-between`}>
+                            <div className="pr-4"><h3 className={`font-bold text-sm ${textMain}`}>{getT('enableTimeouts')}</h3><p className={`text-xs mt-1 ${textSub}`}>{getT('customTimeoutsDesc') || "Timeouts per team (0-3)"}</p></div>
+                            <select value={enableTimeoutsSetup} onChange={(e) => setEnableTimeoutsSetup(parseInt(e.target.value))} className={`w-16 px-2 py-1.5 rounded-lg border ${borderSub} ${bgCard} ${textMain} text-sm font-bold focus:outline-none cursor-pointer`}>
+                              <option value={0}>0</option><option value={1}>1</option><option value={2}>2</option><option value={3}>3</option>
+                            </select>
+                          </div>
+                        ) : (
+                          <div className={`p-4 rounded-xl border ${borderSub} ${bgMain} flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform`} onClick={() => setEnableTimeoutsSetup(enableTimeoutsSetup ? 0 : 1)}>
+                            <div className="pr-4"><h3 className={`font-bold text-sm ${textMain}`}>{getT('enableTimeouts')}</h3><p className={`text-xs mt-1 ${textSub}`}>{getT('timeoutsDesc')}</p></div>
+                            <button className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${enableTimeoutsSetup ? 'bg-emerald-500' : 'bg-stone-300 dark:bg-stone-600'}`}><div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-300 ${enableTimeoutsSetup ? 'translate-x-6' : 'translate-x-0'}`} /></button>
+                          </div>
+                        )}
+                        <div className={`p-4 rounded-xl border ${borderSub} ${bgMain} flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform`} onClick={() => setEnableSwitchEnds(!enableSwitchEnds)}>
+                          <div className="pr-4"><h3 className={`font-bold text-sm ${textMain}`}>{getT('switchEndsOption')}</h3><p className={`text-xs mt-1 ${textSub}`}>{getT('switchEndsOptionDesc')}</p></div>
+                          <button className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${enableSwitchEnds ? 'bg-emerald-500' : 'bg-stone-300 dark:bg-stone-600'}`}><div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-300 ${enableSwitchEnds ? 'translate-x-6' : 'translate-x-0'}`} /></button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-6 pt-4 flex-shrink-0 border-t border-stone-100 dark:border-stone-800/50">
+                      <div className="flex gap-3">
+                        <button onClick={() => setPendingGame(null)} className={`flex-1 py-3 rounded-xl font-semibold border ${borderSub} ${textSub} hover:${textMain}`}>{getT('cancel')}</button>
+                        <button onClick={() => { startGame(pendingGame.mode, pendingGame.rules, matchTitleInput, pendingGame.mode === 'single' ? t1PLeftInput : t1PLeftInput, pendingGame.mode === 'single' ? '' : t1PRightInput, pendingGame.mode === 'single' ? t2PLeftInput : t2PLeftInput, pendingGame.mode === 'single' ? '' : t2PRightInput, customPlayTo, customWinBy, enableSwitchEnds, startingServer, enableTimeoutsSetup); setPendingGame(null); }} className={`flex-1 py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-md transition-colors`}>{getT('startMatch')}</button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
