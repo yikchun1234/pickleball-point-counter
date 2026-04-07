@@ -1325,7 +1325,6 @@
               )}
 
               {appState === 'game' && (
-              {/* --- GHOST REPLAY MODAL FOR HISTORY --- */}
               {previewSnapshot && appState === 'history' && (
                 <div className="fixed inset-0 z-[150] flex items-center justify-center p-4" onClick={() => setPreviewSnapshot(null)}>
                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
@@ -1347,15 +1346,15 @@
                               </svg>
                               <div className="flex-1 relative border-b border-white/50 z-20">
                                   <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
-                                  <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">{(previewSnapshot.t1Right || previewSnapshot.serverPos === 'top-left' || previewSnapshot.receiverPos === 'top-left') && renderPlayerBadge(previewSnapshot.t1Right ? previewSnapshot.t2Right : previewSnapshot.t2Left, previewSnapshot.serverPos === 'top-left' ? 'server' : previewSnapshot.receiverPos === 'top-left' ? 'receiver' : 'partner')}</div>
-                                  <div className="absolute top-1 right-0 w-1/2 flex justify-center items-center h-full">{(previewSnapshot.t1Right || previewSnapshot.serverPos === 'top-right' || previewSnapshot.receiverPos === 'top-right') && renderPlayerBadge(previewSnapshot.t2Left, previewSnapshot.serverPos === 'top-right' ? 'server' : previewSnapshot.receiverPos === 'top-right' ? 'receiver' : 'partner')}</div>
+                                  <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || previewSnapshot.serverPos === 'top-left' || previewSnapshot.receiverPos === 'top-left') && renderPlayerBadge(gameMode === 'single' ? t2PLeft : previewSnapshot.t2Right, previewSnapshot.serverPos === 'top-left' ? 'server' : previewSnapshot.receiverPos === 'top-left' ? 'receiver' : 'partner')}</div>
+                                  <div className="absolute top-1 right-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || previewSnapshot.serverPos === 'top-right' || previewSnapshot.receiverPos === 'top-right') && renderPlayerBadge(gameMode === 'single' ? t2PLeft : previewSnapshot.t2Left, previewSnapshot.serverPos === 'top-right' ? 'server' : previewSnapshot.receiverPos === 'top-right' ? 'receiver' : 'partner')}</div>
                               </div>
                               <div className={`h-6 md:h-8 border-b-2 border-white/80 bg-amber-500 z-20`}></div>
                               <div className={`h-6 md:h-8 border-b border-white/50 bg-amber-500 z-20`}></div>
                               <div className="flex-1 relative z-20">
                                   <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
-                                  <div className="absolute bottom-1 left-0 w-1/2 flex justify-center items-center h-full">{(previewSnapshot.t1Right || previewSnapshot.serverPos === 'bottom-left' || previewSnapshot.receiverPos === 'bottom-left') && renderPlayerBadge(previewSnapshot.t1Left, previewSnapshot.serverPos === 'bottom-left' ? 'server' : previewSnapshot.receiverPos === 'bottom-left' ? 'receiver' : 'partner')}</div>
-                                  <div className="absolute bottom-1 right-0 w-1/2 flex justify-center items-center h-full">{(previewSnapshot.t1Right || previewSnapshot.serverPos === 'bottom-right' || previewSnapshot.receiverPos === 'bottom-right') && renderPlayerBadge(previewSnapshot.t1Right ? previewSnapshot.t1Right : previewSnapshot.t1Left, previewSnapshot.serverPos === 'bottom-right' ? 'server' : previewSnapshot.receiverPos === 'bottom-right' ? 'receiver' : 'partner')}</div>
+                                  <div className="absolute bottom-1 left-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || previewSnapshot.serverPos === 'bottom-left' || previewSnapshot.receiverPos === 'bottom-left') && renderPlayerBadge(gameMode === 'single' ? t1PLeft : previewSnapshot.t1Left, previewSnapshot.serverPos === 'bottom-left' ? 'server' : previewSnapshot.receiverPos === 'bottom-left' ? 'receiver' : 'partner')}</div>
+                                  <div className="absolute bottom-1 right-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || previewSnapshot.serverPos === 'bottom-right' || previewSnapshot.receiverPos === 'bottom-right') && renderPlayerBadge(gameMode === 'single' ? t1PLeft : previewSnapshot.t1Right, previewSnapshot.serverPos === 'bottom-right' ? 'server' : previewSnapshot.receiverPos === 'bottom-right' ? 'receiver' : 'partner')}</div>
                               </div>
                           </div>
                       </div>
