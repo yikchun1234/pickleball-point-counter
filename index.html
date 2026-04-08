@@ -1321,36 +1321,36 @@
                     </div>
 
                     <div className={`flex justify-center w-full mt-6 md:mt-8 ${isSuddenDeath && !winner ? 'mb-4' : 'mb-6 md:mb-8'} relative z-10 flex-col items-center`}>
-    <div className="relative flex items-center justify-center w-[240px] h-[240px] md:w-[280px] md:h-[280px]">
-        <div className={`w-[180px] h-[240px] md:w-[220px] md:h-[280px] bg-emerald-600 border-white/90 rounded-[3px] border-[3px] shadow-md relative flex flex-col overflow-hidden pointer-events-none transition-all duration-500 ease-in-out`} style={{ transform: `rotate(${courtRotation}deg)` }}>
-            <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
-                <defs>
-                    <marker id="arrowLive" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                        <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(255,255,255,0.8)" />
-                    </marker>
-                </defs>
-                {d_srvPos === 'bottom-right' ? ( <line x1="75%" y1="85%" x2="25%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" markerEnd="url(#arrowLive)" /> ) : 
-                 d_srvPos === 'top-left' ? ( <line x1="25%" y1="15%" x2="75%" y2="85%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" markerEnd="url(#arrowLive)" /> ) : 
-                 d_srvPos === 'bottom-left' ? ( <line x1="25%" y1="85%" x2="75%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" markerEnd="url(#arrowLive)" /> ) : 
-                 ( <line x1="75%" y1="15%" x2="25%" y2="85%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" markerEnd="url(#arrowLive)" /> )}
-            </svg>
-            <div className="flex-1 relative border-b border-white/50 z-20">
-                <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
-                <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || d_srvPos === 'top-left' || d_rcvPos === 'top-left') && renderPlayerBadge(gameMode === 'single' ? t2PLeft : d_t2Right, d_srvPos === 'top-left' ? 'server' : d_rcvPos === 'top-left' ? 'receiver' : 'partner', courtRotation)}</div>
-                <div className="absolute top-1 right-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || d_srvPos === 'top-right' || d_rcvPos === 'top-right') && renderPlayerBadge(gameMode === 'single' ? t2PLeft : d_t2Left, d_srvPos === 'top-right' ? 'server' : d_rcvPos === 'top-right' ? 'receiver' : 'partner', courtRotation)}</div>
+                      <div className="relative flex items-center justify-center w-[240px] h-[240px] md:w-[280px] md:h-[280px]">
+                        <div className={`w-[180px] h-[240px] md:w-[220px] md:h-[280px] bg-emerald-600 border-white/90 rounded-[3px] border-[3px] shadow-md relative flex flex-col overflow-hidden pointer-events-none transition-all duration-500 ease-in-out`} style={{ transform: `rotate(${courtRotation}deg)` }}>
+                          <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+                            <defs>
+                              <marker id="arrowLive" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(255,255,255,0.8)" />
+                              </marker>
+                            </defs>
+                            {d_srvPos === 'bottom-right' ? ( <line x1="75%" y1="85%" x2="25%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" markerEnd="url(#arrowLive)" /> ) : 
+                             d_srvPos === 'top-left' ? ( <line x1="25%" y1="15%" x2="75%" y2="85%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" markerEnd="url(#arrowLive)" /> ) : 
+                            d_srvPos === 'bottom-left' ? ( <line x1="25%" y1="85%" x2="75%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" markerEnd="url(#arrowLive)" /> ) : 
+                            ( <line x1="75%" y1="15%" x2="25%" y2="85%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" markerEnd="url(#arrowLive)" /> )}
+                          </svg>
+                        <div className="flex-1 relative border-b border-white/50 z-20">
+                          <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
+                          <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || d_srvPos === 'top-left' || d_rcvPos === 'top-left') && renderPlayerBadge(gameMode === 'single' ? t2PLeft : d_t2Right, d_srvPos === 'top-left' ? 'server' : d_rcvPos === 'top-left' ? 'receiver' : 'partner', courtRotation)}</div>
+                          <div className="absolute top-1 right-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || d_srvPos === 'top-right' || d_rcvPos === 'top-right') && renderPlayerBadge(gameMode === 'single' ? t2PLeft : d_t2Left, d_srvPos === 'top-right' ? 'server' : d_rcvPos === 'top-right' ? 'receiver' : 'partner', courtRotation)}</div>
+                        </div>
+                       <div className={`h-6 md:h-8 border-b-2 border-white/80 bg-emerald-500 z-20 transition-colors`}></div>
+                       <div className={`h-6 md:h-8 border-b border-white/50 bg-emerald-500 z-20 transition-colors`}></div>
+                       <div className="flex-1 relative z-20">
+                         <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
+                         <div className="absolute bottom-1 left-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || d_srvPos === 'bottom-left' || d_rcvPos === 'bottom-left') && renderPlayerBadge(gameMode === 'single' ? t1PLeft : d_t1Left, d_srvPos === 'bottom-left' ? 'server' : d_rcvPos === 'bottom-left' ? 'receiver' : 'partner', courtRotation)}</div>
+                         <div className="absolute bottom-1 right-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || d_srvPos === 'bottom-right' || d_rcvPos === 'bottom-right') && renderPlayerBadge(gameMode === 'single' ? t1PLeft : d_t1Right, d_srvPos === 'bottom-right' ? 'server' : d_rcvPos === 'bottom-right' ? 'receiver' : 'partner', courtRotation)}</div>
+                       </div>
+                    </div>
+                    <div className="absolute top-1/2 -translate-y-1/2 -left-[50px] md:-left-[60px] pointer-events-auto z-20"><button onClick={() => setCourtRotation(r => r - 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md`}><RotateCcw size={18} /></button></div>
+                    <div className="absolute top-1/2 -translate-y-1/2 -right-[50px] md:-right-[60px] pointer-events-auto z-20"><button onClick={() => setCourtRotation(r => r + 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md`}><RotateCw size={18} /></button></div>
+                </div>
             </div>
-            <div className={`h-6 md:h-8 border-b-2 border-white/80 bg-emerald-500 z-20 transition-colors`}></div>
-            <div className={`h-6 md:h-8 border-b border-white/50 bg-emerald-500 z-20 transition-colors`}></div>
-            <div className="flex-1 relative z-20">
-                <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
-                <div className="absolute bottom-1 left-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || d_srvPos === 'bottom-left' || d_rcvPos === 'bottom-left') && renderPlayerBadge(gameMode === 'single' ? t1PLeft : d_t1Left, d_srvPos === 'bottom-left' ? 'server' : d_rcvPos === 'bottom-left' ? 'receiver' : 'partner', courtRotation)}</div>
-                <div className="absolute bottom-1 right-0 w-1/2 flex justify-center items-center h-full">{(gameMode === 'double' || d_srvPos === 'bottom-right' || d_rcvPos === 'bottom-right') && renderPlayerBadge(gameMode === 'single' ? t1PLeft : d_t1Right, d_srvPos === 'bottom-right' ? 'server' : d_rcvPos === 'bottom-right' ? 'receiver' : 'partner', courtRotation)}</div>
-            </div>
-        </div>
-        <div className="absolute top-1/2 -translate-y-1/2 -left-[50px] md:-left-[60px] pointer-events-auto z-20"><button onClick={() => setCourtRotation(r => r - 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md`}><RotateCcw size={18} /></button></div>
-        <div className="absolute top-1/2 -translate-y-1/2 -right-[50px] md:-right-[60px] pointer-events-auto z-20"><button onClick={() => setCourtRotation(r => r + 90)} className={`p-3 rounded-full ${bgCard} border ${borderSub} text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 active:scale-95 transition-all shadow-md`}><RotateCw size={18} /></button></div>
-    </div>
-</div>
 
                     {isSuddenDeath && !winner && (<div className="flex justify-center w-full mb-6 relative z-10 animate-screen-enter"><span className={`px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-900/50 dark:text-rose-300 dark:border-rose-800 shadow-sm text-center max-w-[90%]`}>🔥 {getT('suddenDeath')} - {serveToWinAt14 ? getT('suddenDeathServeDesc') : getT('nextPointWins')} 🔥</span></div>)}
 
