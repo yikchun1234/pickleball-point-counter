@@ -1632,8 +1632,8 @@
               
               {showLegacyAlert && (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowLegacyAlert(false)}></div>
-                  <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl text-center`}>
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowLegacyAlert(false)}></div>
+                  <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl text-center animate-screen-enter`}>
                     <div className="absolute top-4 right-4"><button onClick={() => setShowLegacyAlert(false)} className={`p-1.5 rounded-full bg-stone-100 dark:bg-stone-800 ${textSub} hover:${textMain} transition-colors`}><X size={16}/></button></div>
                     <HistoryIcon size={48} className="mx-auto text-amber-500 mb-4 opacity-80" />
                     <h2 className={`text-lg font-bold mb-2 ${textMain}`}>{getT('ghostUnavailable')}</h2>
@@ -1645,9 +1645,9 @@
 
               {previewData && (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-                  <div className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity" style={{touchAction: 'none'}} onClick={() => setPreviewData(null)}></div>
-                  <div className={`relative p-6 md:p-8 ${bgCard} border ${borderSub} rounded-3xl shadow-2xl flex flex-col items-center w-full max-w-sm mx-auto`}>
-                      <div className="flex justify-between items-center w-full mb-6">
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setPreviewData(null)}></div>
+                  <div className={`relative w-full max-w-sm p-6 md:p-8 ${bgCard} border ${borderSub} rounded-3xl shadow-2xl flex flex-col items-center animate-screen-enter`}>
+                      <div className="flex justify-between items-center w-full mb-6 relative z-10">
                           <h3 className={`text-lg font-bold tracking-widest uppercase ${textMain}`}>{getT('ghostReplay')}</h3>
                           <button onClick={() => setPreviewData(null)} className={`p-1.5 rounded-full bg-stone-100 dark:bg-stone-800 ${textSub} hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors`}><X size={16}/></button>
                       </div>
@@ -1666,7 +1666,7 @@
 
                           return (
                               <>
-                                  <div className="flex items-center justify-center gap-6 mb-8 w-full">
+                                  <div className="flex items-center justify-center gap-6 mb-8 w-full relative z-10">
                                       <div className="text-center flex-1"><span className={`text-[10px] font-bold ${textSub} block uppercase tracking-widest mb-1`}>{snap.servingTeam === 1 ? getT('serverRole') : getT('receiverRole')}</span><span className={`text-5xl font-black ${snap.servingTeam === 1 ? accentGreen : textMain}`}>{snap.team1Score}</span></div>
                                       
                                       {isSingle ? (
@@ -1681,7 +1681,7 @@
                                       <div className="text-center flex-1"><span className={`text-[10px] font-bold ${textSub} block uppercase tracking-widest mb-1`}>{snap.servingTeam === 2 ? getT('serverRole') : getT('receiverRole')}</span><span className={`text-5xl font-black ${snap.servingTeam === 2 ? accentRed : textMain}`}>{snap.team2Score}</span></div>
                                   </div>
                                   
-                                  <div className="relative flex items-center justify-center w-[220px] h-[280px]">
+                                  <div className="relative flex items-center justify-center w-[220px] h-[280px] z-10">
                                       <div className={`w-[180px] h-[240px] bg-amber-600 border-amber-300 rounded-[3px] border-[3px] shadow-lg relative flex flex-col overflow-hidden pointer-events-none transition-all duration-500 ease-in-out`} style={{ transform: `rotate(${histRotation}deg)` }}>
                                           <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
                                               <defs>
@@ -1709,7 +1709,7 @@
                                       </div>
                                   </div>
 
-                                  <div className="flex justify-between items-center w-full mt-6 pt-2">
+                                  <div className="flex justify-between items-center w-full mt-6 pt-2 relative z-10">
                                       <button onClick={(e) => { e.stopPropagation(); setPreviewData(prev => ({...prev, index: prev.index - 1})); }} disabled={previewData.index === 0} className={`px-4 py-2 rounded-xl font-bold text-xs transition-colors ${previewData.index === 0 ? 'opacity-30 cursor-not-allowed bg-stone-200 dark:bg-stone-800 text-stone-400' : 'bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-900/50 dark:text-amber-400 dark:hover:bg-amber-800'}`}>&larr; {getT('prev')}</button>
                                       <span className="text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-500">{getT('point')} {previewData.index + 1} / {previewData.history.length}</span>
                                       <button onClick={(e) => { e.stopPropagation(); setPreviewData(prev => ({...prev, index: prev.index + 1})); }} disabled={previewData.index === previewData.history.length - 1} className={`px-4 py-2 rounded-xl font-bold text-xs transition-colors ${previewData.index === previewData.history.length - 1 ? 'opacity-30 cursor-not-allowed bg-stone-200 dark:bg-stone-800 text-stone-400' : 'bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-900/50 dark:text-amber-400 dark:hover:bg-amber-800'}`}>{getT('next')} &rarr;</button>
