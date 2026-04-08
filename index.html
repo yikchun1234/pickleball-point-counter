@@ -1063,52 +1063,76 @@
               setPreviewData({ history: timelineData, index: index, match: matchObj });
           };
 
-          const renderTimeline = (timelineData, matchObj = null, useScrollRef = false, isLive = false) => (
-            <div className={`mt-6 muji-card p-5 rounded-xl`}>
-              <div className={`text-[10px] font-bold uppercase tracking-widest mb-4 flex justify-between items-center ${textSub}`}>
-                 <span>{getT('timeline')}</span>
-                 {isLive && (
-                     <button onClick={() => { setIsTimelineLocked(!isTimelineLocked); if (!isTimelineLocked) setPreviewData(null); }} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors shadow-sm font-black text-[10px] ${isTimelineLocked ? `text-stone-500 bg-stone-100 dark:bg-stone-800` : `text-amber-900 bg-amber-400 animate-pulse`}`}>
-                         {isTimelineLocked ? <Lock size={14} /> : <Unlock size={14} />}{isTimelineLocked ? getT('locked') : getT('ghostReplay').toUpperCase()}
-                     </button>
-                 )}
-              </div>
-              <div ref={useScrollRef ? timelineScrollRef : null} className="overflow-x-auto pb-4 pt-2 muji-scrollbar relative scroll-smooth">
-                {timelineData.length === 0 && <div className={`text-xs italic ${textSub} px-2`}>{getT('awaiting')}</div>}
-                {timelineData.length > 0 && (
-                  <div className="flex min-w-max relative px-2">
-                    <div className={`absolute top-[12px] left-14 right-0 h-px ${isDark ? 'bg-stone-700' : 'bg-stone-200'} z-0`}></div><div className={`absolute bottom-[12px] left-14 right-0 h-px ${isDark ? 'bg-stone-700' : 'bg-stone-200'} z-0`}></div>
-                    <div className={`w-12 flex flex-col gap-3 sticky left-0 z-20 ${bgCard} pr-2 ${isDark ? 'shadow-[4px_0_8px_-4px_rgba(0,0,0,0.3)]' : 'shadow-[4px_0_8px_-4px_rgba(0,0,0,0.1)]'}`}>
-                        <div className={`h-6 flex items-center text-[10px] font-bold uppercase ${accentGreen}`}>{getT('t1Label')}</div><div className="h-4"></div><div className={`h-6 flex items-center text-[10px] font-bold uppercase ${accentRed}`}>{getT('t2Label')}</div>
-                    </div>
-                    <div className="flex items-center">
-                        {timelineData.map((event, index) => (
-                          <div key={event.id} onClick={() => handleDotClick(index, event, timelineData, matchObj, isLive)} className={`flex flex-col items-center justify-center w-8 gap-3 relative z-10 transition-transform ${(!isTimelineLocked && isLive) || !isLive ? 'cursor-pointer hover:scale-125 hover:-translate-y-2' : ''}`}>
-                            <div className="h-6 flex items-center justify-center w-full">
-                              {event.type === 'T1_POINT' ? (<div className={`w-5 h-5 rounded-full bg-emerald-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[10px] font-bold text-white transition-transform hover:scale-110 cursor-default shadow-sm z-10`}>{event.point}</div>) 
-                              : event.type === 'T1_TIMEOUT' ? (<div className={`w-4 h-4 rounded-[4px] bg-amber-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[8px] font-black text-white cursor-default shadow-sm z-10`} title="Timeout">T</div>) 
-                              : (<div className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-stone-600' : 'bg-stone-300'} z-10`}></div>)}
-                            </div>
-                            <div className="h-4 flex items-center justify-center w-full">
-                                {(event.type === 'SIDEOUT' || event.type === 'FAULT') && (
-                                  <div className={`w-4 h-4 rounded-sm rotate-45 border flex items-center justify-center shadow-sm z-10 ${event.team === 2 ? (isDark ? 'bg-emerald-900/40 border-emerald-600' : 'bg-emerald-100 border-emerald-300') : (isDark ? 'bg-rose-900/40 border-rose-600' : 'bg-rose-100 border-rose-300')}`} title={event.type}>
-                                    <span className={`text-[8px] font-black -rotate-45 ${event.team === 2 ? (isDark ? 'text-emerald-400' : 'text-emerald-700') : (isDark ? 'text-rose-400' : 'text-rose-700')}`}>{event.type === 'FAULT' ? 'F' : 'S'}</span>
-                                  </div>
-                                )}
-                            </div>
-                            <div className="h-6 flex items-center justify-center w-full">
-                              {event.type === 'T2_POINT' ? (<div className={`w-5 h-5 rounded-full bg-rose-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[10px] font-bold text-white transition-transform hover:scale-110 cursor-default shadow-sm z-10`}>{event.point}</div>) 
-                              : event.type === 'T2_TIMEOUT' ? (<div className={`w-4 h-4 rounded-[4px] bg-amber-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[8px] font-black text-white cursor-default shadow-sm z-10`} title="Timeout">T</div>) 
-                              : (<div className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-stone-600' : 'bg-stone-300'} z-10`}></div>)}
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
+          const renderTimeline = (timelineData, matchObj = null, useScrollRef = false, isLive = false) => {
+              const isMatchPreviewing = previewData && ((matchObj && previewData.match && matchObj.id === previewData.match.id) || (!matchObj && !previewData.match));
+
+              return (
+                <div className={`mt-6 muji-card p-4 md:p-5 rounded-xl overflow-hidden relative`}>
+                  <div className={`text-[10px] font-bold uppercase tracking-widest mb-4 flex justify-between items-center ${textSub}`}>
+                     <span>{getT('timeline')}</span>
+                     {isLive && (
+                         <button onClick={() => { setIsTimelineLocked(!isTimelineLocked); if (!isTimelineLocked) setPreviewData(null); }} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors shadow-sm font-black text-[10px] border ${isTimelineLocked ? `text-stone-500 bg-stone-100 border-stone-200 dark:bg-stone-800 dark:border-stone-700` : `text-emerald-400 bg-emerald-900/30 border-emerald-800/50`}`}>
+                             {isTimelineLocked ? <Lock size={14} /> : <Unlock size={14} />}{isTimelineLocked ? getT('locked') : 'UNLOCKED'}
+                         </button>
+                     )}
+                  </div>
+                  <div ref={useScrollRef ? timelineScrollRef : null} className="overflow-x-auto pb-4 pt-2 muji-scrollbar relative scroll-smooth">
+                    {timelineData.length === 0 && <div className={`text-xs italic ${textSub} px-2`}>{getT('awaiting')}</div>}
+                    {timelineData.length > 0 && (
+                      <div className="flex min-w-max relative px-2 py-1">
+                        {/* Background Horizontal Lines */}
+                        <div className={`absolute top-[16px] left-14 right-4 h-[1px] ${isDark ? 'bg-stone-700/50' : 'bg-stone-200'} z-0`}></div>
+                        <div className={`absolute bottom-[16px] left-14 right-4 h-[1px] ${isDark ? 'bg-stone-700/50' : 'bg-stone-200'} z-0`}></div>
+                        
+                        {/* Sticky Left Column for T1/T2 Labels */}
+                        <div className={`w-12 flex flex-col gap-3 sticky left-0 z-30 ${bgCard} pr-2`}>
+                            {/* Smooth gradient shadow indicating scroll depth */}
+                            <div className={`absolute top-0 bottom-0 -right-4 w-4 bg-gradient-to-r ${isDark ? 'from-[#292524] to-transparent' : 'from-[#ffffff] to-transparent'} pointer-events-none`}></div>
+                            <div className={`h-6 flex items-center text-[10px] font-bold uppercase ${accentGreen}`}>{getT('t1Label')}</div>
+                            <div className="h-4"></div>
+                            <div className={`h-6 flex items-center text-[10px] font-bold uppercase ${accentRed}`}>{getT('t2Label')}</div>
+                        </div>
+
+                        {/* Timeline Dots and Events */}
+                        <div className="flex items-center gap-1.5 pl-2">
+                            {timelineData.map((event, index) => {
+                                const isSelected = isMatchPreviewing && previewData.index === index;
+                                return (
+                                  <div key={event.id} onClick={() => handleDotClick(index, event, timelineData, matchObj, isLive)} className={`flex flex-col items-center justify-center w-9 py-1 gap-3 relative z-10 transition-transform ${(!isTimelineLocked && isLive) || !isLive ? 'cursor-pointer hover:-translate-y-1' : ''}`}>
+                                    {/* Active Ghost Replay Highlight Box */}
+                                    {isSelected && (
+                                        <div className="absolute inset-0 bg-amber-500/10 border-[1.5px] border-amber-500/60 rounded-full z-0 pointer-events-none shadow-[0_0_10px_rgba(245,158,11,0.15)]"></div>
+                                    )}
+
+                                    <div className="h-6 flex items-center justify-center w-full relative z-10">
+                                      {event.type === 'T1_POINT' ? (<div className={`w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-[10px] font-bold text-white shadow-sm`}>{event.point}</div>) 
+                                      : event.type === 'T1_TIMEOUT' ? (<div className={`w-4 h-4 rounded-[4px] bg-amber-500 flex items-center justify-center text-[8px] font-black text-white shadow-sm`} title="Timeout">T</div>) 
+                                      : (<div className={`w-2 h-2 rounded-full ${isDark ? 'bg-stone-600' : 'bg-stone-300'}`}></div>)}
+                                    </div>
+
+                                    <div className="h-4 flex items-center justify-center w-full relative z-10">
+                                        {(event.type === 'SIDEOUT' || event.type === 'FAULT') && (
+                                          <div className={`w-3.5 h-3.5 rounded-[3px] rotate-45 flex items-center justify-center shadow-sm ${event.team === 2 ? (isDark ? 'bg-emerald-900/60 text-emerald-400' : 'bg-emerald-100 text-emerald-600') : (isDark ? 'bg-rose-900/60 text-rose-400' : 'bg-rose-100 text-rose-600')}`} title={event.type}>
+                                            <span className={`text-[7px] font-black -rotate-45 leading-none`}>{event.type === 'FAULT' ? 'F' : 'S'}</span>
+                                          </div>
+                                        )}
+                                    </div>
+
+                                    <div className="h-6 flex items-center justify-center w-full relative z-10">
+                                      {event.type === 'T2_POINT' ? (<div className={`w-5 h-5 rounded-full bg-rose-500 flex items-center justify-center text-[10px] font-bold text-white shadow-sm`}>{event.point}</div>) 
+                                      : event.type === 'T2_TIMEOUT' ? (<div className={`w-4 h-4 rounded-[4px] bg-amber-500 flex items-center justify-center text-[8px] font-black text-white shadow-sm`} title="Timeout">T</div>) 
+                                      : (<div className={`w-2 h-2 rounded-full ${isDark ? 'bg-stone-600' : 'bg-stone-300'}`}></div>)}
+                                    </div>
+                                  </div>
+                                );
+                            })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+          };
 
           useEffect(() => {
             const handlePointerMove = (e) => {
