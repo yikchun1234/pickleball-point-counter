@@ -1063,76 +1063,52 @@
               setPreviewData({ history: timelineData, index: index, match: matchObj });
           };
 
-          const renderTimeline = (timelineData, matchObj = null, useScrollRef = false, isLive = false) => {
-              const isMatchPreviewing = previewData && ((matchObj && previewData.match && matchObj.id === previewData.match.id) || (!matchObj && !previewData.match));
-
-              return (
-                <div className={`mt-6 muji-card p-4 md:p-5 rounded-xl overflow-hidden relative`}>
-                  <div className={`text-[10px] font-bold uppercase tracking-widest mb-4 flex justify-between items-center ${textSub}`}>
-                     <span>{getT('timeline')}</span>
-                     {isLive && (
-                         <button onClick={() => { setIsTimelineLocked(!isTimelineLocked); if (!isTimelineLocked) setPreviewData(null); }} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors shadow-sm font-black text-[10px] border ${isTimelineLocked ? `text-stone-500 bg-stone-100 border-stone-200 dark:bg-stone-800 dark:border-stone-700` : `text-emerald-400 bg-emerald-900/30 border-emerald-800/50`}`}>
-                             {isTimelineLocked ? <Lock size={14} /> : <Unlock size={14} />}{isTimelineLocked ? getT('locked') : 'UNLOCKED'}
-                         </button>
-                     )}
-                  </div>
-                  <div ref={useScrollRef ? timelineScrollRef : null} className="overflow-x-auto pb-4 pt-2 muji-scrollbar relative scroll-smooth">
-                    {timelineData.length === 0 && <div className={`text-xs italic ${textSub} px-2`}>{getT('awaiting')}</div>}
-                    {timelineData.length > 0 && (
-                      <div className="flex min-w-max relative px-2 py-1">
-                        {/* Background Horizontal Lines */}
-                        <div className={`absolute top-[16px] left-14 right-4 h-[1px] ${isDark ? 'bg-stone-700/50' : 'bg-stone-200'} z-0`}></div>
-                        <div className={`absolute bottom-[16px] left-14 right-4 h-[1px] ${isDark ? 'bg-stone-700/50' : 'bg-stone-200'} z-0`}></div>
-                        
-                        {/* Sticky Left Column for T1/T2 Labels */}
-                        <div className={`w-12 flex flex-col gap-3 sticky left-0 z-30 ${bgCard} pr-2`}>
-                            {/* Smooth gradient shadow indicating scroll depth */}
-                            <div className={`absolute top-0 bottom-0 -right-4 w-4 bg-gradient-to-r ${isDark ? 'from-[#292524] to-transparent' : 'from-[#ffffff] to-transparent'} pointer-events-none`}></div>
-                            <div className={`h-6 flex items-center text-[10px] font-bold uppercase ${accentGreen}`}>{getT('t1Label')}</div>
-                            <div className="h-4"></div>
-                            <div className={`h-6 flex items-center text-[10px] font-bold uppercase ${accentRed}`}>{getT('t2Label')}</div>
-                        </div>
-
-                        {/* Timeline Dots and Events */}
-                        <div className="flex items-center gap-1.5 pl-2">
-                            {timelineData.map((event, index) => {
-                                const isSelected = isMatchPreviewing && previewData.index === index;
-                                return (
-                                  <div key={event.id} onClick={() => handleDotClick(index, event, timelineData, matchObj, isLive)} className={`flex flex-col items-center justify-center w-9 py-1 gap-3 relative z-10 transition-transform ${(!isTimelineLocked && isLive) || !isLive ? 'cursor-pointer hover:-translate-y-1' : ''}`}>
-                                    {/* Active Ghost Replay Highlight Box */}
-                                    {isSelected && (
-                                        <div className="absolute inset-0 bg-amber-500/10 border-[1.5px] border-amber-500/60 rounded-full z-0 pointer-events-none shadow-[0_0_10px_rgba(245,158,11,0.15)]"></div>
-                                    )}
-
-                                    <div className="h-6 flex items-center justify-center w-full relative z-10">
-                                      {event.type === 'T1_POINT' ? (<div className={`w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-[10px] font-bold text-white shadow-sm`}>{event.point}</div>) 
-                                      : event.type === 'T1_TIMEOUT' ? (<div className={`w-4 h-4 rounded-[4px] bg-amber-500 flex items-center justify-center text-[8px] font-black text-white shadow-sm`} title="Timeout">T</div>) 
-                                      : (<div className={`w-2 h-2 rounded-full ${isDark ? 'bg-stone-600' : 'bg-stone-300'}`}></div>)}
-                                    </div>
-
-                                    <div className="h-4 flex items-center justify-center w-full relative z-10">
-                                        {(event.type === 'SIDEOUT' || event.type === 'FAULT') && (
-                                          <div className={`w-3.5 h-3.5 rounded-[3px] rotate-45 flex items-center justify-center shadow-sm ${event.team === 2 ? (isDark ? 'bg-emerald-900/60 text-emerald-400' : 'bg-emerald-100 text-emerald-600') : (isDark ? 'bg-rose-900/60 text-rose-400' : 'bg-rose-100 text-rose-600')}`} title={event.type}>
-                                            <span className={`text-[7px] font-black -rotate-45 leading-none`}>{event.type === 'FAULT' ? 'F' : 'S'}</span>
-                                          </div>
-                                        )}
-                                    </div>
-
-                                    <div className="h-6 flex items-center justify-center w-full relative z-10">
-                                      {event.type === 'T2_POINT' ? (<div className={`w-5 h-5 rounded-full bg-rose-500 flex items-center justify-center text-[10px] font-bold text-white shadow-sm`}>{event.point}</div>) 
-                                      : event.type === 'T2_TIMEOUT' ? (<div className={`w-4 h-4 rounded-[4px] bg-amber-500 flex items-center justify-center text-[8px] font-black text-white shadow-sm`} title="Timeout">T</div>) 
-                                      : (<div className={`w-2 h-2 rounded-full ${isDark ? 'bg-stone-600' : 'bg-stone-300'}`}></div>)}
-                                    </div>
-                                  </div>
-                                );
-                            })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-          };
+          const renderTimeline = (timelineData, matchObj = null, useScrollRef = false, isLive = false) => (
+            <div className={`mt-6 muji-card p-5 rounded-xl`}>
+              <div className={`text-[10px] font-bold uppercase tracking-widest mb-4 flex justify-between items-center ${textSub}`}>
+                 <span>{getT('timeline')}</span>
+                 {isLive && (
+                     <button onClick={() => { setIsTimelineLocked(!isTimelineLocked); if (!isTimelineLocked) setPreviewData(null); }} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors shadow-sm font-black text-[10px] ${isTimelineLocked ? `text-stone-500 bg-stone-100 dark:bg-stone-800` : `text-amber-900 bg-amber-400 animate-pulse`}`}>
+                         {isTimelineLocked ? <Lock size={14} /> : <Unlock size={14} />}{isTimelineLocked ? getT('locked') : getT('ghostReplay').toUpperCase()}
+                     </button>
+                 )}
+              </div>
+              <div ref={useScrollRef ? timelineScrollRef : null} className="overflow-x-auto pb-4 pt-2 muji-scrollbar relative scroll-smooth">
+                {timelineData.length === 0 && <div className={`text-xs italic ${textSub} px-2`}>{getT('awaiting')}</div>}
+                {timelineData.length > 0 && (
+                  <div className="flex min-w-max relative px-2">
+                    <div className={`absolute top-[12px] left-14 right-0 h-px ${isDark ? 'bg-stone-700' : 'bg-stone-200'} z-0`}></div><div className={`absolute bottom-[12px] left-14 right-0 h-px ${isDark ? 'bg-stone-700' : 'bg-stone-200'} z-0`}></div>
+                    <div className={`w-12 flex flex-col gap-3 sticky left-0 z-20 ${bgCard} pr-2 ${isDark ? 'shadow-[4px_0_8px_-4px_rgba(0,0,0,0.3)]' : 'shadow-[4px_0_8px_-4px_rgba(0,0,0,0.1)]'}`}>
+                        <div className={`h-6 flex items-center text-[10px] font-bold uppercase ${accentGreen}`}>{getT('t1Label')}</div><div className="h-4"></div><div className={`h-6 flex items-center text-[10px] font-bold uppercase ${accentRed}`}>{getT('t2Label')}</div>
+                    </div>
+                    <div className="flex items-center">
+                        {timelineData.map((event, index) => (
+                          <div key={event.id} onClick={() => handleDotClick(index, event, timelineData, matchObj, isLive)} className={`flex flex-col items-center justify-center w-8 gap-3 relative z-10 transition-transform ${(!isTimelineLocked && isLive) || !isLive ? 'cursor-pointer hover:scale-125 hover:-translate-y-2' : ''}`}>
+                            <div className="h-6 flex items-center justify-center w-full">
+                              {event.type === 'T1_POINT' ? (<div className={`w-5 h-5 rounded-full bg-emerald-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[10px] font-bold text-white transition-transform hover:scale-110 cursor-default shadow-sm z-10`}>{event.point}</div>) 
+                              : event.type === 'T1_TIMEOUT' ? (<div className={`w-4 h-4 rounded-[4px] bg-amber-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[8px] font-black text-white cursor-default shadow-sm z-10`} title="Timeout">T</div>) 
+                              : (<div className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-stone-600' : 'bg-stone-300'} z-10`}></div>)}
+                            </div>
+                            <div className="h-4 flex items-center justify-center w-full">
+                                {(event.type === 'SIDEOUT' || event.type === 'FAULT') && (
+                                  <div className={`w-4 h-4 rounded-sm rotate-45 border flex items-center justify-center shadow-sm z-10 ${event.team === 2 ? (isDark ? 'bg-emerald-900/40 border-emerald-600' : 'bg-emerald-100 border-emerald-300') : (isDark ? 'bg-rose-900/40 border-rose-600' : 'bg-rose-100 border-rose-300')}`} title={event.type}>
+                                    <span className={`text-[8px] font-black -rotate-45 ${event.team === 2 ? (isDark ? 'text-emerald-400' : 'text-emerald-700') : (isDark ? 'text-rose-400' : 'text-rose-700')}`}>{event.type === 'FAULT' ? 'F' : 'S'}</span>
+                                  </div>
+                                )}
+                            </div>
+                            <div className="h-6 flex items-center justify-center w-full">
+                              {event.type === 'T2_POINT' ? (<div className={`w-5 h-5 rounded-full bg-rose-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[10px] font-bold text-white transition-transform hover:scale-110 cursor-default shadow-sm z-10`}>{event.point}</div>) 
+                              : event.type === 'T2_TIMEOUT' ? (<div className={`w-4 h-4 rounded-[4px] bg-amber-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[8px] font-black text-white cursor-default shadow-sm z-10`} title="Timeout">T</div>) 
+                              : (<div className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-stone-600' : 'bg-stone-300'} z-10`}></div>)}
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
 
           useEffect(() => {
             const handlePointerMove = (e) => {
@@ -1655,101 +1631,96 @@
               )}
               
               {showLegacyAlert && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowLegacyAlert(false)}></div>
-                  <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl text-center animate-screen-enter`}>
-                    <div className="absolute top-4 right-4"><button onClick={() => setShowLegacyAlert(false)} className={`p-1.5 rounded-full bg-stone-100 dark:bg-stone-800 ${textSub} hover:${textMain} transition-colors`}><X size={16}/></button></div>
-                    <HistoryIcon size={48} className="mx-auto text-amber-500 mb-4 opacity-80" />
-                    <h2 className={`text-lg font-bold mb-2 ${textMain}`}>{getT('ghostUnavailable')}</h2>
-                    <p className={`text-sm mb-6 ${textSub}`}>{getT('ghostNoData')}</p>
-                    <button onClick={() => setShowLegacyAlert(false)} className={`w-full py-3 rounded-xl font-bold text-white bg-amber-500 hover:bg-amber-600 shadow-md transition-colors`}>{getT('gotIt')}</button>
-                  </div>
-                </div>
-              )}
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowLegacyAlert(false)}></div>
+                  <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl text-center animate-screen-enter`}>
+                    <div className="absolute top-4 right-4"><button onClick={() => setShowLegacyAlert(false)} className={`p-1.5 rounded-full bg-stone-100 dark:bg-stone-800 ${textSub} hover:${textMain} transition-colors`}><X size={16}/></button></div>
+                    <HistoryIcon size={48} className="mx-auto text-amber-500 mb-4 opacity-80" />
+                    <h2 className={`text-lg font-bold mb-2 ${textMain}`}>{getT('ghostUnavailable')}</h2>
+                    <p className={`text-sm mb-6 ${textSub}`}>{getT('ghostNoData')}</p>
+                    <button onClick={() => setShowLegacyAlert(false)} className={`w-full py-3 rounded-xl font-bold text-white bg-amber-500 hover:bg-amber-600 shadow-md transition-colors`}>{getT('gotIt')}</button>
+                  </div>
+                </div>
+              )}
 
-              {previewData && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-                  <div className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity" style={{touchAction: 'none'}} onClick={() => setPreviewData(null)}></div>
-                  <div className={`relative p-6 md:p-8 ${bgCard} border ${borderSub} rounded-3xl shadow-2xl flex flex-col items-center w-full max-w-sm mx-auto animate-screen-enter`}>
-                      <div className="flex justify-between items-center w-full mb-6 relative z-10">
-                          <h3 className={`text-lg font-bold tracking-widest uppercase ${textMain}`}>{getT('ghostReplay')}</h3>
-                          <button onClick={() => setPreviewData(null)} className={`p-1.5 rounded-full bg-stone-100 dark:bg-stone-800 ${textSub} hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors`}><X size={16}/></button>
-                      </div>
-                      
-                      {(() => {
-                          const m = previewData.match || {};
-                          const snap = previewData.history[previewData.index].snapshot;
-                          if (!snap) return null;
-                          
-                          const isSingle = m.mode ? m.mode === 'single' : gameMode === 'single';
-                          const p_t1Left = m.t1PLeft || m.t1Name || t1Name;
-                          const p_t1Right = m.t1PRight || '';
-                          const p_t2Left = m.t2PLeft || m.t2Name || t2Name;
-                          const p_t2Right = m.t2PRight || '';
-                          const histRotation = 180; 
+              {previewData && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ touchAction: 'none' }}>
+                  <div className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity" onClick={() => setPreviewData(null)}></div>
+                  <div className={`relative p-6 md:p-8 ${bgCard} border ${borderSub} rounded-3xl shadow-2xl flex flex-col items-center w-full max-w-sm mx-auto z-10 animate-screen-enter`}>
+                      <div className="flex justify-between items-center w-full mb-6">
+                          <h3 className={`text-lg font-bold tracking-widest uppercase ${textMain}`}>{getT('ghostReplay')}</h3>
+                          <button onClick={() => setPreviewData(null)} className={`p-1.5 rounded-full bg-stone-100 dark:bg-stone-800 ${textSub} hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors`}><X size={16}/></button>
+                      </div>
+                      
+                      {(() => {
+                          const m = previewData.match || {};
+                          const snap = previewData.history[previewData.index].snapshot;
+                          if (!snap) return null;
+                          
+                          // Safely checks if it's a saved match OR a live game
+                          const isSingle = m.mode ? m.mode === 'single' : gameMode === 'single';
+                          const p_t1Left = m.t1PLeft || m.t1Name || t1Name;
+                          const p_t1Right = m.t1PRight || '';
+                          const p_t2Left = m.t2PLeft || m.t2Name || t2Name;
+                          const p_t2Right = m.t2PRight || '';
+                          const histRotation = 180; 
 
-                          return (
-                              <>
-                                  <div className="flex items-center justify-center gap-6 mb-8 w-full relative z-10">
-                                      <div className="text-center flex-1">
-                                          <span className={`text-[10px] font-bold ${textSub} block uppercase tracking-widest mb-1`}>{snap.servingTeam === 1 ? getT('serverRole') : getT('receiverRole')}</span>
-                                          <span className={`text-5xl font-black ${snap.servingTeam === 1 ? accentGreen : textMain}`}>{snap.team1Score}</span>
-                                      </div>
-                                      
-                                      {isSingle ? (
-                                          <span className={`text-3xl font-light text-stone-300 dark:text-stone-700 px-2`}>-</span>
-                                      ) : (
-                                          <div className="flex flex-col items-center justify-center px-2">
-                                              <span className={`text-[9px] font-bold uppercase tracking-widest ${textSub} mb-1`}>{getT('serveLabel')}</span>
-                                              <span className="text-3xl font-black text-amber-500 leading-none">{snap.serverNumber}</span>
-                                          </div>
-                                      )}
+                          return (
+                              <>
+                                  <div className="flex items-center justify-center gap-6 mb-8 w-full">
+                                      <div className="text-center flex-1"><span className={`text-[10px] font-bold ${textSub} block uppercase tracking-widest mb-1`}>{snap.servingTeam === 1 ? getT('serverRole') : getT('receiverRole')}</span><span className={`text-5xl font-black ${snap.servingTeam === 1 ? accentGreen : textMain}`}>{snap.team1Score}</span></div>
+                                      
+                                      {isSingle ? (
+                                          <span className={`text-3xl font-light text-stone-300 dark:text-stone-700 px-2`}>-</span>
+                                      ) : (
+                                          <div className="flex flex-col items-center justify-center px-2">
+                                              <span className={`text-[9px] font-bold uppercase tracking-widest ${textSub} mb-1`}>{getT('serveLabel')}</span>
+                                              <span className="text-3xl font-black text-amber-500 leading-none">{snap.serverNumber}</span>
+                                          </div>
+                                      )}
 
-                                      <div className="text-center flex-1">
-                                          <span className={`text-[10px] font-bold ${textSub} block uppercase tracking-widest mb-1`}>{snap.servingTeam === 2 ? getT('serverRole') : getT('receiverRole')}</span>
-                                          <span className={`text-5xl font-black ${snap.servingTeam === 2 ? accentRed : textMain}`}>{snap.team2Score}</span>
-                                      </div>
-                                  </div>
-                                  
-                                  <div className="relative flex items-center justify-center w-[220px] h-[280px] z-10">
-                                      <div className={`w-[180px] h-[240px] bg-amber-600 border-amber-300 rounded-[3px] border-[3px] shadow-lg relative flex flex-col overflow-hidden pointer-events-none transition-all duration-500 ease-in-out`} style={{ transform: `rotate(${histRotation}deg)` }}>
-                                          <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
-                                              <defs>
-                                                  <marker id="arrowHistory" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                                                      <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(255,255,255,0.8)" />
-                                                  </marker>
-                                              </defs>
-                                              {snap.serverPos === 'bottom-right' ? ( <line x1="75%" y1="85%" x2="25%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" markerEnd="url(#arrowHistory)" /> ) : 
-                                               snap.serverPos === 'top-left' ? ( <line x1="25%" y1="15%" x2="75%" y2="85%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" markerEnd="url(#arrowHistory)" /> ) : 
-                                               snap.serverPos === 'bottom-left' ? ( <line x1="25%" y1="85%" x2="75%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" markerEnd="url(#arrowHistory)" /> ) : 
-                                               ( <line x1="75%" y1="15%" x2="25%" y2="85%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" markerEnd="url(#arrowHistory)" /> )}
-                                          </svg>
-                                          <div className="flex-1 relative border-b border-white/50 z-20">
-                                              <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
-                                              <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">{(!isSingle || snap.serverPos === 'top-left' || snap.receiverPos === 'top-left') && renderPlayerBadge(isSingle ? p_t2Left : snap.t2Right, snap.serverPos === 'top-left' ? 'server' : snap.receiverPos === 'top-left' ? 'receiver' : 'partner', histRotation)}</div>
-                                              <div className="absolute top-1 right-0 w-1/2 flex justify-center items-center h-full">{(!isSingle || snap.serverPos === 'top-right' || snap.receiverPos === 'top-right') && renderPlayerBadge(isSingle ? p_t2Left : snap.t2Left, snap.serverPos === 'top-right' ? 'server' : snap.receiverPos === 'top-right' ? 'receiver' : 'partner', histRotation)}</div>
-                                          </div>
-                                          <div className={`h-6 md:h-8 border-b-2 border-white/80 bg-amber-500 z-20`}></div>
-                                          <div className={`h-6 md:h-8 border-b border-white/50 bg-amber-500 z-20`}></div>
-                                          <div className="flex-1 relative z-20">
-                                              <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
-                                              <div className="absolute bottom-1 left-0 w-1/2 flex justify-center items-center h-full">{(!isSingle || snap.serverPos === 'bottom-left' || snap.receiverPos === 'bottom-left') && renderPlayerBadge(isSingle ? p_t1Left : snap.t1Left, snap.serverPos === 'bottom-left' ? 'server' : snap.receiverPos === 'bottom-left' ? 'receiver' : 'partner', histRotation)}</div>
-                                              <div className="absolute bottom-1 right-0 w-1/2 flex justify-center items-center h-full">{(!isSingle || snap.serverPos === 'bottom-right' || snap.receiverPos === 'bottom-right') && renderPlayerBadge(isSingle ? p_t1Left : snap.t1Right, snap.serverPos === 'bottom-right' ? 'server' : snap.receiverPos === 'bottom-right' ? 'receiver' : 'partner', histRotation)}</div>
-                                          </div>
-                                      </div>
-                                  </div>
+                                      <div className="text-center flex-1"><span className={`text-[10px] font-bold ${textSub} block uppercase tracking-widest mb-1`}>{snap.servingTeam === 2 ? getT('serverRole') : getT('receiverRole')}</span><span className={`text-5xl font-black ${snap.servingTeam === 2 ? accentRed : textMain}`}>{snap.team2Score}</span></div>
+                                  </div>
+                                  
+                                  <div className="relative flex items-center justify-center w-[220px] h-[280px]">
+                                      <div className={`w-[180px] h-[240px] bg-amber-600 border-amber-300 rounded-[3px] border-[3px] shadow-lg relative flex flex-col overflow-hidden pointer-events-none transition-all duration-500 ease-in-out`} style={{ transform: `rotate(${histRotation}deg)` }}>
+                                          <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+                                              <defs>
+                                                  <marker id="arrowHistory" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                                      <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(255,255,255,0.8)" />
+                                                  </marker>
+                                              </defs>
+                                              {snap.serverPos === 'bottom-right' ? ( <line x1="75%" y1="85%" x2="25%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" markerEnd="url(#arrowHistory)" /> ) : 
+                                               snap.serverPos === 'top-left' ? ( <line x1="25%" y1="15%" x2="75%" y2="85%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" markerEnd="url(#arrowHistory)" /> ) : 
+                                               snap.serverPos === 'bottom-left' ? ( <line x1="25%" y1="85%" x2="75%" y2="15%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" markerEnd="url(#arrowHistory)" /> ) : 
+                                               ( <line x1="75%" y1="15%" x2="25%" y2="85%" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeDasharray="4 4" markerEnd="url(#arrowHistory)" /> )}
+                                          </svg>
+                                          <div className="flex-1 relative border-b border-white/50 z-20">
+                                              <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
+                                              <div className="absolute top-1 left-0 w-1/2 flex justify-center items-center h-full">{(!isSingle || snap.serverPos === 'top-left' || snap.receiverPos === 'top-left') && renderPlayerBadge(isSingle ? p_t2Left : snap.t2Right, snap.serverPos === 'top-left' ? 'server' : snap.receiverPos === 'top-left' ? 'receiver' : 'partner', histRotation)}</div>
+                                              <div className="absolute top-1 right-0 w-1/2 flex justify-center items-center h-full">{(!isSingle || snap.serverPos === 'top-right' || snap.receiverPos === 'top-right') && renderPlayerBadge(isSingle ? p_t2Left : snap.t2Left, snap.serverPos === 'top-right' ? 'server' : snap.receiverPos === 'top-right' ? 'receiver' : 'partner', histRotation)}</div>
+                                          </div>
+                                          <div className={`h-6 md:h-8 border-b-2 border-white/80 bg-amber-500 z-20`}></div>
+                                          <div className={`h-6 md:h-8 border-b border-white/50 bg-amber-500 z-20`}></div>
+                                          <div className="flex-1 relative z-20">
+                                              <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-white/60 -translate-x-1/2"></div>
+                                              <div className="absolute bottom-1 left-0 w-1/2 flex justify-center items-center h-full">{(!isSingle || snap.serverPos === 'bottom-left' || snap.receiverPos === 'bottom-left') && renderPlayerBadge(isSingle ? p_t1Left : snap.t1Left, snap.serverPos === 'bottom-left' ? 'server' : snap.receiverPos === 'bottom-left' ? 'receiver' : 'partner', histRotation)}</div>
+                                              <div className="absolute bottom-1 right-0 w-1/2 flex justify-center items-center h-full">{(!isSingle || snap.serverPos === 'bottom-right' || snap.receiverPos === 'bottom-right') && renderPlayerBadge(isSingle ? p_t1Left : snap.t1Right, snap.serverPos === 'bottom-right' ? 'server' : snap.receiverPos === 'bottom-right' ? 'receiver' : 'partner', histRotation)}</div>
+                                          </div>
+                                      </div>
+                                  </div>
 
-                                  <div className="flex justify-between items-center w-full mt-6 pt-2 relative z-10">
-                                      <button onClick={(e) => { e.stopPropagation(); setPreviewData(prev => ({...prev, index: prev.index - 1})); }} disabled={previewData.index === 0} className={`px-4 py-2 rounded-xl font-bold text-xs transition-colors ${previewData.index === 0 ? 'opacity-30 cursor-not-allowed bg-stone-200 dark:bg-stone-800 text-stone-400' : 'bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-900/50 dark:text-amber-400 dark:hover:bg-amber-800'}`}>&larr; {getT('prev')}</button>
-                                      <span className="text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-500">{getT('point')} {previewData.index + 1} / {previewData.history.length}</span>
-                                      <button onClick={(e) => { e.stopPropagation(); setPreviewData(prev => ({...prev, index: prev.index + 1})); }} disabled={previewData.index === previewData.history.length - 1} className={`px-4 py-2 rounded-xl font-bold text-xs transition-colors ${previewData.index === previewData.history.length - 1 ? 'opacity-30 cursor-not-allowed bg-stone-200 dark:bg-stone-800 text-stone-400' : 'bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-900/50 dark:text-amber-400 dark:hover:bg-amber-800'}`}>{getT('next')} &rarr;</button>
-                                  </div>
-                              </>
-                          );
-                      })()}
-                  </div>
-                </div>
-              )}
+                                  <div className="flex justify-between items-center w-full mt-6 pt-2">
+                                      <button onClick={(e) => { e.stopPropagation(); setPreviewData(prev => ({...prev, index: prev.index - 1})); }} disabled={previewData.index === 0} className={`px-4 py-2 rounded-xl font-bold text-xs transition-colors ${previewData.index === 0 ? 'opacity-30 cursor-not-allowed bg-stone-200 dark:bg-stone-800 text-stone-400' : 'bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-900/50 dark:text-amber-400 dark:hover:bg-amber-800'}`}>&larr; {getT('prev')}</button>
+                                      <span className="text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-500">{getT('point')} {previewData.index + 1} / {previewData.history.length}</span>
+                                      <button onClick={(e) => { e.stopPropagation(); setPreviewData(prev => ({...prev, index: prev.index + 1})); }} disabled={previewData.index === previewData.history.length - 1} className={`px-4 py-2 rounded-xl font-bold text-xs transition-colors ${previewData.index === previewData.history.length - 1 ? 'opacity-30 cursor-not-allowed bg-stone-200 dark:bg-stone-800 text-stone-400' : 'bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-900/50 dark:text-amber-400 dark:hover:bg-amber-800'}`}>{getT('next')} &rarr;</button>
+                                  </div>
+                              </>
+                          );
+                      })()}
+                  </div>
+                </div>
+              )}
                 
               {secretGame && (
                   <div className="fixed inset-0 z-[200] bg-stone-900 text-stone-100 flex flex-col animate-screen-enter select-none">
