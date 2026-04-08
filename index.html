@@ -1657,7 +1657,7 @@
                           const snap = previewData.history[previewData.index].snapshot;
                           if (!snap) return null;
                           
-                          const isSingle = m.mode === 'single';
+                          const isSingle = (m.mode || gameMode) === 'single';
                           const p_t1Left = m.t1PLeft || m.t1Name || t1Name;
                           const p_t1Right = m.t1PRight || '';
                           const p_t2Left = m.t2PLeft || m.t2Name || t2Name;
