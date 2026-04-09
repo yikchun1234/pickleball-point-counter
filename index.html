@@ -1480,43 +1480,40 @@ const [enableTimeouts, setEnableTimeouts] = useState(0);
   <div className="flex-1 relative">
     <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('t1Name')}</label>
     <input type="text" placeholder={getT('t1Name')} value={t1PLeftInput} onChange={(e) => setT1PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none pr-10`} />
-    <button onClick={() => openPlayerSelect('t1Left')} className={`absolute right-1 top-[26px] bottom-1 w-8 flex items-center justify-center rounded-lg ${textSub} hover:text-emerald-500 transition-colors`}><Users size={16}/></button>
+    <button onClick={() => openPlayerSelect('t1Left')} className={`absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg ${textSub} hover:text-emerald-500 transition-colors`} title="Select Player"><Users size={16}/></button>
   </div>
   <div className="flex-1 relative">
     <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('t2Name')}</label>
     <input type="text" placeholder={getT('t2Name')} value={t2PLeftInput} onChange={(e) => setT2PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none pr-10`} />
-    <button onClick={() => openPlayerSelect('t2Left')} className={`absolute right-1 top-[26px] bottom-1 w-8 flex items-center justify-center rounded-lg ${textSub} hover:text-emerald-500 transition-colors`}><Users size={16}/></button>
+    <button onClick={() => openPlayerSelect('t2Left')} className={`absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg ${textSub} hover:text-emerald-500 transition-colors`} title="Select Player"><Users size={16}/></button>
   </div>
 </div>
 ) : (
 <div className="space-y-3">
-  {/* Team 1 Row */}
-  <div className="flex items-end gap-2">
+  <div className="flex items-center gap-1.5 sm:gap-2">
     <div className="flex-1 relative">
-      <label className={`block text-[9px] font-bold uppercase tracking-wider mb-1 ${textSub}`}>{getT('t1P1')} <span className="opacity-70 lowercase text-[8px]">{getT('oddCourt')}</span></label>
-      <input type="text" placeholder={getT('t1P1')} value={t1PLeftInput} onChange={(e) => setT1PLeftInput(e.target.value)} className={`w-full px-3 py-2 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none pr-10`} />
-      <button onClick={() => openPlayerSelect('t1Left')} className={`absolute right-1 top-[26px] bottom-1 w-8 flex items-center justify-center rounded-lg ${textSub} hover:text-emerald-500 transition-colors`}><Users size={16}/></button>
+      <label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t1P1')} <span className="opacity-70 lowercase text-[8px]">{getT('oddCourt')}</span></label>
+      <input type="text" placeholder={getT('t1P1')} value={t1PLeftInput} onChange={(e) => setT1PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none pr-10`} />
+      <button onClick={() => openPlayerSelect('t1Left')} className={`absolute right-2 top-[42px] -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg ${textSub} hover:text-emerald-500 transition-colors`} title="Select Player"><Users size={16}/></button>
     </div>
-    <button onClick={() => { const t = t1PLeftInput; setT1PLeftInput(t1PRightInput); setT1PRightInput(t); }} className={`mb-1 p-2 rounded-full ${bgMain} border ${borderSub} text-stone-400 hover:text-emerald-500 transition-all active:scale-95 shrink-0`} title="Swap"><ArrowRightLeft size={16}/></button>
+    <button onClick={() => { const temp = t1PLeftInput; setT1PLeftInput(t1PRightInput); setT1PRightInput(temp); }} className={`mt-5 p-2 rounded-full ${bgMain} border ${borderSub} text-stone-400 hover:text-emerald-500 hover:border-emerald-500/30 transition-all active:scale-95 shrink-0`} title="Swap Players"><ArrowRightLeft size={16} /></button>
     <div className="flex-1 relative">
-      <label className={`block text-[9px] font-bold uppercase tracking-wider mb-1 ${textSub}`}>{getT('t1P2')} <span className="opacity-70 lowercase text-[8px]">{getT('evenCourt')}</span></label>
-      <input type="text" placeholder={getT('t1P2')} value={t1PRightInput} onChange={(e) => setT1PRightInput(e.target.value)} className={`w-full px-3 py-2 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none pr-10`} />
-      <button onClick={() => openPlayerSelect('t1Right')} className={`absolute right-1 top-[26px] bottom-1 w-8 flex items-center justify-center rounded-lg ${textSub} hover:text-emerald-500 transition-colors`}><Users size={16}/></button>
+      <label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t1P2')} <span className="opacity-70 lowercase text-[8px]">{getT('evenCourt')}</span></label>
+      <input type="text" placeholder={getT('t1P2')} value={t1PRightInput} onChange={(e) => setT1PRightInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none pr-10`} />
+      <button onClick={() => openPlayerSelect('t1Right')} className={`absolute right-2 top-[42px] -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg ${textSub} hover:text-emerald-500 transition-colors`} title="Select Player"><Users size={16}/></button>
     </div>
   </div>
-
-  {/* Team 2 Row */}
-  <div className="flex items-end gap-2">
+  <div className="flex items-center gap-1.5 sm:gap-2">
     <div className="flex-1 relative">
-      <label className={`block text-[9px] font-bold uppercase tracking-wider mb-1 ${textSub}`}>{getT('t2P1')} <span className="opacity-70 lowercase text-[8px]">{getT('oddCourt')}</span></label>
-      <input type="text" placeholder={getT('t2P1')} value={t2PLeftInput} onChange={(e) => setT2PLeftInput(e.target.value)} className={`w-full px-3 py-2 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none pr-10`} />
-      <button onClick={() => openPlayerSelect('t2Left')} className={`absolute right-1 top-[26px] bottom-1 w-8 flex items-center justify-center rounded-lg ${textSub} hover:text-emerald-500 transition-colors`}><Users size={16}/></button>
+      <label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t2P1')} <span className="opacity-70 lowercase text-[8px]">{getT('oddCourt')}</span></label>
+      <input type="text" placeholder={getT('t2P1')} value={t2PLeftInput} onChange={(e) => setT2PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none pr-10`} />
+      <button onClick={() => openPlayerSelect('t2Left')} className={`absolute right-2 top-[42px] -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg ${textSub} hover:text-emerald-500 transition-colors`} title="Select Player"><Users size={16}/></button>
     </div>
-    <button onClick={() => { const t = t2PLeftInput; setT2PLeftInput(t2PRightInput); setT2PRightInput(t); }} className={`mb-1 p-2 rounded-full ${bgMain} border ${borderSub} text-stone-400 hover:text-emerald-500 transition-all active:scale-95 shrink-0`} title="Swap"><ArrowRightLeft size={16}/></button>
+    <button onClick={() => { const temp = t2PLeftInput; setT2PLeftInput(t2PRightInput); setT2PRightInput(temp); }} className={`mt-5 p-2 rounded-full ${bgMain} border ${borderSub} text-stone-400 hover:text-emerald-500 hover:border-emerald-500/30 transition-all active:scale-95 shrink-0`} title="Swap Players"><ArrowRightLeft size={16} /></button>
     <div className="flex-1 relative">
-      <label className={`block text-[9px] font-bold uppercase tracking-wider mb-1 ${textSub}`}>{getT('t2P2')} <span className="opacity-70 lowercase text-[8px]">{getT('evenCourt')}</span></label>
-      <input type="text" placeholder={getT('t2P2')} value={t2PRightInput} onChange={(e) => setT2PRightInput(e.target.value)} className={`w-full px-3 py-2 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none pr-10`} />
-      <button onClick={() => openPlayerSelect('t2Right')} className={`absolute right-1 top-[26px] bottom-1 w-8 flex items-center justify-center rounded-lg ${textSub} hover:text-emerald-500 transition-colors`}><Users size={16}/></button>
+      <label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t2P2')} <span className="opacity-70 lowercase text-[8px]">{getT('evenCourt')}</span></label>
+      <input type="text" placeholder={getT('t2P2')} value={t2PRightInput} onChange={(e) => setT2PRightInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none pr-10`} />
+      <button onClick={() => openPlayerSelect('t2Right')} className={`absolute right-2 top-[42px] -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg ${textSub} hover:text-emerald-500 transition-colors`} title="Select Player"><Users size={16}/></button>
     </div>
   </div>
 </div>
