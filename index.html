@@ -632,21 +632,28 @@ const [editMemberId, setEditMemberId] = useState(null);
 const [memberFormName, setMemberFormName] = useState('');
 const [playerSelectTarget, setPlayerSelectTarget] = useState(null); // 't1Left','t1Right','t2Left','t2Right'
 // --- DRAG & DROP STATE ---
-const [draggedIndex, setDraggedIndex] = useState(null);
-const [dragOverIndex, setDragOverIndex] = useState(null);
+const [draggedIdx, setDraggedIdx] = useState(null);
+const [dragOverIdx, setDragOverIdx] = useState(null);
 
-const handleDragStart = (index) => setDraggedIndex(index);
-const handleDragOver = (e, index) => { e.preventDefault(); setDragOverIndex(index); };
-const handleDragEnd = () => { setDraggedIndex(null); setDragOverIndex(null); };
-const handleDrop = (e, dropIndex) => {
+const handleDragStart = (idx) => setDraggedIdx(idx);
+const handleDragOver = (e, idx) => { e.preventDefault(); setDragOverIdx(idx); };
+const handleDragEnter = (e, idx) => { e.preventDefault(); setDragOverIdx(idx); };
+const handleDragEnd = () => { setDraggedIdx(null); setDragOverIdx(null); };
+const handleDrop = (e, idx) => {
   e.preventDefault();
-  if (draggedIndex === null || draggedIndex === dropIndex) return;
+  if (draggedIdx === null || draggedIdx === idx) return;
   const newMembers = [...savedMembers];
-  const [draggedItem] = newMembers.splice(draggedIndex, 1);
-  newMembers.splice(dropIndex, 0, draggedItem);
+  const [draggedItem] = newMembers.splice(draggedIdx, 1);
+  newMembers.splice(idx, 0, draggedItem);
   setSavedMembers(newMembers);
   localStorage.setItem('pb_members', JSON.stringify(newMembers));
-  setDraggedIndex(null); setDragOverIndex(null);
+  setDraggedIdx(null); setDragOverIdx(null);
+};
+const deleteMember = (hexId) => {
+  const updated = savedMembers.filter(m => m.hexId !== hexId);
+  setSavedMembers(updated);
+  localStorage.setItem('pb_members', JSON.stringify(updated));
+  if (editMemberId === hexId) { setEditMemberId(null); setMemberFormName(''); }
 };
 
 useEffect(() => {
@@ -1931,18 +1938,22 @@ const [enableTimeouts, setEnableTimeouts] = useState(0);
 <div>
   <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>Saved Players</label>
   <div className="flex flex-col gap-2 max-h-40 overflow-y-auto p-1 muji-scrollbar">
-    {savedMembers.length===0 && <span className={`text-xs italic ${textSub}`}>{getT('noSaved')}</span>}
-    {savedMembers.map((m, index) => (
+    {savedMembers.length === 0 && <span className={`text-xs italic ${textSub}`}>{getT('noSaved')}</span>}
+    {savedMembers.map((m, idx) => (
       <div
         key={m.hexId}
         draggable
-        onDragStart={() => handleDragStart(index)}
-        onDragOver={(e) => handleDragOver(e, index)}
-        onDrop={(e) => handleDrop(e, index)}
+        onDragStart={() => handleDragStart(idx)}
+        onDragOver={(e) => handleDragOver(e, idx)}
+        onDragEnter={(e) => handleDragEnter(e, idx)}
+        onDrop={(e) => handleDrop(e, idx)}
         onDragEnd={handleDragEnd}
-        className={`flex items-center gap-2 p-2 rounded-lg border transition-all cursor-grab active:cursor-grabbing select-none ${dragOverIndex === index ? 'border-emerald-500 bg-emerald-500/10 scale-[1.02]' : draggedIndex === index ? 'opacity-40 border-stone-400' : `${bgMain} ${borderSub}`}`}
+        style={{ touchAction: 'none' }}
+        className={`flex items-center gap-2 p-2 rounded-lg border transition-all cursor-grab active:cursor-grabbing select-none ${dragOverIdx === idx ? 'border-emerald-500 bg-emerald-500/10 scale-[1.02]' : draggedIdx === idx ? 'opacity-40 border-stone-400' : `${bgMain} ${borderSub}`}`}
       >
-        <GripVertical size={16} className={textSub} />
+        <div className="p-1 cursor-grab active:cursor-grabbing" draggable="true" onClick={(e) => e.stopPropagation()}>
+          <GripVertical size={16} className={textSub} />
+        </div>
         <button onClick={() => openEditMember(m)} className={`flex-1 text-left text-xs font-bold px-1 py-1 truncate ${editMemberId === m.hexId ? 'text-emerald-500' : textMain}`}>
           {m.name}
         </button>
