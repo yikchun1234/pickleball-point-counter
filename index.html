@@ -255,6 +255,8 @@
         const ArrowRightLeft = (props) => <IconWrapper iconObj={lucide.icons.ArrowRightLeft} {...props} />;
         const Lock = (props) => <IconWrapper iconObj={lucide.icons.Lock} {...props} />;
         const Unlock = (props) => <IconWrapper iconObj={lucide.icons.Unlock} {...props} />;
+        const UserPlus = (props) => <IconWrapper iconObj={lucide.icons.UserPlus} {...props} />;
+        const BookUser = (props) => <IconWrapper iconObj={lucide.icons.BookUser} {...props} />;
 
         const dict = {
           en: { appTitle: "Pickleball", appSub: "Point Counter", tapToStart: "Tap to start", newMatch: "Pickleball Point Counter", selectFormat: "Select match format & rules", singles: "Singles", doubles: "Doubles", stdTitle: "Standard (11 Pts)", stdDescSingle: "0-0 Rule • Play to 11 • Win by 2", stdDescDouble: "0-0-2 Rule • Play to 11 • Win by 2", fourteenTitle: "14-Point Rule", fourteenDesc: "Rally Scoring • Play to 15 • No serve needed", customFormat: "Custom Rules", customDesc: "Set your own points and win margin", playTo: "Play To", winBy: "Win By", t1Name: "Player 1", t2Name: "Player 2", team1: "Team 1", team2: "Team 2", server: "Serve", wonRally: "Won Rally", serving: "Serving", winner: "Wins the Match!", playAgain: "Play Again", undo: "Undo", reset: "Retreat", timeline: "Rally Timeline", awaiting: "Awaiting first serve...", suddenDeath: "Sudden Death", nextPointWins: "Next point wins", install: "Install App", serveToWinOption: "14-14 Serve to Win", serveToWinDesc: "Must be serving to win at 14-14", suddenDeathServeDesc: "Must serve to win", switchEndsOption: "Switch Ends at Half", switchEndsOptionDesc: "Prompt to switch sides at half points", customServeToWin: "Serve to Score", customServeToWinDesc: "Only serving team scores (0-0-2 rule)", customServeToWinDescSingle: "Only serving team scores (0-0 rule)", matchPoint: "Match Point", cancel: "Cancel", startMatch: "Start Match", t1Label: "T1", t2Label: "T2", installAsApp: "Install as a native app", designBy: "Designed by Amos © 2026", matchTitlePlaceholder: "Match Title (Optional)", matchHistory: "Match History", clearHistory: "Clear History", reviewMatch: "Review Timeline", noHistory: "No matches saved yet.", untitledMatch: "Friendly Match", confirmClear: "Clear all match history?", yesClear: "Yes, Clear All", showResults: "Show Results", installStepsIOS: 'Tap Share icon at the bottom, then "Add to Home Screen".', installStepsAndroid: 'Tap browser menu and select "Install App".', gotIt: 'Got it!', infoTitle: 'About & Disclaimer', infoHowToTitle: 'How to Use', infoHowTo1: '1. Setup: Choose format, rules, and toggle Timeouts or Switch Ends.', infoHowTo2: '2. Score: Tap a team to add points. Use Undo for mistakes.', infoHowTo3: '3. Court Map: Check player positions. Rotate the court to match your view.', infoHowTo4: '4. Voice: Turn on the speaker icon for audio announcements.', infoHowTo5: '5. Share: Save matches to History, view stats, and export images.', infoHowTo6: '6. Secret: Tap "Somewhere" 5 times to unlock "Easter Egg"', infoData: 'All history is saved locally on your device. No cloud storage. Clearing browser data will delete history.', infoUsage: 'Open-source project. Free to use with credit to creator (Amos).', infoFooter: 'Designed with ❤️ for the Pickleball community.', retreatTitle: 'Who retreated?', t1Retreat: 'Team 1 Retreated', t2Retreat: 'Team 2 Retreated', quitMatch: 'Quit Match', quitConfirm: 'Return to menu? This match will not be saved.', yesQuit: 'Yes, Quit', winByRetreat: 'Wins by Retreat!', loading: 'Loading...', switchEnds: "Switch Ends!", switchEndsDesc: "Players should now switch sides of the court.", resumeMatch: "Resume Match", resumeDesc: "You have an unfinished match. Do you want to resume?", stats: "Statistics", totalMatches: "Total Matches", avgDuration: "Avg Duration", share: "Share", edit: "Edit", winRate: "T1 Win Rate", time: "Time", firstServer: "First Serve", sideOut: "Side out", secondServer: "Second serve", totalPoints: "Total Points", winDist: "Win Distribution", formatStats: "Format Breakdown", enableTimeouts: "Enable Timeouts", timeoutsDesc: "1 timeout per team", customTimeoutsDesc: "Timeouts per team (0-3)", callTimeout: "Call Timeout", courtPosTitle: "Court Guide", courtPosDesc: "Server and receiver starting positions", receiver: "Receiver", generatingImage: "Generating Image", t1P1: "T1 L. Player", t1P2: "T1 R. Player", t2P1: "T2 L. Player", t2P2: "T2 R. Player", oddCourt: "(Odd Court)", evenCourt: "(Even Court)", point: "Point", resetMatch: "Reset", resetTitle: "Reset Match?", resetWarning: "Current progress will not be saved.", resetSettings: "Change Players/Settings", resetPoints: "Reset Points Only", menu: "Menu", shareApp: "Share App", shareAppTitle: "Share with Players", shareAppText: "Hey Pickleball fans! 🏓 Say goodbye to losing track of the score. Check out this awesome, easy-to-use Pickleball Point Counter. It tracks standard, rally, and custom rules perfectly!", copied: "Copied!", serverTimeout: "Server timeout", receiverTimeout: "Receiver timeout", ghostReplay: "Ghost Replay", ghostUnavailable: "Ghost Replay Unavailable", ghostNoData: "This feature relies on court positioning data, which was not recorded for this older match.", serverRole: "Server", receiverRole: "Receiver", serveLabel: "Serve", locked: "LOCKED", prev: "Prev", next: "Next", invalidPointsTitle: "Invalid Points", invalidPointsMsg: "At least 1 point is required to start the game.", highPointTitle: "High Point Target", highPointMsg: "Are you sure you want to continue? This point target is more than human can handle.", continueBtn: "Continue", scanToShare: "Scan in person or Share the link below" },
@@ -624,6 +626,10 @@
           const [showLegacyAlert, setShowLegacyAlert] = useState(false);
           const [showZeroPointAlert, setShowZeroPointAlert] = useState(false);
           const [showHighPointWarning, setShowHighPointWarning] = useState(false);
+          const [members, setMembers] = useState([]);
+          const [showMemberMenu, setShowMemberMenu] = useState(false);
+          const [memberSelectTarget, setMemberSelectTarget] = useState(null);
+          const [newMemberName, setNewMemberName] = useState('');
           
           const [enableTimeouts, setEnableTimeouts] = useState(0);
           const [enableTimeoutsSetup, setEnableTimeoutsSetup] = useState(0);
@@ -755,8 +761,22 @@
               }, 280); 
           };
 
-          useEffect(() => {
-            const saved = localStorage.getItem('pb_history_matches');
+          const generateHexId = () => Array.from({length: 16}, () => Math.floor(Math.random() * 16).toString(16)).join('');
+          const saveMembers = (newMembers) => { setMembers(newMembers); localStorage.setItem('pb_members', JSON.stringify(newMembers)); };
+          const handleAddMember = (e) => { e.preventDefault(); if(!newMemberName.trim()) return; const newMem = { id: generateHexId(), name: newMemberName.trim(), addedAt: Date.now() }; saveMembers([...members, newMem]); setNewMemberName(''); triggerHaptic('point'); };
+          const handleDeleteMember = (id) => { saveMembers(members.filter(m => m.id !== id)); triggerHaptic('point'); };
+          const handleSelectMember = (name) => {
+              if (memberSelectTarget === 't1PLeft') setT1PLeftInput(name);
+              if (memberSelectTarget === 't1PRight') setT1PRightInput(name);
+              if (memberSelectTarget === 't2PLeft') setT2PLeftInput(name);
+              if (memberSelectTarget === 't2PRight') setT2PRightInput(name);
+              setMemberSelectTarget(null);
+          };
+
+          useEffect(() => {
+            const savedMembers = localStorage.getItem('pb_members');
+            if (savedMembers) { try { setMembers(JSON.parse(savedMembers)); } catch(e) {} }
+            const saved = localStorage.getItem('pb_history_matches');
             if (saved) { try { setSavedMatches(JSON.parse(saved)); } catch (e) {} }
             let savedLang = localStorage.getItem('pb_lang_pref');
             if (savedLang === 'zh') savedLang = 'zh_CN'; 
@@ -1177,7 +1197,8 @@
                     <div className={`flex items-center overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.2,1,0.4,1)] ${showMenuButtons ? 'max-w-[200px] opacity-100' : 'max-w-0 opacity-0 -ml-2 pointer-events-none'}`}>
                       <div className={`flex items-center gap-2 min-w-max transition-transform duration-500 ease-[cubic-bezier(0.2,1,0.4,1)] ${showMenuButtons ? 'translate-x-0 scale-100' : 'translate-x-4 scale-95'}`}>
                         <button onClick={() => openScreenFromMenu('stats')} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-all`}><BarChart2 size={18} className={textSub} /></button>
-                        <button onClick={() => openScreenFromMenu('history')} className={`flex items-center gap-1.5 px-3 py-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-all text-xs font-bold ${textSub}`}><HistoryIcon size={16} /> <span className="hidden sm:inline">History</span></button>
+                        <button onClick={() => setShowMemberMenu(true)} className={`flex items-center gap-1.5 px-3 py-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-all text-xs font-bold ${textSub}`}><BookUser size={16} /> <span className="hidden sm:inline">Members</span></button>
+                        <button onClick={() => openScreenFromMenu('history')} className={`flex items-center gap-1.5 px-3 py-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-all text-xs font-bold ${textSub}`}><HistoryIcon size={16} /> <span className="hidden sm:inline">History</span></button>
                       </div>
                     </div>
                     <button onClick={() => setShowLangMenu(true)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform relative z-10`}><Globe size={18} className={textSub} /></button>
@@ -1413,21 +1434,21 @@
                         <div><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('matchTitlePlaceholder')}</label><input type="text" placeholder={getT('untitledMatch')} value={matchTitleInput} onChange={(e) => setMatchTitleInput(e.target.value)} className={`w-full px-4 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} focus:outline-none focus:ring-2 focus:ring-emerald-500/50`} /></div>
                         {pendingGame.mode === 'single' ? (
                             <div className="flex gap-3">
-                              <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('t1Name')}</label><input type="text" placeholder={getT('t1Name')} value={t1PLeftInput} onChange={(e) => setT1PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
-                              <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('t2Name')}</label><input type="text" placeholder={getT('t2Name')} value={t2PLeftInput} onChange={(e) => setT2PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
-                            </div>
+                              <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('t1Name')}</label><div className="flex gap-1.5"><input type="text" placeholder={getT('t1Name')} value={t1PLeftInput} onChange={(e) => setT1PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /><button onClick={() => setMemberSelectTarget('t1PLeft')} className={`px-3 rounded-xl border ${borderSub} ${bgMain} text-emerald-500 hover:bg-emerald-500/10 active:scale-95 transition-colors`}><BookUser size={16}/></button></div></div>
+                              <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('t2Name')}</label><div className="flex gap-1.5"><input type="text" placeholder={getT('t2Name')} value={t2PLeftInput} onChange={(e) => setT2PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /><button onClick={() => setMemberSelectTarget('t2PLeft')} className={`px-3 rounded-xl border ${borderSub} ${bgMain} text-emerald-500 hover:bg-emerald-500/10 active:scale-95 transition-colors`}><BookUser size={16}/></button></div></div>
+                            </div>
                         ) : (
                             <div className="space-y-3">
                               <div className="flex items-end gap-1.5 sm:gap-2">
-                                <div className="flex-1 min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t1P1')} <span className="opacity-70 lowercase text-[8px]">{getT('oddCourt')}</span></label><input type="text" placeholder={getT('t1P1')} value={t1PLeftInput} onChange={(e) => setT1PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
-                                <button onClick={() => { const temp = t1PLeftInput; setT1PLeftInput(t1PRightInput); setT1PRightInput(temp); }} className={`mb-1 p-2 rounded-full ${bgMain} border ${borderSub} text-stone-400 hover:text-emerald-500 hover:border-emerald-500/30 transition-all active:scale-95 shrink-0`} title="Swap Players"><ArrowRightLeft size={16} /></button>
-                                <div className="flex-1 min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t1P2')} <span className="opacity-70 lowercase text-[8px]">{getT('evenCourt')}</span></label><input type="text" placeholder={getT('t1P2')} value={t1PRightInput} onChange={(e) => setT1PRightInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
-                              </div>
+                                <div className="flex-1 min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t1P1')} <span className="opacity-70 lowercase text-[8px]">{getT('oddCourt')}</span></label><div className="flex gap-1"><input type="text" placeholder={getT('t1P1')} value={t1PLeftInput} onChange={(e) => setT1PLeftInput(e.target.value)} className={`w-full px-2 sm:px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /><button onClick={() => setMemberSelectTarget('t1PLeft')} className={`px-2 rounded-xl border ${borderSub} ${bgMain} text-emerald-500 hover:bg-emerald-500/10 active:scale-95 transition-colors`}><BookUser size={14}/></button></div></div>
+                                <button onClick={() => { const temp = t1PLeftInput; setT1PLeftInput(t1PRightInput); setT1PRightInput(temp); }} className={`mb-1 p-2 rounded-full ${bgMain} border ${borderSub} text-stone-400 hover:text-emerald-500 hover:border-emerald-500/30 transition-all active:scale-95 shrink-0`} title="Swap Players"><ArrowRightLeft size={16} /></button>
+                                <div className="flex-1 min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t1P2')} <span className="opacity-70 lowercase text-[8px]">{getT('evenCourt')}</span></label><div className="flex gap-1"><input type="text" placeholder={getT('t1P2')} value={t1PRightInput} onChange={(e) => setT1PRightInput(e.target.value)} className={`w-full px-2 sm:px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /><button onClick={() => setMemberSelectTarget('t1PRight')} className={`px-2 rounded-xl border ${borderSub} ${bgMain} text-emerald-500 hover:bg-emerald-500/10 active:scale-95 transition-colors`}><BookUser size={14}/></button></div></div>
+                              </div>
                               <div className="flex items-end gap-1.5 sm:gap-2">
-                                <div className="flex-1 min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t2P1')} <span className="opacity-70 lowercase text-[8px]">{getT('oddCourt')}</span></label><input type="text" placeholder={getT('t2P1')} value={t2PLeftInput} onChange={(e) => setT2PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
-                                <button onClick={() => { const temp = t2PLeftInput; setT2PLeftInput(t2PRightInput); setT2PRightInput(temp); }} className={`mb-1 p-2 rounded-full ${bgMain} border ${borderSub} text-stone-400 hover:text-emerald-500 hover:border-emerald-500/30 transition-all active:scale-95 shrink-0`} title="Swap Players"><ArrowRightLeft size={16} /></button>
-                                <div className="flex-1 min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t2P2')} <span className="opacity-70 lowercase text-[8px]">{getT('evenCourt')}</span></label><input type="text" placeholder={getT('t2P2')} value={t2PRightInput} onChange={(e) => setT2PRightInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
-                              </div>
+                                <div className="flex-1 min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t2P1')} <span className="opacity-70 lowercase text-[8px]">{getT('oddCourt')}</span></label><div className="flex gap-1"><input type="text" placeholder={getT('t2P1')} value={t2PLeftInput} onChange={(e) => setT2PLeftInput(e.target.value)} className={`w-full px-2 sm:px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /><button onClick={() => setMemberSelectTarget('t2PLeft')} className={`px-2 rounded-xl border ${borderSub} ${bgMain} text-emerald-500 hover:bg-emerald-500/10 active:scale-95 transition-colors`}><BookUser size={14}/></button></div></div>
+                                <button onClick={() => { const temp = t2PLeftInput; setT2PLeftInput(t2PRightInput); setT2PRightInput(temp); }} className={`mb-1 p-2 rounded-full ${bgMain} border ${borderSub} text-stone-400 hover:text-emerald-500 hover:border-emerald-500/30 transition-all active:scale-95 shrink-0`} title="Swap Players"><ArrowRightLeft size={16} /></button>
+                                <div className="flex-1 min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t2P2')} <span className="opacity-70 lowercase text-[8px]">{getT('evenCourt')}</span></label><div className="flex gap-1"><input type="text" placeholder={getT('t2P2')} value={t2PRightInput} onChange={(e) => setT2PRightInput(e.target.value)} className={`w-full px-2 sm:px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /><button onClick={() => setMemberSelectTarget('t2PRight')} className={`px-2 rounded-xl border ${borderSub} ${bgMain} text-emerald-500 hover:bg-emerald-500/10 active:scale-95 transition-colors`}><BookUser size={14}/></button></div></div>
+                              </div>
                             </div>
                         )}
                         <div className="flex flex-col gap-1.5 mt-2 mb-2">
@@ -1619,7 +1640,62 @@
                 </div>
               )}
 
-              {showLangMenu && (
+              {showMemberMenu && (
+                <div className="fixed inset-0 z-[130] flex items-center justify-center p-4">
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" style={{touchAction: 'none'}} onClick={() => setShowMemberMenu(false)}></div>
+                  <div className={`relative w-full max-w-md flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl transition-all duration-200 max-h-[85vh] overflow-hidden animate-screen-enter`}>
+                    <div className="p-5 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50 flex justify-between items-center">
+                      <div className="flex items-center gap-3"><BookUser size={24} className={accentGreen} /><h2 className={`text-xl font-bold ${textMain}`}>Members</h2></div>
+                      <button onClick={() => setShowMemberMenu(false)} className={`p-1.5 rounded-full bg-stone-100 dark:bg-stone-800 ${textSub} hover:${textMain} transition-colors`}><X size={16}/></button>
+                    </div>
+                    <div className="px-5 py-4 overflow-y-auto muji-scrollbar flex-1 overscroll-contain">
+                      <form onSubmit={handleAddMember} className="flex gap-2 mb-6">
+                        <input type="text" placeholder="Add new member..." value={newMemberName} onChange={(e) => setNewMemberName(e.target.value)} className={`flex-1 px-4 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50`} />
+                        <button type="submit" className={`px-4 py-2.5 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-md transition-colors flex items-center gap-1`}><UserPlus size={16}/></button>
+                      </form>
+                      {members.length === 0 ? (
+                         <div className={`text-center py-8 ${textSub} flex flex-col items-center`}><Users size={32} className="mb-2 opacity-50"/> <p className="text-sm font-medium">No members added yet.</p></div>
+                      ) : (
+                        <div className="space-y-2">
+                          {members.map(member => (
+                            <div key={member.id} className={`flex items-center justify-between p-3 rounded-xl border ${borderSub} ${bgMain}`}>
+                              <span className={`font-bold ${textMain} truncate`}>{member.name}</span>
+                              <button onClick={() => handleDeleteMember(member.id)} className={`p-2 rounded-lg text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 transition-colors`}><Trash2 size={16}/></button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {memberSelectTarget && (
+                <div className="fixed inset-0 z-[140] flex items-center justify-center p-4">
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" style={{touchAction: 'none'}} onClick={() => setMemberSelectTarget(null)}></div>
+                  <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl transition-all duration-200 max-h-[70vh] overflow-hidden animate-screen-enter`}>
+                    <div className="p-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50 flex justify-between items-center">
+                      <h2 className={`text-lg font-bold ${textMain}`}>Select Player</h2>
+                      <button onClick={() => setMemberSelectTarget(null)} className={`p-1.5 rounded-full bg-stone-100 dark:bg-stone-800 ${textSub} hover:${textMain} transition-colors`}><X size={16}/></button>
+                    </div>
+                    <div className="px-4 py-3 overflow-y-auto muji-scrollbar flex-1 overscroll-contain">
+                      {members.length === 0 ? (
+                         <div className={`text-center py-6 ${textSub}`}><p className="text-sm mb-4">No members available.</p><button onClick={() => { setMemberSelectTarget(null); setShowMemberMenu(true); }} className={`px-4 py-2 rounded-full font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-md text-xs`}>Manage Members</button></div>
+                      ) : (
+                        <div className="grid grid-cols-1 gap-2">
+                          {members.map(member => (
+                            <button key={member.id} onClick={() => handleSelectMember(member.name)} className={`text-left p-3 rounded-xl border ${borderSub} ${bgMain} hover:border-emerald-500/50 active:scale-[0.98] transition-all`}>
+                              <span className={`font-bold ${textMain}`}>{member.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {showLangMenu && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" style={{touchAction: 'none'}} onClick={() => setShowLangMenu(false)}></div>
                   <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl`}>
