@@ -624,12 +624,12 @@
           const [showLegacyAlert, setShowLegacyAlert] = useState(false);
           const [showZeroPointAlert, setShowZeroPointAlert] = useState(false);
           const [showHighPointWarning, setShowHighPointWarning] = useState(false);
-// --- MEMBER MANAGEMENT STATES ---
+// --- MEMBER MANAGEMENT ---
 const [showAddMemberModal, setShowAddMemberModal] = useState(false);
 const [memberName, setMemberName] = useState('');
 const [memberHexId, setMemberHexId] = useState('');
 const [savedMembers, setSavedMembers] = useState([]);
-const [selectedMember, setSelectedMember] = useState(null);
+const [selectedMemberHex, setSelectedMemberHex] = useState(null);
 
 useEffect(() => {
   try {
@@ -639,29 +639,36 @@ useEffect(() => {
 }, []);
 
 const generateHexId = () => {
-  const arr = new Uint8Array(4);
-  (crypto.getRandomValues || window.msCrypto.getRandomValues)(arr);
-  return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+  try {
+    const arr = new Uint8Array(4);
+    window.crypto.getRandomValues(arr);
+    return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+  } catch(e) {
+    return Math.random().toString(16).substring(2, 10).toUpperCase();
+  }
 };
 
-const handleSelectMember = (member) => {
-  setSelectedMember(member);
-  setMemberName(member.name);
-  setMemberHexId(member.hexId);
+const handleSelectMember = (hex) => {
+  const member = savedMembers.find(m => m.hexId === hex);
+  if (member) {
+    setSelectedMemberHex(hex);
+    setMemberName(member.name);
+    setMemberHexId(member.hexId);
+  }
 };
 
 const handleSaveMember = () => {
   if (!memberName.trim()) return;
   const finalHex = memberHexId || generateHexId();
   const newMember = { name: memberName.trim(), hexId: finalHex, addedAt: Date.now() };
-  const updated = savedMembers.filter(m => m.name.toLowerCase() !== memberName.trim().toLowerCase());
+  const updated = savedMembers.filter(m => m.name.toLowerCase() !== memberName.trim().toLowerCase() && m.hexId !== finalHex);
   updated.push(newMember);
   setSavedMembers(updated);
   localStorage.setItem('pb_members', JSON.stringify(updated));
   setShowAddMemberModal(false);
   setMemberName('');
   setMemberHexId('');
-  setSelectedMember(null);
+  setSelectedMemberHex(null);
 };
           
           const [enableTimeouts, setEnableTimeouts] = useState(0);
@@ -1829,38 +1836,38 @@ const handleSaveMember = () => {
                 
               {showAddMemberModal && (
 <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowAddMemberModal(false)}></div>
+  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowAddMemberModal(false)}></div>
   <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden`}>
     <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50">
-      <h2 className={`text-xl font-bold ${textMain}`}>{getT('addMember')}</h2>
-      <p className={`text-xs ${textSub} mt-1`}>{getT('hexIdLabel')}</p>
+      <h2 className={`text-xl font-bold ${textMain}`}>{getT('addMember') || 'Add Member'}</h2>
+      <p className={`text-xs ${textSub} mt-1`}>{getT('hexIdLabel') || 'HEX ID for QR Sync'}</p>
     </div>
     <div className="px-6 py-4 overflow-y-auto muji-scrollbar flex-1 overscroll-contain space-y-4">
       <div>
-        <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('selectExisting')}</label>
+        <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('selectExisting') || 'Select Existing'}</label>
         <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto p-1">
           {savedMembers.length === 0 && <span className={`text-xs italic ${textSub}`}>No saved members yet.</span>}
           {savedMembers.map(m => (
-            <button key={m.hexId} onClick={() => handleSelectMember(m)} className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${selectedMember?.hexId === m.hexId ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm' : `${bgMain} ${borderSub} ${textMain} hover:border-emerald-400/50`}`}>
+            <button key={m.hexId} onClick={() => handleSelectMember(m.hexId)} className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${selectedMemberHex === m.hexId ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm' : `${bgMain} ${borderSub} ${textMain} hover:border-emerald-400/50`}`}>
               {m.name}
             </button>
           ))}
         </div>
       </div>
       <div>
-        <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('enterName')}</label>
+        <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('enterName') || 'Member Name'}</label>
         <input type="text" value={memberName} onChange={(e) => setMemberName(e.target.value)} placeholder="Enter name..." className={`w-full px-4 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} focus:outline-none focus:ring-2 focus:ring-emerald-500/50`} />
       </div>
       <div>
-        <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('hexIdLabel')}</label>
+        <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('hexIdLabel') || 'HEX ID'}</label>
         <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border ${borderSub} ${bgMain}`}>
-          <code className={`flex-1 font-mono text-sm tracking-wider ${accentGreen}`}>{memberHexId || generateHexId()}</code>
-          <button onClick={() => setMemberHexId(generateHexId())} className={`p-1.5 rounded-md ${bgCard} border ${borderSub} text-stone-400 hover:text-emerald-500 transition-colors`} title={getT('refreshId')}><RefreshCw size={14}/></button>
+          <code className={`flex-1 font-mono text-sm tracking-wider ${accentGreen}`}>{memberHexId || 'XXXXXXXX'}</code>
+          <button onClick={() => setMemberHexId(generateHexId())} className={`p-1.5 rounded-md ${bgCard} border ${borderSub} text-stone-400 hover:text-emerald-500 transition-colors`} title="Refresh ID"><RefreshCw size={14}/></button>
         </div>
       </div>
     </div>
     <div className="p-6 pt-4 flex-shrink-0 border-t border-stone-100 dark:border-stone-800/50">
-      <button onClick={handleSaveMember} disabled={!memberName.trim()} className={`w-full py-3 rounded-xl font-bold text-white transition-colors ${memberName.trim() ? 'bg-emerald-500 hover:bg-emerald-600 shadow-md' : 'bg-stone-400 cursor-not-allowed'}`}>{getT('saveMemberBtn')}</button>
+      <button onClick={handleSaveMember} disabled={!memberName.trim()} className={`w-full py-3 rounded-xl font-bold text-white transition-colors ${memberName.trim() ? 'bg-emerald-500 hover:bg-emerald-600 shadow-md' : 'bg-stone-400 cursor-not-allowed'}`}>{getT('saveMemberBtn') || 'Save to Device'}</button>
     </div>
   </div>
 </div>
