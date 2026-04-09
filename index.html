@@ -255,11 +255,9 @@
         const ArrowRightLeft = (props) => <IconWrapper iconObj={lucide.icons.ArrowRightLeft} {...props} />;
         const Lock = (props) => <IconWrapper iconObj={lucide.icons.Lock} {...props} />;
         const Unlock = (props) => <IconWrapper iconObj={lucide.icons.Unlock} {...props} />;
-        const UserPlus = (props) => <IconWrapper iconObj={lucide.icons.UserPlus} {...props} />;
-        const BookUser = (props) => <IconWrapper iconObj={lucide.icons.BookUser} {...props} />;
 
         const dict = {
-          en: { appTitle: "Pickleball", appSub: "Point Counter", tapToStart: "Tap to start", newMatch: "Pickleball Point Counter", selectFormat: "Select match format & rules", singles: "Singles", doubles: "Doubles", stdTitle: "Standard (11 Pts)", stdDescSingle: "0-0 Rule • Play to 11 • Win by 2", stdDescDouble: "0-0-2 Rule • Play to 11 • Win by 2", fourteenTitle: "14-Point Rule", fourteenDesc: "Rally Scoring • Play to 15 • No serve needed", customFormat: "Custom Rules", customDesc: "Set your own points and win margin", playTo: "Play To", winBy: "Win By", t1Name: "Player 1", t2Name: "Player 2", team1: "Team 1", team2: "Team 2", server: "Serve", wonRally: "Won Rally", serving: "Serving", winner: "Wins the Match!", playAgain: "Play Again", undo: "Undo", reset: "Retreat", timeline: "Rally Timeline", awaiting: "Awaiting first serve...", suddenDeath: "Sudden Death", nextPointWins: "Next point wins", install: "Install App", serveToWinOption: "14-14 Serve to Win", serveToWinDesc: "Must be serving to win at 14-14", suddenDeathServeDesc: "Must serve to win", switchEndsOption: "Switch Ends at Half", switchEndsOptionDesc: "Prompt to switch sides at half points", customServeToWin: "Serve to Score", customServeToWinDesc: "Only serving team scores (0-0-2 rule)", customServeToWinDescSingle: "Only serving team scores (0-0 rule)", matchPoint: "Match Point", cancel: "Cancel", startMatch: "Start Match", t1Label: "T1", t2Label: "T2", installAsApp: "Install as a native app", designBy: "Designed by Amos © 2026", matchTitlePlaceholder: "Match Title (Optional)", matchHistory: "Match History", clearHistory: "Clear History", reviewMatch: "Review Timeline", noHistory: "No matches saved yet.", untitledMatch: "Friendly Match", confirmClear: "Clear all match history?", yesClear: "Yes, Clear All", showResults: "Show Results", installStepsIOS: 'Tap Share icon at the bottom, then "Add to Home Screen".', installStepsAndroid: 'Tap browser menu and select "Install App".', gotIt: 'Got it!', infoTitle: 'About & Disclaimer', infoHowToTitle: 'How to Use', infoHowTo1: '1. Setup: Choose format, rules, and toggle Timeouts or Switch Ends.', infoHowTo2: '2. Score: Tap a team to add points. Use Undo for mistakes.', infoHowTo3: '3. Court Map: Check player positions. Rotate the court to match your view.', infoHowTo4: '4. Voice: Turn on the speaker icon for audio announcements.', infoHowTo5: '5. Share: Save matches to History, view stats, and export images.', infoHowTo6: '6. Secret: Tap "Somewhere" 5 times to unlock "Easter Egg"', infoData: 'All history is saved locally on your device. No cloud storage. Clearing browser data will delete history.', infoUsage: 'Open-source project. Free to use with credit to creator (Amos).', infoFooter: 'Designed with ❤️ for the Pickleball community.', retreatTitle: 'Who retreated?', t1Retreat: 'Team 1 Retreated', t2Retreat: 'Team 2 Retreated', quitMatch: 'Quit Match', quitConfirm: 'Return to menu? This match will not be saved.', yesQuit: 'Yes, Quit', winByRetreat: 'Wins by Retreat!', loading: 'Loading...', switchEnds: "Switch Ends!", switchEndsDesc: "Players should now switch sides of the court.", resumeMatch: "Resume Match", resumeDesc: "You have an unfinished match. Do you want to resume?", stats: "Statistics", totalMatches: "Total Matches", avgDuration: "Avg Duration", share: "Share", edit: "Edit", winRate: "T1 Win Rate", time: "Time", firstServer: "First Serve", sideOut: "Side out", secondServer: "Second serve", totalPoints: "Total Points", winDist: "Win Distribution", formatStats: "Format Breakdown", enableTimeouts: "Enable Timeouts", timeoutsDesc: "1 timeout per team", customTimeoutsDesc: "Timeouts per team (0-3)", callTimeout: "Call Timeout", courtPosTitle: "Court Guide", courtPosDesc: "Server and receiver starting positions", receiver: "Receiver", generatingImage: "Generating Image", t1P1: "T1 L. Player", t1P2: "T1 R. Player", t2P1: "T2 L. Player", t2P2: "T2 R. Player", oddCourt: "(Odd Court)", evenCourt: "(Even Court)", point: "Point", resetMatch: "Reset", resetTitle: "Reset Match?", resetWarning: "Current progress will not be saved.", resetSettings: "Change Players/Settings", resetPoints: "Reset Points Only", menu: "Menu", shareApp: "Share App", shareAppTitle: "Share with Players", shareAppText: "Hey Pickleball fans! 🏓 Say goodbye to losing track of the score. Check out this awesome, easy-to-use Pickleball Point Counter. It tracks standard, rally, and custom rules perfectly!", copied: "Copied!", serverTimeout: "Server timeout", receiverTimeout: "Receiver timeout", ghostReplay: "Ghost Replay", ghostUnavailable: "Ghost Replay Unavailable", ghostNoData: "This feature relies on court positioning data, which was not recorded for this older match.", serverRole: "Server", receiverRole: "Receiver", serveLabel: "Serve", locked: "LOCKED", prev: "Prev", next: "Next", invalidPointsTitle: "Invalid Points", invalidPointsMsg: "At least 1 point is required to start the game.", highPointTitle: "High Point Target", highPointMsg: "Are you sure you want to continue? This point target is more than human can handle.", continueBtn: "Continue", scanToShare: "Scan in person or Share the link below" },
+          en: { appTitle: "Pickleball", appSub: "Point Counter", tapToStart: "Tap to start", newMatch: "Pickleball Point Counter", selectFormat: "Select match format & rules", singles: "Singles", doubles: "Doubles", stdTitle: "Standard (11 Pts)", stdDescSingle: "0-0 Rule • Play to 11 • Win by 2", stdDescDouble: "0-0-2 Rule • Play to 11 • Win by 2", fourteenTitle: "14-Point Rule", fourteenDesc: "Rally Scoring • Play to 15 • No serve needed", customFormat: "Custom Rules", customDesc: "Set your own points and win margin", playTo: "Play To", winBy: "Win By", t1Name: "Player 1", t2Name: "Player 2", team1: "Team 1", team2: "Team 2", server: "Serve", wonRally: "Won Rally", serving: "Serving", winner: "Wins the Match!", playAgain: "Play Again", undo: "Undo", reset: "Retreat", timeline: "Rally Timeline", awaiting: "Awaiting first serve...", suddenDeath: "Sudden Death", nextPointWins: "Next point wins", install: "Install App", serveToWinOption: "14-14 Serve to Win", serveToWinDesc: "Must be serving to win at 14-14", suddenDeathServeDesc: "Must serve to win", switchEndsOption: "Switch Ends at Half", switchEndsOptionDesc: "Prompt to switch sides at half points", customServeToWin: "Serve to Score", customServeToWinDesc: "Only serving team scores (0-0-2 rule)", customServeToWinDescSingle: "Only serving team scores (0-0 rule)", matchPoint: "Match Point", cancel: "Cancel", startMatch: "Start Match", t1Label: "T1", t2Label: "T2", installAsApp: "Install as a native app", designBy: "Designed by Amos © 2026", matchTitlePlaceholder: "Match Title (Optional)", matchHistory: "Match History", clearHistory: "Clear History", reviewMatch: "Review Timeline", noHistory: "No matches saved yet.", untitledMatch: "Friendly Match", confirmClear: "Clear all match history?", yesClear: "Yes, Clear All", showResults: "Show Results", installStepsIOS: 'Tap Share icon at the bottom, then "Add to Home Screen".', installStepsAndroid: 'Tap browser menu and select "Install App".', gotIt: 'Got it!', infoTitle: 'About & Disclaimer', infoHowToTitle: 'How to Use', infoHowTo1: '1. Setup: Choose format, rules, and toggle Timeouts or Switch Ends.', infoHowTo2: '2. Score: Tap a team to add points. Use Undo for mistakes.', infoHowTo3: '3. Court Map: Check player positions. Rotate the court to match your view.', infoHowTo4: '4. Voice: Turn on the speaker icon for audio announcements.', infoHowTo5: '5. Share: Save matches to History, view stats, and export images.', infoHowTo6: '6. Secret: Tap "Somewhere" 5 times to unlock "Easter Egg"', infoData: 'All history is saved locally on your device. No cloud storage. Clearing browser data will delete history.', infoUsage: 'Open-source project. Free to use with credit to creator (Amos).', infoFooter: 'Designed with ❤️ for the Pickleball community.', retreatTitle: 'Who retreated?', t1Retreat: 'Team 1 Retreated', t2Retreat: 'Team 2 Retreated', quitMatch: 'Quit Match', quitConfirm: 'Return to menu? This match will not be saved.', yesQuit: 'Yes, Quit', winByRetreat: 'Wins by Retreat!', loading: 'Loading...', switchEnds: "Switch Ends!", switchEndsDesc: "Players should now switch sides of the court.", resumeMatch: "Resume Match", resumeDesc: "You have an unfinished match. Do you want to resume?", stats: "Statistics", totalMatches: "Total Matches", avgDuration: "Avg Duration", share: "Share", edit: "Edit", winRate: "T1 Win Rate", time: "Time", firstServer: "First Serve", sideOut: "Side out", secondServer: "Second serve", totalPoints: "Total Points", winDist: "Win Distribution", formatStats: "Format Breakdown", enableTimeouts: "Enable Timeouts", timeoutsDesc: "1 timeout per team", customTimeoutsDesc: "Timeouts per team (0-3)", callTimeout: "Call Timeout", courtPosTitle: "Court Guide", courtPosDesc: "Server and receiver starting positions", receiver: "Receiver", generatingImage: "Generating Image", t1P1: "T1 L. Player", t1P2: "T1 R. Player", t2P1: "T2 L. Player", t2P2: "T2 R. Player", oddCourt: "(Odd Court)", evenCourt: "(Even Court)", point: "Point", resetMatch: "Reset", resetTitle: "Reset Match?", resetWarning: "Current progress will not be saved.", resetSettings: "Change Players/Settings", resetPoints: "Reset Points Only", menu: "Menu", shareApp: "Share App", shareAppTitle: "Share with Players", shareAppText: "Hey Pickleball fans! 🏓 Say goodbye to losing track of the score. Check out this awesome, easy-to-use Pickleball Point Counter. It tracks standard, rally, and custom rules perfectly!", copied: "Copied!", serverTimeout: "Server timeout", receiverTimeout: "Receiver timeout", ghostReplay: "Ghost Replay", ghostUnavailable: "Ghost Replay Unavailable", ghostNoData: "This feature relies on court positioning data, which was not recorded for this older match.", serverRole: "Server", receiverRole: "Receiver", serveLabel: "Serve", locked: "LOCKED", prev: "Prev", next: "Next", invalidPointsTitle: "Invalid Points", invalidPointsMsg: "At least 1 point is required to start the game.", highPointTitle: "High Point Target", highPointMsg: "Are you sure you want to continue? This point target is more than human can handle.", continueBtn: "Continue", scanToShare: "Scan in person or Share the link below", addMember: "Add Member", manageMembers: "Manage Players", selectExisting: "Select Existing", enterName: "Member Name", hexIdLabel: "HEX ID (Sync)", refreshId: "Refresh", saveMemberBtn: "Save to Device" },
           zh_CN: { appTitle: "匹克球", appSub: "计分器", tapToStart: "点击开始", newMatch: "匹克球计分器", selectFormat: "选择比赛模式与规则", singles: "单打", doubles: "双打", stdTitle: "标准规则 (11分)", stdDescSingle: "0-0规则 • 11分制 • 赢2分", stdDescDouble: "0-0-2规则 • 11分制 • 赢2分", fourteenTitle: "14分制 (每球得分)", fourteenDesc: "15分制 • 接发球方也可直接得分获胜", customFormat: "自定义规则", customDesc: "设置目标分数和获胜分差", playTo: "目标分数", winBy: "获胜分差", t1Name: "队伍 1 名称", t2Name: "队伍 2 名称", team1: "队伍 1", team2: "队伍 2", server: "发球", wonRally: "得分", serving: "发球方", winner: "获得胜利！", playAgain: "再来一局", undo: "撤销", reset: "退赛", timeline: "对局记录", awaiting: "比赛尚未开始...", suddenDeath: "决胜局", nextPointWins: "一球定胜负", install: "安装应用", serveToWinOption: "14平必须发球得分", serveToWinDesc: "在14-14平时，必须是发球方赢下回合才能获得第15分", suddenDeathServeDesc: "发球方得分制胜", switchEndsOption: "半场交换场地", switchEndsOptionDesc: "分数过半时提示交换场地", customServeToWin: "发球得分制", customServeToWinDesc: "仅发球方可得分 (0-0-2规则)", customServeToWinDescSingle: "仅发球方可得分 (0-0规则)", matchPoint: "赛点", cancel: "取消", startMatch: "开始比赛", t1Label: "T1", t2Label: "T2", installAsApp: "安装为原生应用", designBy: "设计者 Amos © 2026", matchTitlePlaceholder: "比赛名称 (选填)", matchHistory: "历史记录", clearHistory: "清空记录", reviewMatch: "查看对局过程", noHistory: "暂无历史记录", untitledMatch: "友谊赛", confirmClear: "确定要清空所有比赛历史记录吗？", yesClear: "确定清空", showResults: "查看结果", installStepsIOS: '点击底部的“分享”图标，然后选择“添加到主屏幕”。', installStepsAndroid: '点击浏览器菜单（三个点），然后选择“安装应用”。', gotIt: '知道了！', infoTitle: '关于与免责声明', infoHowToTitle: '使用说明', infoHowTo1: '1. 设置: 选择模式、规则，并可开启暂停或交换场地功能。', infoHowTo2: '2. 记分: 点击队伍即可得分，使用撤销按钮纠正错误。', infoHowTo3: '3. 站位图: 查看球员站位。可旋转球场以匹配您的视角。', infoHowTo4: '4. 语音: 开启音量图标即可启用自动语音报分。', infoHowTo5: '5. 分享: 自动保存历史记录，查看统计数据并导出对局图片。', infoHowTo6: '6. 秘密: 连续点击“某处” 5 次解锁“彩蛋”', infoData: '所有比赛记录均保存在本地。清除浏览器数据将删除记录。', infoUsage: '开源项目。可免费使用，请鸣谢原作者 (Amos)。', infoFooter: '为匹克球社区用心设计 ❤️', retreatTitle: '谁退赛了？', t1Retreat: '队伍 1 退赛', t2Retreat: '队伍 2 退赛', quitMatch: '退出比赛', quitConfirm: '确定返回菜单吗？比赛记录不会保存。', yesQuit: '确定退出', winByRetreat: '对方退赛，获得胜利！', loading: '加载中...', switchEnds: "交换场地！", switchEndsDesc: "双方球员现在应交换场地。", resumeMatch: "恢复比赛", resumeDesc: "您有一场未完成的比赛。是否恢复？", stats: "统计数据", totalMatches: "总场数", avgDuration: "平均时长", share: "分享", edit: "编辑", winRate: "队1胜率", time: "时间", firstServer: "先发球", sideOut: "换发球", secondServer: "第二发球", totalPoints: "总分数", winDist: "胜率分布", formatStats: "比赛模式统计", enableTimeouts: "启用暂停", timeoutsDesc: "每队每局1次暂停", customTimeoutsDesc: "每队暂停次数 (0-3)", callTimeout: "请求暂停", courtPosTitle: "站位图", courtPosDesc: "发球与接发球站位指导", receiver: "接发球", generatingImage: "正在生成图片", t1P1: "队1 左侧球员", t1P2: "队1 右侧球员", t2P1: "队2 左侧球员", t2P2: "队2 右侧球员", oddCourt: "(奇数区)", evenCourt: "(偶数区)", point: "得分", resetMatch: "重置", resetTitle: "重置比赛？", resetWarning: "当前进度将不会被保存。", resetSettings: "更改球员/设置", resetPoints: "仅重置分数", menu: "菜单", shareApp: "分享应用", shareAppTitle: "推荐给球友", shareAppText: "匹克球爱好者们！🏓 告别记错分数的烦恼。快来看看这款超级好用的匹克球计分器，完美支持标准、每球得分和自定义规则！", copied: "已复制！", serverTimeout: "发球方暂停", receiverTimeout: "接发球方暂停", ghostReplay: "幽灵回放", ghostUnavailable: "幽灵回放不可用", ghostNoData: "此功能依赖于球场站位数据，该旧比赛未记录此数据。", serverRole: "发球方", receiverRole: "接发球方", serveLabel: "发球", locked: "已锁定", prev: "上一球", next: "下一球", invalidPointsTitle: "无效分数", invalidPointsMsg: "开始比赛至少需要1分。", highPointTitle: "过高的目标分数", highPointMsg: "确定要继续吗？这个目标分数超出了人类的极限。", continueBtn: "继续", scanToShare: "当面扫码或分享下方链接" },
           zh_TW: { appTitle: "匹克球", appSub: "計分器", tapToStart: "點擊開始", newMatch: "匹克球計分器", selectFormat: "選擇比賽模式與規則", singles: "單打", doubles: "雙打", stdTitle: "標準規則 (11分)", stdDescSingle: "0-0規則 • 11分制 • 贏2分", stdDescDouble: "0-0-2規則 • 11分制 • 贏2分", fourteenTitle: "14分制 (每球得分)", fourteenDesc: "15分制 • 接發球方也可直接得分獲勝", customFormat: "自定義規則", customDesc: "設置目標分數和獲勝分差", playTo: "目標分數", winBy: "獲勝分差", t1Name: "隊伍 1 名稱", t2Name: "隊伍 2 名稱", team1: "隊伍 1", team2: "隊伍 2", server: "發球", wonRally: "得分", serving: "發球方", winner: "獲得勝利！", playAgain: "再來一局", undo: "撤銷", reset: "退賽", timeline: "對局記錄", awaiting: "比賽尚未開始...", suddenDeath: "決勝局", nextPointWins: "一球定勝負", install: "安裝應用", serveToWinOption: "14平必須發球得分", serveToWinDesc: "在14-14平時，必須是發球方贏下回合才能獲得第15分", suddenDeathServeDesc: "發球方得分制勝", switchEndsOption: "半場交換場地", switchEndsOptionDesc: "分數過半時提示交換場地", customServeToWin: "發球得分制", customServeToWinDesc: "僅發球方可得分 (0-0-2規則)", customServeToWinDescSingle: "僅發球方可得分 (0-0規則)", matchPoint: "賽點", cancel: "取消", startMatch: "開始比賽", t1Label: "T1", t2Label: "T2", installAsApp: "安裝為原生應用", designBy: "設計者 Amos © 2026", matchTitlePlaceholder: "比賽名稱 (選填)", matchHistory: "歷史記錄", clearHistory: "清空記錄", reviewMatch: "查看對局過程", noHistory: "暫無歷史記錄", untitledMatch: "友誼賽", confirmClear: "確定要清空所有比賽歷史記錄嗎？", yesClear: "確定清空", showResults: "查看結果", installStepsIOS: '點擊底部的“分享”圖標，然後選擇“添加到主屏幕”。', installStepsAndroid: '點擊瀏覽器菜單（三個點），然後選擇“安裝應用”。', gotIt: '知道了！', infoTitle: '關於與免聲聲明', infoHowToTitle: '使用說明', infoHowTo1: '1. 設置: 選擇模式、規則，並可開啟暫停或交換場地功能。', infoHowTo2: '2. 記分: 點擊隊伍即可得分，使用撤銷按鈕糾正錯誤。', infoHowTo3: '3. 站位圖: 查看球員站位。可旋轉球場以匹配您的視角。', infoHowTo4: '4. 語音: 開啟音量圖標即可啟用自動語音報分。', infoHowTo5: '5. 分享: 自動保存歷史記錄，查看統計數據並導出對局圖片。', infoHowTo6: '6. 秘密: 點擊“某處” 5 次解鎖“彩蛋”', infoData: '所有比賽記錄均保存在本地。清除瀏覽器數據將刪除記錄。', infoUsage: '開源項目。可免費使用，請鳴謝原作者 (Amos)。', infoFooter: '為匹克球社區用心設計 ❤️', retreatTitle: '誰退賽了？', t1Retreat: '隊伍 1 退賽', t2Retreat: '隊伍 2 退賽', quitMatch: '退出比賽', quitConfirm: '確定返回菜單嗎？比賽記錄不會保存。', yesQuit: '確定退出', winByRetreat: '對方退賽，獲得勝利！', loading: '加載中...', switchEnds: "交換場地！", switchEndsDesc: "雙方球員現在應交換場地。", resumeMatch: "恢復比赛", resumeDesc: "您有一場未完成的比赛。是否恢復？", stats: "統計數據", totalMatches: "總場數", avgDuration: "平均時長", share: "分享", edit: "編輯", winRate: "隊1勝率", time: "時間", firstServer: "先發球", sideOut: "換發球", secondServer: "第二發球", totalPoints: "總分數", winDist: "勝率分佈", formatStats: "比賽模式統計", enableTimeouts: "啟用暫停", timeoutsDesc: "每隊每局1次暫停", customTimeoutsDesc: "每隊暫停次數 (0-3)", callTimeout: "請求暫停", courtPosTitle: "站位圖", courtPosDesc: "發球與接發球站位指導", receiver: "接發球", generatingImage: "正在產生圖片", t1P1: "隊1 左側球員", t1P2: "隊1 右側球員", t2P1: "隊2 左側球員", t2P2: "隊2 右側球員", oddCourt: "(奇數區)", evenCourt: "(偶數區)", point: "得分", resetMatch: "重置", resetTitle: "重置比賽？", resetWarning: "當前進度將不會被保存。", resetSettings: "更改球員/設置", resetPoints: "僅重置分數", menu: "菜單", shareApp: "分享應用", shareAppTitle: "推薦給球友", shareAppText: "匹克球愛好者們！🏓 告別記錯分數的煩惱。快來看看這款超級好用的匹克球計分器，完美支援標準、每球得分和自定義規則！", copied: "已複製！", serverTimeout: "發球方暫停", receiverTimeout: "接發球方暫停", ghostReplay: "幽靈回放", ghostUnavailable: "幽靈回放不可用", ghostNoData: "此功能依賴於球場站位數據，該舊比賽未記錄此數據。", serverRole: "發球方", receiverRole: "接發球方", serveLabel: "發球", locked: "已鎖定", prev: "上一球", next: "下一球", invalidPointsTitle: "無效分數", invalidPointsMsg: "開始比賽至少需要1分。", highPointTitle: "過高的目標分數", highPointMsg: "確定要繼續嗎？這個目標分數超出了人類的極限。", continueBtn: "繼續", scanToShare: "當面掃碼或分享下方連結" },
           ms: { appTitle: "Pickleball", appSub: "Kaunter Mata", tapToStart: "Ketik untuk mula", newMatch: "Kaunter Mata", selectFormat: "Pilih format & peraturan", singles: "Perseorangan", doubles: "Beregu", stdTitle: "Standard (11 Mata)", stdDescSingle: "Main hingga 11 • Menang dgn 2", stdDescDouble: "Main hingga 11 • Menang dgn 2", fourteenTitle: "Peraturan 14-Mata", fourteenDesc: "Main hingga 15 • Mata rali", customFormat: "Peraturan Sendiri", customDesc: "Tetapkan mata dan margin", playTo: "Main Ke", winBy: "Menang Dgn", t1Name: "Pemain 1", t2Name: "Pemain 2", team1: "Pasukan 1", team2: "Pasukan 2", server: "Servis", wonRally: "Menang Rali", serving: "Servis", winner: "Menang Perlawanan!", playAgain: "Main Semula", undo: "Buat Asal", reset: "Tarik Diri", timeline: "Garis Masa", awaiting: "Menunggu servis...", suddenDeath: "Mata Penentuan", nextPointWins: "Mata seterusnya menang", install: "Pasang App", serveToWinOption: "14-14 Servis Menang", serveToWinDesc: "Mesti servis pada 14-14", suddenDeathServeDesc: "Mesti servis", switchEndsOption: "Tukar Gelanggang", switchEndsOptionDesc: "Gesaan tukar sisi", customServeToWin: "Servis untuk Skor", customServeToWinDesc: "Hanya servis boleh skor (0-0-2)", customServeToWinDescSingle: "Hanya servis boleh skor (0-0)", matchPoint: "Mata Penamat", cancel: "Batal", startMatch: "Mula", t1Label: "P1", t2Label: "P2", installAsApp: "Pasang sebagai app", designBy: "Direka oleh Amos © 2026", matchTitlePlaceholder: "Tajuk Perlawanan", matchHistory: "Sejarah", clearHistory: "Padam Sejarah", reviewMatch: "Semak Perlawanan", noHistory: "Tiada sejarah.", untitledMatch: "Perlawanan Biasa", confirmClear: "Padam semua sejarah?", yesClear: "Ya", showResults: "Keputusan", installStepsIOS: 'Kongsi -> Tambah ke Skrin Utama.', installStepsAndroid: 'Menu -> Pasang Aplikasi.', gotIt: 'Faham!', infoTitle: 'Maklumat', infoHowToTitle: 'Cara Penggunaan', infoHowTo1: '1. Tetapan: Pilih format, peraturan dan aktifkan Masa Rehat/Tukar Gelanggang.', infoHowTo2: '2. Skor: Ketik pasukan untuk mata. Guna Buat Asal jika silap.', infoHowTo3: '3. Gelanggang: Semak posisi pemain. Putar gelanggang ikut pandangan anda.', infoHowTo4: '4. Suara: Buka ikon pembesar suara untuk pengumuman automatik.', infoHowTo5: '5. Kongsi: Simpan sejarah, lihat statistik dan eksport imej perlawanan.', infoHowTo6: '6. Rahsia: Ketik "Sesuatu Tempat" 5 kali untuk "Easter Egg"', infoData: 'Data disimpan di peranti. Tiada awan.', infoUsage: 'Projek sumber terbuka. Kredit kepada Amos.', infoFooter: 'Dibuat dengan ❤️.', retreatTitle: 'Siapa Tarik Diri?', t1Retreat: 'P1 Tarik Diri', t2Retreat: 'P2 Tarik Diri', quitMatch: 'Berhenti', quitConfirm: 'Kembali ke menu?', yesQuit: 'Ya', winByRetreat: 'Menang Tarik Diri!', loading: 'Memuatkan...', switchEnds: "Tukar Gelanggang!", switchEndsDesc: "Pemain patut bertukar tempat.", resumeMatch: "Sambung Semula", resumeDesc: "Sambung perlawanan tertangguh?", stats: "Statistik", totalMatches: "Jumlah Perlawanan", avgDuration: "Purata Masa", share: "Kongsi", edit: "Edit", winRate: "Kadar Menang P1", time: "Masa", firstServer: "Servis Pertama", sideOut: "Tukar servis", secondServer: "Servis kedua", totalPoints: "Jumlah Mata", winDist: "Taburan Kemenangan", formatStats: "Statistik Format", enableTimeouts: "Bolehkan Masa Rehat", timeoutsDesc: "1 rehat setiap pasukan", customTimeoutsDesc: "Rehat setiap pasukan (0-3)", callTimeout: "Minta Rehat", courtPosTitle: "Posisi Gelanggang", courtPosDesc: "Posisi servis & terima", receiver: "Penerima", generatingImage: "Menjana Imej", t1P1: "Pemain Kiri T1", t1P2: "Pemain Kanan T1", t2P1: "Pemain Kiri T2", t2P2: "Pemain Kanan T2", oddCourt: "(Kiri)", evenCourt: "(Kanan)", point: "Mata", resetMatch: "Mula Semula", resetTitle: "Mula Semula Perlawanan?", resetWarning: "Kemajuan semasa tidak akan disimpan.", resetSettings: "Tukar Pemain/Tetapan", resetPoints: "Tetapkan Semula Mata Sahaja", menu: "Menu", shareApp: "Kongsi App", shareAppTitle: "Kongsi dgn Pemain", shareAppText: "Hai peminat Pickleball! 🏓 Tiada lagi masalah lupa markah. Cuba Kaunter Mata Pickleball yang hebat & mudah ini. Ia menyokong pelbagai peraturan dengan sempurna!", copied: "Disalin!", serverTimeout: "Masa rehat pembuat servis", receiverTimeout: "Masa rehat penerima", ghostReplay: "Tayangan Hantu", ghostUnavailable: "Tayangan Hantu Tidak Tersedia", ghostNoData: "Ciri ini bergantung pada data kedudukan gelanggang, yang tidak direkodkan untuk perlawanan lama ini.", serverRole: "Pembuat Servis", receiverRole: "Penerima", serveLabel: "Servis", locked: "DIKUNCI", prev: "Sblm", next: "Strusnya", invalidPointsTitle: "Mata Tidak Sah", invalidPointsMsg: "Sekurang-kurangnya 1 mata diperlukan untuk memulakan permainan.", highPointTitle: "Sasaran Mata Tinggi", highPointMsg: "Adakah anda pasti mahu meneruskan? Sasaran mata ini terlalu tinggi untuk dikendalikan oleh manusia.", continueBtn: "Teruskan", scanToShare: "Imbas secara berdepan atau Kongsi pautan di bawah" },
@@ -626,10 +624,45 @@
           const [showLegacyAlert, setShowLegacyAlert] = useState(false);
           const [showZeroPointAlert, setShowZeroPointAlert] = useState(false);
           const [showHighPointWarning, setShowHighPointWarning] = useState(false);
-          const [members, setMembers] = useState([]);
-          const [showMemberMenu, setShowMemberMenu] = useState(false);
-          const [memberSelectTarget, setMemberSelectTarget] = useState(null);
-          const [newMemberName, setNewMemberName] = useState('');
+// --- MEMBER MANAGEMENT STATES ---
+const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+const [memberName, setMemberName] = useState('');
+const [memberHexId, setMemberHexId] = useState('');
+const [savedMembers, setSavedMembers] = useState([]);
+const [selectedMember, setSelectedMember] = useState(null);
+
+useEffect(() => {
+  try {
+    const stored = localStorage.getItem('pb_members');
+    if (stored) setSavedMembers(JSON.parse(stored));
+  } catch(e) {}
+}, []);
+
+const generateHexId = () => {
+  const arr = new Uint8Array(4);
+  (crypto.getRandomValues || window.msCrypto.getRandomValues)(arr);
+  return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+};
+
+const handleSelectMember = (member) => {
+  setSelectedMember(member);
+  setMemberName(member.name);
+  setMemberHexId(member.hexId);
+};
+
+const handleSaveMember = () => {
+  if (!memberName.trim()) return;
+  const finalHex = memberHexId || generateHexId();
+  const newMember = { name: memberName.trim(), hexId: finalHex, addedAt: Date.now() };
+  const updated = savedMembers.filter(m => m.name.toLowerCase() !== memberName.trim().toLowerCase());
+  updated.push(newMember);
+  setSavedMembers(updated);
+  localStorage.setItem('pb_members', JSON.stringify(updated));
+  setShowAddMemberModal(false);
+  setMemberName('');
+  setMemberHexId('');
+  setSelectedMember(null);
+};
           
           const [enableTimeouts, setEnableTimeouts] = useState(0);
           const [enableTimeoutsSetup, setEnableTimeoutsSetup] = useState(0);
@@ -761,22 +794,8 @@
               }, 280); 
           };
 
-          const generateHexId = () => Array.from({length: 16}, () => Math.floor(Math.random() * 16).toString(16)).join('');
-          const saveMembers = (newMembers) => { setMembers(newMembers); localStorage.setItem('pb_members', JSON.stringify(newMembers)); };
-          const handleAddMember = (e) => { e.preventDefault(); if(!newMemberName.trim()) return; const newMem = { id: generateHexId(), name: newMemberName.trim(), addedAt: Date.now() }; saveMembers([...members, newMem]); setNewMemberName(''); triggerHaptic('point'); };
-          const handleDeleteMember = (id) => { saveMembers(members.filter(m => m.id !== id)); triggerHaptic('point'); };
-          const handleSelectMember = (name) => {
-              if (memberSelectTarget === 't1PLeft') setT1PLeftInput(name);
-              if (memberSelectTarget === 't1PRight') setT1PRightInput(name);
-              if (memberSelectTarget === 't2PLeft') setT2PLeftInput(name);
-              if (memberSelectTarget === 't2PRight') setT2PRightInput(name);
-              setMemberSelectTarget(null);
-          };
-
-          useEffect(() => {
-            const savedMembers = localStorage.getItem('pb_members');
-            if (savedMembers) { try { setMembers(JSON.parse(savedMembers)); } catch(e) {} }
-            const saved = localStorage.getItem('pb_history_matches');
+          useEffect(() => {
+            const saved = localStorage.getItem('pb_history_matches');
             if (saved) { try { setSavedMatches(JSON.parse(saved)); } catch (e) {} }
             let savedLang = localStorage.getItem('pb_lang_pref');
             if (savedLang === 'zh') savedLang = 'zh_CN'; 
@@ -1194,11 +1213,10 @@
                   </div>
                   <div className={`flex items-center gap-2 pointer-events-auto`}>
                     <button onClick={handleSoundClick} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform relative z-10`}>{soundEnabled ? <Volume2 size={18} className={accentGreen} /> : <VolumeX size={18} className={textSub} />}</button>
-                    <div className={`flex items-center overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.2,1,0.4,1)] ${showMenuButtons ? 'max-w-[450px] opacity-100' : 'max-w-0 opacity-0 -ml-2 pointer-events-none'}`}>
+                    <div className={`flex items-center overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.2,1,0.4,1)] ${showMenuButtons ? 'max-w-[200px] opacity-100' : 'max-w-0 opacity-0 -ml-2 pointer-events-none'}`}>
                       <div className={`flex items-center gap-2 min-w-max transition-transform duration-500 ease-[cubic-bezier(0.2,1,0.4,1)] ${showMenuButtons ? 'translate-x-0 scale-100' : 'translate-x-4 scale-95'}`}>
                         <button onClick={() => openScreenFromMenu('stats')} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-all`}><BarChart2 size={18} className={textSub} /></button>
-                        <button onClick={() => setShowMemberMenu(true)} className={`flex items-center gap-1.5 px-3 py-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-all text-xs font-bold ${textSub}`}><BookUser size={16} /> <span className="hidden sm:inline">Members</span></button>
-                        <button onClick={() => openScreenFromMenu('history')} className={`flex items-center gap-1.5 px-3 py-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-all text-xs font-bold ${textSub}`}><HistoryIcon size={16} /> <span className="hidden sm:inline">History</span></button>
+                        <button onClick={() => openScreenFromMenu('history')} className={`flex items-center gap-1.5 px-3 py-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-all text-xs font-bold ${textSub}`}><HistoryIcon size={16} /> <span className="hidden sm:inline">History</span></button>
                       </div>
                     </div>
                     <button onClick={() => setShowLangMenu(true)} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform relative z-10`}><Globe size={18} className={textSub} /></button>
@@ -1428,27 +1446,30 @@
                 <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
                   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setPendingGame(null)}></div>
                   <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden`}>
-                    <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50"><h2 className={`text-xl font-bold ${textMain}`}>{pendingGame.mode === 'single' ? getT('singles') : getT('doubles')} - {pendingGame.rules === 'standard' ? getT('stdTitle') : pendingGame.rules === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</h2></div>
-                    <div className="px-6 py-4 overflow-y-auto muji-scrollbar overscroll-contain">
+                    <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50 flex justify-between items-center">
+  <h2 className={`text-xl font-bold ${textMain} pr-4`}>{pendingGame.mode === 'single' ? getT('singles') : getT('doubles')} - {pendingGame.rules === 'standard' ? getT('stdTitle') : pendingGame.rules === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</h2>
+  <button onClick={() => setShowAddMemberModal(true)} className={`px-3 py-1.5 rounded-lg text-xs font-bold border ${borderSub} ${textSub} hover:text-emerald-500 hover:border-emerald-500/50 transition-colors flex items-center gap-1`}><Users size={14}/> {getT('manageMembers')}</button>
+</div>
+                    <div className="px-6 py-4 overflow-y-auto muji-scrollbar flex-1 overscroll-contain">
                       <div className="space-y-4">
                         <div><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('matchTitlePlaceholder')}</label><input type="text" placeholder={getT('untitledMatch')} value={matchTitleInput} onChange={(e) => setMatchTitleInput(e.target.value)} className={`w-full px-4 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} focus:outline-none focus:ring-2 focus:ring-emerald-500/50`} /></div>
                         {pendingGame.mode === 'single' ? (
-                            <div className="flex gap-3 w-full">
-                              <div className="flex-1 w-full min-w-0"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub} truncate`}>{getT('t1Name')}</label><div className="flex gap-1.5 w-full"><input type="text" placeholder={getT('t1Name')} value={t1PLeftInput} onChange={(e) => setT1PLeftInput(e.target.value)} className={`w-full min-w-0 px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /><button type="button" onClick={() => setMemberSelectTarget('t1PLeft')} className={`flex-shrink-0 w-11 h-[42px] rounded-xl border ${borderSub} ${bgMain} text-emerald-500 hover:bg-emerald-500/10 active:scale-95 transition-colors flex items-center justify-center`}><BookUser size={16}/></button></div></div>
-                              <div className="flex-1 w-full min-w-0"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub} truncate`}>{getT('t2Name')}</label><div className="flex gap-1.5 w-full"><input type="text" placeholder={getT('t2Name')} value={t2PLeftInput} onChange={(e) => setT2PLeftInput(e.target.value)} className={`w-full min-w-0 px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /><button type="button" onClick={() => setMemberSelectTarget('t2PLeft')} className={`flex-shrink-0 w-11 h-[42px] rounded-xl border ${borderSub} ${bgMain} text-emerald-500 hover:bg-emerald-500/10 active:scale-95 transition-colors flex items-center justify-center`}><BookUser size={16}/></button></div></div>
-                            </div>
+                            <div className="flex gap-3">
+                              <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('t1Name')}</label><input type="text" placeholder={getT('t1Name')} value={t1PLeftInput} onChange={(e) => setT1PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
+                              <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('t2Name')}</label><input type="text" placeholder={getT('t2Name')} value={t2PLeftInput} onChange={(e) => setT2PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
+                            </div>
                         ) : (
                             <div className="space-y-3">
-                              <div className="flex items-end gap-1.5 sm:gap-2 w-full">
-                                <div className="flex-1 w-full min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t1P1')} <span className="opacity-70 lowercase text-[8px]">{getT('oddCourt')}</span></label><div className="flex gap-1 w-full"><input type="text" placeholder={getT('t1P1')} value={t1PLeftInput} onChange={(e) => setT1PLeftInput(e.target.value)} className={`w-full min-w-0 px-2 sm:px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /><button type="button" onClick={() => setMemberSelectTarget('t1PLeft')} className={`flex-shrink-0 w-9 sm:w-10 h-[42px] rounded-xl border ${borderSub} ${bgMain} text-emerald-500 hover:bg-emerald-500/10 active:scale-95 transition-colors flex items-center justify-center`}><BookUser size={14}/></button></div></div>
-                                <button type="button" onClick={() => { const temp = t1PLeftInput; setT1PLeftInput(t1PRightInput); setT1PRightInput(temp); }} className={`mb-[3px] p-1.5 sm:p-2 rounded-full ${bgMain} border ${borderSub} text-stone-400 hover:text-emerald-500 hover:border-emerald-500/30 transition-all active:scale-95 shrink-0`} title="Swap Players"><ArrowRightLeft size={14} className="sm:w-4 sm:h-4" /></button>
-                                <div className="flex-1 w-full min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t1P2')} <span className="opacity-70 lowercase text-[8px]">{getT('evenCourt')}</span></label><div className="flex gap-1 w-full"><input type="text" placeholder={getT('t1P2')} value={t1PRightInput} onChange={(e) => setT1PRightInput(e.target.value)} className={`w-full min-w-0 px-2 sm:px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /><button type="button" onClick={() => setMemberSelectTarget('t1PRight')} className={`flex-shrink-0 w-9 sm:w-10 h-[42px] rounded-xl border ${borderSub} ${bgMain} text-emerald-500 hover:bg-emerald-500/10 active:scale-95 transition-colors flex items-center justify-center`}><BookUser size={14}/></button></div></div>
-                              </div>
-                              <div className="flex items-end gap-1.5 sm:gap-2 w-full">
-                                <div className="flex-1 w-full min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t2P1')} <span className="opacity-70 lowercase text-[8px]">{getT('oddCourt')}</span></label><div className="flex gap-1 w-full"><input type="text" placeholder={getT('t2P1')} value={t2PLeftInput} onChange={(e) => setT2PLeftInput(e.target.value)} className={`w-full min-w-0 px-2 sm:px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /><button type="button" onClick={() => setMemberSelectTarget('t2PLeft')} className={`flex-shrink-0 w-9 sm:w-10 h-[42px] rounded-xl border ${borderSub} ${bgMain} text-emerald-500 hover:bg-emerald-500/10 active:scale-95 transition-colors flex items-center justify-center`}><BookUser size={14}/></button></div></div>
-                                <button type="button" onClick={() => { const temp = t2PLeftInput; setT2PLeftInput(t2PRightInput); setT2PRightInput(temp); }} className={`mb-[3px] p-1.5 sm:p-2 rounded-full ${bgMain} border ${borderSub} text-stone-400 hover:text-emerald-500 hover:border-emerald-500/30 transition-all active:scale-95 shrink-0`} title="Swap Players"><ArrowRightLeft size={14} className="sm:w-4 sm:h-4" /></button>
-                                <div className="flex-1 w-full min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t2P2')} <span className="opacity-70 lowercase text-[8px]">{getT('evenCourt')}</span></label><div className="flex gap-1 w-full"><input type="text" placeholder={getT('t2P2')} value={t2PRightInput} onChange={(e) => setT2PRightInput(e.target.value)} className={`w-full min-w-0 px-2 sm:px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /><button type="button" onClick={() => setMemberSelectTarget('t2PRight')} className={`flex-shrink-0 w-9 sm:w-10 h-[42px] rounded-xl border ${borderSub} ${bgMain} text-emerald-500 hover:bg-emerald-500/10 active:scale-95 transition-colors flex items-center justify-center`}><BookUser size={14}/></button></div></div>
-                              </div>
+                              <div className="flex items-end gap-1.5 sm:gap-2">
+                                <div className="flex-1 min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t1P1')} <span className="opacity-70 lowercase text-[8px]">{getT('oddCourt')}</span></label><input type="text" placeholder={getT('t1P1')} value={t1PLeftInput} onChange={(e) => setT1PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
+                                <button onClick={() => { const temp = t1PLeftInput; setT1PLeftInput(t1PRightInput); setT1PRightInput(temp); }} className={`mb-1 p-2 rounded-full ${bgMain} border ${borderSub} text-stone-400 hover:text-emerald-500 hover:border-emerald-500/30 transition-all active:scale-95 shrink-0`} title="Swap Players"><ArrowRightLeft size={16} /></button>
+                                <div className="flex-1 min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t1P2')} <span className="opacity-70 lowercase text-[8px]">{getT('evenCourt')}</span></label><input type="text" placeholder={getT('t1P2')} value={t1PRightInput} onChange={(e) => setT1PRightInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
+                              </div>
+                              <div className="flex items-end gap-1.5 sm:gap-2">
+                                <div className="flex-1 min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t2P1')} <span className="opacity-70 lowercase text-[8px]">{getT('oddCourt')}</span></label><input type="text" placeholder={getT('t2P1')} value={t2PLeftInput} onChange={(e) => setT2PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
+                                <button onClick={() => { const temp = t2PLeftInput; setT2PLeftInput(t2PRightInput); setT2PRightInput(temp); }} className={`mb-1 p-2 rounded-full ${bgMain} border ${borderSub} text-stone-400 hover:text-emerald-500 hover:border-emerald-500/30 transition-all active:scale-95 shrink-0`} title="Swap Players"><ArrowRightLeft size={16} /></button>
+                                <div className="flex-1 min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t2P2')} <span className="opacity-70 lowercase text-[8px]">{getT('evenCourt')}</span></label><input type="text" placeholder={getT('t2P2')} value={t2PRightInput} onChange={(e) => setT2PRightInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
+                              </div>
                             </div>
                         )}
                         <div className="flex flex-col gap-1.5 mt-2 mb-2">
@@ -1640,63 +1661,7 @@
                 </div>
               )}
 
-              {showMemberMenu && (
-                <div className="fixed inset-0 z-[130] flex items-center justify-center p-4">
-                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" style={{touchAction: 'none'}} onClick={() => setShowMemberMenu(false)}></div>
-                  <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl transition-all duration-200 max-h-[90vh] overflow-hidden animate-screen-enter`}>
-                    <div className="p-5 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50 flex justify-between items-center">
-                      <div className="flex items-center gap-3"><BookUser size={24} className={accentGreen} /><h2 className={`text-xl font-bold ${textMain}`}>Members</h2></div>
-                      <button onClick={() => setShowMemberMenu(false)} className={`p-1.5 rounded-full bg-stone-100 dark:bg-stone-800 ${textSub} hover:${textMain} transition-colors`}><X size={16}/></button>
-                    </div>
-                    <div className="px-5 py-4 overflow-y-auto muji-scrollbar overscroll-contain">
-                      <form onSubmit={handleAddMember} className="flex items-center gap-2 mb-6 w-full">
-                        <input type="text" placeholder="Add new member..." value={newMemberName} onChange={(e) => setNewMemberName(e.target.value)} className={`flex-1 w-full min-w-0 px-4 py-3 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50`} />
-                        <button type="submit" className={`flex-shrink-0 w-12 h-[46px] rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-md transition-colors flex items-center justify-center`}><UserPlus size={20}/></button>
-                      </form>
-                      {members.length === 0 ? (
-                         <div className={`text-center py-8 ${textSub} flex flex-col items-center`}><Users size={32} className="mb-2 opacity-50"/> <p className="text-sm font-medium">No members added yet.</p></div>
-                      ) : (
-                        <div className="space-y-2">
-                          {members.map(member => (
-                            <div key={member.id} className={`flex items-center justify-between p-3 rounded-xl border ${borderSub} ${bgMain}`}>
-                              <span className={`font-bold ${textMain} truncate`}>{member.name}</span>
-                              <button onClick={() => handleDeleteMember(member.id)} className={`p-2 rounded-lg text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 transition-colors`}><Trash2 size={16}/></button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {memberSelectTarget && (
-                <div className="fixed inset-0 z-[140] flex items-center justify-center p-4">
-                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" style={{touchAction: 'none'}} onClick={() => setMemberSelectTarget(null)}></div>
-                  <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl transition-all duration-200 max-h-[85vh] overflow-hidden animate-screen-enter`}>
-                    <div className="p-5 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50 flex justify-between items-center">
-                      <div className="flex items-center gap-3"><User size={24} className={accentGreen} /><h2 className={`text-xl font-bold ${textMain}`}>Select Player</h2></div>
-                      <button onClick={() => setMemberSelectTarget(null)} className={`p-1.5 rounded-full bg-stone-100 dark:bg-stone-800 ${textSub} hover:${textMain} transition-colors`}><X size={16}/></button>
-                    </div>
-                    <div className="px-4 py-4 overflow-y-auto muji-scrollbar overscroll-contain">
-                      {members.length === 0 ? (
-                         <div className={`text-center py-6 ${textSub}`}><p className="text-sm mb-4">No members available.</p><button onClick={() => { setMemberSelectTarget(null); setShowMemberMenu(true); }} className={`px-4 py-2 rounded-full font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-md text-xs`}>Manage Members</button></div>
-                      ) : (
-                        <div className="grid grid-cols-1 gap-3">
-                          {members.map(member => (
-                            <button key={member.id} onClick={() => handleSelectMember(member.name)} className={`w-full text-left px-4 py-4 rounded-xl border ${borderSub} ${bgMain} hover:border-emerald-500 hover:shadow-md active:scale-[0.98] transition-all flex items-center gap-3`}>
-                              <div className="bg-stone-200 dark:bg-stone-800 p-2 rounded-full"><User size={18} className={textSub}/></div>
-                              <span className={`font-bold text-base ${textMain} truncate`}>{member.name}</span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {showLangMenu && (
+              {showLangMenu && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" style={{touchAction: 'none'}} onClick={() => setShowLangMenu(false)}></div>
                   <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl`}>
@@ -1862,7 +1827,45 @@
                 </div>
               )}
                 
-              {secretGame && (
+              {showAddMemberModal && (
+<div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowAddMemberModal(false)}></div>
+  <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden`}>
+    <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50">
+      <h2 className={`text-xl font-bold ${textMain}`}>{getT('addMember')}</h2>
+      <p className={`text-xs ${textSub} mt-1`}>{getT('hexIdLabel')}</p>
+    </div>
+    <div className="px-6 py-4 overflow-y-auto muji-scrollbar flex-1 overscroll-contain space-y-4">
+      <div>
+        <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('selectExisting')}</label>
+        <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto p-1">
+          {savedMembers.length === 0 && <span className={`text-xs italic ${textSub}`}>No saved members yet.</span>}
+          {savedMembers.map(m => (
+            <button key={m.hexId} onClick={() => handleSelectMember(m)} className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${selectedMember?.hexId === m.hexId ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm' : `${bgMain} ${borderSub} ${textMain} hover:border-emerald-400/50`}`}>
+              {m.name}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div>
+        <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('enterName')}</label>
+        <input type="text" value={memberName} onChange={(e) => setMemberName(e.target.value)} placeholder="Enter name..." className={`w-full px-4 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} focus:outline-none focus:ring-2 focus:ring-emerald-500/50`} />
+      </div>
+      <div>
+        <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('hexIdLabel')}</label>
+        <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border ${borderSub} ${bgMain}`}>
+          <code className={`flex-1 font-mono text-sm tracking-wider ${accentGreen}`}>{memberHexId || generateHexId()}</code>
+          <button onClick={() => setMemberHexId(generateHexId())} className={`p-1.5 rounded-md ${bgCard} border ${borderSub} text-stone-400 hover:text-emerald-500 transition-colors`} title={getT('refreshId')}><RefreshCw size={14}/></button>
+        </div>
+      </div>
+    </div>
+    <div className="p-6 pt-4 flex-shrink-0 border-t border-stone-100 dark:border-stone-800/50">
+      <button onClick={handleSaveMember} disabled={!memberName.trim()} className={`w-full py-3 rounded-xl font-bold text-white transition-colors ${memberName.trim() ? 'bg-emerald-500 hover:bg-emerald-600 shadow-md' : 'bg-stone-400 cursor-not-allowed'}`}>{getT('saveMemberBtn')}</button>
+    </div>
+  </div>
+</div>
+)}
+{secretGame && (
                   <div className="fixed inset-0 z-[200] bg-stone-900 text-stone-100 flex flex-col animate-screen-enter select-none">
                       <div className="p-4 flex justify-between items-center border-b border-stone-800 bg-stone-950">
                           <h2 className="text-xl font-black text-emerald-400 flex items-center gap-2"><Gamepad2 size={24} /> ARCADE MODE</h2>
