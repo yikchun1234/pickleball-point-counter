@@ -677,6 +677,7 @@ const deleteMember = (hexId) => {
   localStorage.setItem('pb_members', JSON.stringify(updated));
   if (editMemberId === hexId) { setEditMemberId(null); setMemberFormName(''); }
 };
+            
 const saveOrUpdateMember = () => {
   const name = memberFormName.trim();
   if (!name) return;
@@ -690,8 +691,11 @@ const saveOrUpdateMember = () => {
   }
   setSavedMembers(updated);
   localStorage.setItem('pb_members', JSON.stringify(updated));
-  setShowMemberModal(false); setEditMemberId(null); setMemberFormName(''); setPlayerSelectTarget(null);
+  // REMOVED: setShowMemberModal(false); // Keeps the popup open for batch adding
+  setEditMemberId(null);
+  setMemberFormName('');
 };
+            
 const [enableTimeouts, setEnableTimeouts] = useState(0);
           const [enableTimeoutsSetup, setEnableTimeoutsSetup] = useState(0);
           const [t1Timeouts, setT1Timeouts] = useState(2);
@@ -1886,10 +1890,10 @@ const [enableTimeouts, setEnableTimeouts] = useState(0);
 <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={()=>setShowMemberModal(false)}></div>
   <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden`}>
-    <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50 flex justify-between items-center">
-      <h2 className={`text-xl font-bold ${textMain}`}>{playerSelectTarget ? "Select Player" : (editMemberId ? getT('editMember') : getT('addMember'))}</h2>
-      {playerSelectTarget && <p className={`text-xs ${textSub}`}>Tap a player to fill the field</p>}
-    </div>
+<div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50 flex justify-between items-center">
+  <h2 className={`text-xl font-bold ${textMain}`}>{editMemberId ? getT('editMember') : getT('addMember')}</h2>
+  <button onClick={()=>setShowMemberModal(false)} className={`p-1.5 rounded-full ${textSub} hover:${textMain} transition-colors`}><X size={20}/></button>
+</div>
     <div className="px-6 py-4 overflow-y-auto muji-scrollbar flex-1 overscroll-contain space-y-4">
       {playerSelectTarget ? (
         <div>
