@@ -632,23 +632,41 @@ const [editMemberId, setEditMemberId] = useState(null);
 const [memberFormName, setMemberFormName] = useState('');
 const [playerSelectTarget, setPlayerSelectTarget] = useState(null); // 't1Left','t1Right','t2Left','t2Right'
 // --- DRAG & DROP STATE ---
+// --- DRAG & DROP STATE & LOGIC ---
 const [draggedIdx, setDraggedIdx] = useState(null);
 const [dragOverIdx, setDragOverIdx] = useState(null);
+const dragOverRef = useRef(null); // Prevents laggy re-renders
 
 const handleDragStart = (idx) => setDraggedIdx(idx);
-const handleDragOver = (e, idx) => { e.preventDefault(); setDragOverIdx(idx); };
-const handleDragEnter = (e, idx) => { e.preventDefault(); setDragOverIdx(idx); };
+const handleDragOver = (e, idx) => {
+  e.preventDefault(); // Required to allow dropping
+  if (dragOverRef.current !== idx) {
+    dragOverRef.current = idx;
+    setDragOverIdx(idx);
+  }
+};
+const handleDragEnter = (e, idx) => {
+  e.preventDefault(); // Critical for mobile/desktop consistency
+  if (dragOverRef.current !== idx) {
+    dragOverRef.current = idx;
+    setDragOverIdx(idx);
+  }
+};
 const handleDragEnd = () => { setDraggedIdx(null); setDragOverIdx(null); };
 const handleDrop = (e, idx) => {
   e.preventDefault();
   if (draggedIdx === null || draggedIdx === idx) return;
+  
   const newMembers = [...savedMembers];
   const [draggedItem] = newMembers.splice(draggedIdx, 1);
   newMembers.splice(idx, 0, draggedItem);
+  
   setSavedMembers(newMembers);
   localStorage.setItem('pb_members', JSON.stringify(newMembers));
+  
   setDraggedIdx(null); setDragOverIdx(null);
 };
+            
 const deleteMember = (hexId) => {
   const updated = savedMembers.filter(m => m.hexId !== hexId);
   setSavedMembers(updated);
@@ -1933,28 +1951,27 @@ const [enableTimeouts, setEnableTimeouts] = useState(0);
   <div className="flex flex-col gap-2 max-h-40 overflow-y-auto p-1 muji-scrollbar">
     {savedMembers.length === 0 && <span className={`text-xs italic ${textSub}`}>{getT('noSaved')}</span>}
     {savedMembers.map((m, idx) => (
-      <div
-        key={m.hexId}
-        draggable
-        onDragStart={() => handleDragStart(idx)}
-        onDragOver={(e) => handleDragOver(e, idx)}
-        onDragEnter={(e) => handleDragEnter(e, idx)}
-        onDrop={(e) => handleDrop(e, idx)}
-        onDragEnd={handleDragEnd}
-        style={{ touchAction: 'none' }}
-        className={`flex items-center gap-2 p-2 rounded-lg border transition-all cursor-grab active:cursor-grabbing select-none ${dragOverIdx === idx ? 'border-emerald-500 bg-emerald-500/10 scale-[1.02]' : draggedIdx === idx ? 'opacity-40 border-stone-400' : `${bgMain} ${borderSub}`}`}
-      >
-        <div className="p-1 cursor-grab active:cursor-grabbing" draggable="true" onClick={(e) => e.stopPropagation()}>
-          <GripVertical size={16} className={textSub} />
-        </div>
-        <button onClick={() => openEditMember(m)} className={`flex-1 text-left text-xs font-bold px-1 py-1 truncate ${editMemberId === m.hexId ? 'text-emerald-500' : textMain}`}>
-          {m.name}
-        </button>
-        <button onClick={(e) => { e.stopPropagation(); deleteMember(m.hexId); }} className="p-1.5 rounded-md text-stone-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors shrink-0">
-          <Trash2 size={14} />
-        </button>
-      </div>
-    ))}
+<div
+key={m.hexId}
+draggable={true}
+onDragStart={() => handleDragStart(idx)}
+onDragOver={(e) => handleDragOver(e, idx)}
+onDragEnter={(e) => handleDragEnter(e, idx)}
+onDrop={(e) => handleDrop(e, idx)}
+onDragEnd={handleDragEnd}
+className={`flex items-center gap-2 p-2 rounded-lg border transition-all cursor-grab select-none touch-none ${dragOverIdx === idx ? 'border-emerald-500 bg-emerald-500/10 scale-[1.02]' : draggedIdx === idx ? 'opacity-50 border-stone-400 scale-[0.98]' : `${bgMain} ${borderSub}`}`}
+>
+<div className="p-1 cursor-grab text-stone-400">
+<GripVertical size={16} />
+</div>
+<button onClick={() => openEditMember(m)} className={`flex-1 text-left text-xs font-bold px-1 py-1 truncate ${editMemberId === m.hexId ? 'text-emerald-500' : textMain}`}>
+{m.name}
+</button>
+<button onClick={(e) => { e.stopPropagation(); deleteMember(m.hexId); }} className="p-1.5 rounded-md text-stone-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors shrink-0">
+<Trash2 size={14} />
+</button>
+</div>
+))}
   </div>
 </div>
           <div>
