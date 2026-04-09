@@ -255,6 +255,7 @@
         const ArrowRightLeft = (props) => <IconWrapper iconObj={lucide.icons.ArrowRightLeft} {...props} />;
         const Lock = (props) => <IconWrapper iconObj={lucide.icons.Lock} {...props} />;
         const Unlock = (props) => <IconWrapper iconObj={lucide.icons.Unlock} {...props} />;
+const GripVertical = (props) => <IconWrapper iconObj={lucide.icons.GripVertical} {...props} />;
 
         const dict = {
           en: { appTitle: "Pickleball", appSub: "Point Counter", tapToStart: "Tap to start", newMatch: "Pickleball Point Counter", selectFormat: "Select match format & rules", singles: "Singles", doubles: "Doubles", stdTitle: "Standard (11 Pts)", stdDescSingle: "0-0 Rule • Play to 11 • Win by 2", stdDescDouble: "0-0-2 Rule • Play to 11 • Win by 2", fourteenTitle: "14-Point Rule", fourteenDesc: "Rally Scoring • Play to 15 • No serve needed", customFormat: "Custom Rules", customDesc: "Set your own points and win margin", playTo: "Play To", winBy: "Win By", t1Name: "Player 1", t2Name: "Player 2", team1: "Team 1", team2: "Team 2", server: "Serve", wonRally: "Won Rally", serving: "Serving", winner: "Wins the Match!", playAgain: "Play Again", undo: "Undo", reset: "Retreat", timeline: "Rally Timeline", awaiting: "Awaiting first serve...", suddenDeath: "Sudden Death", nextPointWins: "Next point wins", install: "Install App", serveToWinOption: "14-14 Serve to Win", serveToWinDesc: "Must be serving to win at 14-14", suddenDeathServeDesc: "Must serve to win", switchEndsOption: "Switch Ends at Half", switchEndsOptionDesc: "Prompt to switch sides at half points", customServeToWin: "Serve to Score", customServeToWinDesc: "Only serving team scores (0-0-2 rule)", customServeToWinDescSingle: "Only serving team scores (0-0 rule)", matchPoint: "Match Point", cancel: "Cancel", startMatch: "Start Match", t1Label: "T1", t2Label: "T2", installAsApp: "Install as a native app", designBy: "Designed by Amos © 2026", matchTitlePlaceholder: "Match Title (Optional)", matchHistory: "Match History", clearHistory: "Clear History", reviewMatch: "Review Timeline", noHistory: "No matches saved yet.", untitledMatch: "Friendly Match", confirmClear: "Clear all match history?", yesClear: "Yes, Clear All", showResults: "Show Results", installStepsIOS: 'Tap Share icon at the bottom, then "Add to Home Screen".', installStepsAndroid: 'Tap browser menu and select "Install App".', gotIt: 'Got it!', infoTitle: 'About & Disclaimer', infoHowToTitle: 'How to Use', infoHowTo1: '1. Setup: Choose format, rules, and toggle Timeouts or Switch Ends.', infoHowTo2: '2. Score: Tap a team to add points. Use Undo for mistakes.', infoHowTo3: '3. Court Map: Check player positions. Rotate the court to match your view.', infoHowTo4: '4. Voice: Turn on the speaker icon for audio announcements.', infoHowTo5: '5. Share: Save matches to History, view stats, and export images.', infoHowTo6: '6. Secret: Tap "Somewhere" 5 times to unlock "Easter Egg"', infoData: 'All history is saved locally on your device. No cloud storage. Clearing browser data will delete history.', infoUsage: 'Open-source project. Free to use with credit to creator (Amos).', infoFooter: 'Designed with ❤️ for the Pickleball community.', retreatTitle: 'Who retreated?', t1Retreat: 'Team 1 Retreated', t2Retreat: 'Team 2 Retreated', quitMatch: 'Quit Match', quitConfirm: 'Return to menu? This match will not be saved.', yesQuit: 'Yes, Quit', winByRetreat: 'Wins by Retreat!', loading: 'Loading...', switchEnds: "Switch Ends!", switchEndsDesc: "Players should now switch sides of the court.", resumeMatch: "Resume Match", resumeDesc: "You have an unfinished match. Do you want to resume?", stats: "Statistics", totalMatches: "Total Matches", avgDuration: "Avg Duration", share: "Share", edit: "Edit", winRate: "T1 Win Rate", time: "Time", firstServer: "First Serve", sideOut: "Side out", secondServer: "Second serve", totalPoints: "Total Points", winDist: "Win Distribution", formatStats: "Format Breakdown", enableTimeouts: "Enable Timeouts", timeoutsDesc: "1 timeout per team", customTimeoutsDesc: "Timeouts per team (0-3)", callTimeout: "Call Timeout", courtPosTitle: "Court Guide", courtPosDesc: "Server and receiver starting positions", receiver: "Receiver", generatingImage: "Generating Image", t1P1: "T1 L. Player", t1P2: "T1 R. Player", t2P1: "T2 L. Player", t2P2: "T2 R. Player", oddCourt: "(Odd Court)", evenCourt: "(Even Court)", point: "Point", resetMatch: "Reset", resetTitle: "Reset Match?", resetWarning: "Current progress will not be saved.", resetSettings: "Change Players/Settings", resetPoints: "Reset Points Only", menu: "Menu", shareApp: "Share App", shareAppTitle: "Share with Players", shareAppText: "Hey Pickleball fans! 🏓 Say goodbye to losing track of the score. Check out this awesome, easy-to-use Pickleball Point Counter. It tracks standard, rally, and custom rules perfectly!", copied: "Copied!", serverTimeout: "Server timeout", receiverTimeout: "Receiver timeout", ghostReplay: "Ghost Replay", ghostUnavailable: "Ghost Replay Unavailable", ghostNoData: "This feature relies on court positioning data, which was not recorded for this older match.", serverRole: "Server", receiverRole: "Receiver", serveLabel: "Serve", locked: "LOCKED", prev: "Prev", next: "Next", invalidPointsTitle: "Invalid Points", invalidPointsMsg: "At least 1 point is required to start the game.", highPointTitle: "High Point Target", highPointMsg: "Are you sure you want to continue? This point target is more than human can handle.", continueBtn: "Continue", scanToShare: "Scan in person or Share the link below", managePlayers: "Manage Players", addMember: "Add Player", editMember: "Edit Player", selectFromList: "Quick Select", noSaved: "No saved players yet.", saveMember: "Save Member", updateMember: "Update Member" },
@@ -627,9 +628,26 @@ const [showHighPointWarning, setShowHighPointWarning] = useState(false);
 // --- PLAYER MANAGEMENT LOGIC ---
 const [showMemberModal, setShowMemberModal] = useState(false);
 const [savedMembers, setSavedMembers] = useState([]);
-const [playerSelectTarget, setPlayerSelectTarget] = useState(null); // Tracks which textbox opened the popup
 const [editMemberId, setEditMemberId] = useState(null);
 const [memberFormName, setMemberFormName] = useState('');
+const [playerSelectTarget, setPlayerSelectTarget] = useState(null); // 't1Left','t1Right','t2Left','t2Right'
+// --- DRAG & DROP STATE ---
+const [draggedIndex, setDraggedIndex] = useState(null);
+const [dragOverIndex, setDragOverIndex] = useState(null);
+
+const handleDragStart = (index) => setDraggedIndex(index);
+const handleDragOver = (e, index) => { e.preventDefault(); setDragOverIndex(index); };
+const handleDragEnd = () => { setDraggedIndex(null); setDragOverIndex(null); };
+const handleDrop = (e, dropIndex) => {
+  e.preventDefault();
+  if (draggedIndex === null || draggedIndex === dropIndex) return;
+  const newMembers = [...savedMembers];
+  const [draggedItem] = newMembers.splice(draggedIndex, 1);
+  newMembers.splice(dropIndex, 0, draggedItem);
+  setSavedMembers(newMembers);
+  localStorage.setItem('pb_members', JSON.stringify(newMembers));
+  setDraggedIndex(null); setDragOverIndex(null);
+};
 
 useEffect(() => {
   try { 
@@ -1911,16 +1929,29 @@ const [enableTimeouts, setEnableTimeouts] = useState(0);
       ) : (
         <>
 <div>
-<label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>Saved Players</label>
-<div className="flex flex-col gap-2 max-h-32 overflow-y-auto p-1">
-  {savedMembers.length===0 && <span className={`text-xs italic ${textSub}`}>{getT('noSaved')}</span>}
-  {savedMembers.map(m => (
-    <div key={m.hexId} className={`flex items-center justify-between p-1.5 rounded-lg border transition-all ${editMemberId===m.hexId ? 'bg-emerald-500/10 border-emerald-500/50' : `${bgMain} ${borderSub}`}`}>
-      <button onClick={() => openEditMember(m)} className={`flex-1 text-left text-xs font-bold px-2 py-1 truncate ${editMemberId===m.hexId ? 'text-emerald-500' : textMain}`}>{m.name}</button>
-      <button onClick={(e) => { e.stopPropagation(); deleteMember(m.hexId); }} className="p-1.5 text-stone-400 hover:text-rose-500 transition-colors"><Trash2 size={14} /></button>
-    </div>
-  ))}
-</div>
+  <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>Saved Players</label>
+  <div className="flex flex-col gap-2 max-h-40 overflow-y-auto p-1 muji-scrollbar">
+    {savedMembers.length===0 && <span className={`text-xs italic ${textSub}`}>{getT('noSaved')}</span>}
+    {savedMembers.map((m, index) => (
+      <div
+        key={m.hexId}
+        draggable
+        onDragStart={() => handleDragStart(index)}
+        onDragOver={(e) => handleDragOver(e, index)}
+        onDrop={(e) => handleDrop(e, index)}
+        onDragEnd={handleDragEnd}
+        className={`flex items-center gap-2 p-2 rounded-lg border transition-all cursor-grab active:cursor-grabbing select-none ${dragOverIndex === index ? 'border-emerald-500 bg-emerald-500/10 scale-[1.02]' : draggedIndex === index ? 'opacity-40 border-stone-400' : `${bgMain} ${borderSub}`}`}
+      >
+        <GripVertical size={16} className={textSub} />
+        <button onClick={() => openEditMember(m)} className={`flex-1 text-left text-xs font-bold px-1 py-1 truncate ${editMemberId === m.hexId ? 'text-emerald-500' : textMain}`}>
+          {m.name}
+        </button>
+        <button onClick={(e) => { e.stopPropagation(); deleteMember(m.hexId); }} className="p-1.5 rounded-md text-stone-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors shrink-0">
+          <Trash2 size={14} />
+        </button>
+      </div>
+    ))}
+  </div>
 </div>
           <div>
             <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>Player Name</label>
