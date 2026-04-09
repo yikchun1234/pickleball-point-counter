@@ -672,13 +672,6 @@ useEffect(() => {
   };
 }, [isDragging, dragIdx, overIdx, savedMembers]);
 
-const deleteMember = (hexId) => {
-  const updated = savedMembers.filter(m => m.hexId !== hexId);
-  setSavedMembers(updated);
-  localStorage.setItem('pb_members', JSON.stringify(updated));
-  if (editMemberId === hexId) { setEditMemberId(null); setMemberFormName(''); }
-};
-
 useEffect(() => {
   try { 
     const s = localStorage.getItem('pb_members'); 
@@ -1956,28 +1949,22 @@ const [enableTimeouts, setEnableTimeouts] = useState(0);
             <div className="flex flex-col gap-3 max-h-64 overflow-y-auto p-2 muji-scrollbar">
               {savedMembers.length === 0 && <span className={`text-sm italic ${textSub}`}>{getT('noSaved')}</span>}
               {savedMembers.map((m, idx) => (
-                <div
-                  key={m.hexId}
-                  draggable
-                  onDragStart={() => handleDragStart(idx)}
-                  onDragOver={(e) => handleDragOver(e, idx)}
-                  onDragEnter={(e) => handleDragEnter(e, idx)}
-                  onDrop={(e) => handleDrop(e, idx)}
-                  onDragEnd={handleDragEnd}
-                  style={{ touchAction: 'none' }}
-                  className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-grab active:cursor-grabbing select-none ${dragOverIdx === idx ? 'border-emerald-500 bg-emerald-500/10 scale-[1.02]' : draggedIdx === idx ? 'opacity-40 border-stone-400' : `${bgMain} ${borderSub}`}`}
-                >
-                  <div className="p-2 cursor-grab active:cursor-grabbing" draggable="true" onClick={(e) => e.stopPropagation()}>
-                    <GripVertical size={20} className={textSub} />
-                  </div>
-                  <button onClick={() => openEditMember(m)} className={`flex-1 text-left text-sm font-bold px-2 py-2 truncate ${editMemberId === m.hexId ? 'text-emerald-500' : textMain}`}>
-                    {m.name}
-                  </button>
-                  <button onClick={(e) => { e.stopPropagation(); deleteMember(m.hexId); }} className="p-2 rounded-lg text-stone-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors shrink-0">
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              ))}
+<div
+key={m.hexId}
+onPointerDown={handlePointerDown(idx)}
+className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-grab active:cursor-grabbing select-none touch-none ${overIdx === idx ? 'border-emerald-500 bg-emerald-500/10 scale-[1.02]' : dragIdx === idx ? 'opacity-40 border-stone-400' : `${bgMain} ${borderSub}`}`}
+>
+<div className="p-2 cursor-grab active:cursor-grabbing" draggable="true" onClick={(e) => e.stopPropagation()}>
+<GripVertical size={20} className={textSub} />
+</div>
+<button onClick={() => openEditMember(m)} className={`flex-1 text-left text-sm font-bold px-2 py-2 truncate ${editMemberId === m.hexId ? 'text-emerald-500' : textMain}`}>
+{m.name}
+</button>
+<button onClick={(e) => { e.stopPropagation(); deleteMember(m.hexId); }} className="p-2 rounded-lg text-stone-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors shrink-0">
+<Trash2 size={18} />
+</button>
+</div>
+))}
             </div>
           </div>
           <div>
