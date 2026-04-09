@@ -623,19 +623,54 @@
           const [editingMatchId, setEditingMatchId] = useState(null);
           const [showLegacyAlert, setShowLegacyAlert] = useState(false);
           const [showZeroPointAlert, setShowZeroPointAlert] = useState(false);
-          const [showHighPointWarning, setShowHighPointWarning] = useState(false);
-// --- PLAYER MANAGEMENT ---
+const [showHighPointWarning, setShowHighPointWarning] = useState(false);
+// --- PLAYER MANAGEMENT LOGIC ---
 const [showMemberModal, setShowMemberModal] = useState(false);
 const [savedMembers, setSavedMembers] = useState([]);
+const [playerSelectTarget, setPlayerSelectTarget] = useState(null); // Tracks which textbox opened the popup
 const [editMemberId, setEditMemberId] = useState(null);
 const [memberFormName, setMemberFormName] = useState('');
 
 useEffect(() => {
-  try { const s = localStorage.getItem('pb_members'); if(s) setSavedMembers(JSON.parse(s)); } catch(e){}
+  try { 
+    const s = localStorage.getItem('pb_members'); 
+    if(s) setSavedMembers(JSON.parse(s)); 
+  } catch(e){}
 }, []);
 
-const openAddMember = () => { setMemberFormName(''); setEditMemberId(null); setShowMemberModal(true); };
-const openEditMember = (m) => { setMemberFormName(m.name); setEditMemberId(m.hexId); setShowMemberModal(true); };
+const openAddMember = () => { 
+  setMemberFormName(''); 
+  setEditMemberId(null); 
+  setPlayerSelectTarget(null); 
+  setShowMemberModal(true); 
+};
+
+const openPlayerSelect = (target) => {
+  setPlayerSelectTarget(target);
+  setEditMemberId(null);
+  setMemberFormName('');
+  setShowMemberModal(true);
+};
+
+const handlePlayerSelect = (member) => {
+  if (!playerSelectTarget) return;
+  if (playerSelectTarget === 't1Left') setT1PLeftInput(member.name);
+  else if (playerSelectTarget === 't1Right') setT1PRightInput(member.name);
+  else if (playerSelectTarget === 't2Left') setT2PLeftInput(member.name);
+  else if (playerSelectTarget === 't2Right') setT2PRightInput(member.name);
+  setShowMemberModal(false);
+  setPlayerSelectTarget(null);
+};
+
+const getSelectedPlayers = () => {
+  const selected = new Set();
+  if (t1PLeftInput) selected.add(t1PLeftInput);
+  if (t1PRightInput) selected.add(t1PRightInput);
+  if (t2PLeftInput) selected.add(t2PLeftInput);
+  if (t2PRightInput) selected.add(t2PRightInput);
+  return selected;
+};
+
 const saveOrUpdateMember = () => {
   const name = memberFormName.trim();
   if (!name) return;
@@ -649,10 +684,9 @@ const saveOrUpdateMember = () => {
   }
   setSavedMembers(updated);
   localStorage.setItem('pb_members', JSON.stringify(updated));
-  setShowMemberModal(false); setEditMemberId(null); setMemberFormName('');
+  setShowMemberModal(false); setEditMemberId(null); setMemberFormName(''); setPlayerSelectTarget(null);
 };
-          
-          const [enableTimeouts, setEnableTimeouts] = useState(0);
+const [enableTimeouts, setEnableTimeouts] = useState(0);
           const [enableTimeoutsSetup, setEnableTimeoutsSetup] = useState(0);
           const [t1Timeouts, setT1Timeouts] = useState(2);
           const [t2Timeouts, setT2Timeouts] = useState(2);
@@ -1442,36 +1476,58 @@ const saveOrUpdateMember = () => {
                       <div className="space-y-4">
                         <div><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('matchTitlePlaceholder')}</label><input type="text" placeholder={getT('untitledMatch')} value={matchTitleInput} onChange={(e) => setMatchTitleInput(e.target.value)} className={`w-full px-4 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} focus:outline-none focus:ring-2 focus:ring-emerald-500/50`} /></div>
                         {pendingGame.mode === 'single' ? (
-<div className="flex flex-col gap-4">
-  {[{lbl:getT('t1Name'),val:t1PLeftInput,set:setT1PLeftInput,id:'t1'},{lbl:getT('t2Name'),val:t2PLeftInput,set:setT2PLeftInput,id:'t2'}].map(p=>(
-    <div key={p.id}>
-      <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1 ${textSub}`}>{getT('selectFromList')}</label>
-      <div className="flex flex-wrap gap-1.5 mb-1.5 min-h-[28px]">
-        {savedMembers.length===0&&<span className={`text-xs italic ${textSub}`}>{getT('noSaved')}</span>}
-        {savedMembers.slice(0,5).map(m=>(<button key={m.hexId} onClick={()=>p.set(m.name)} className={`px-2.5 py-1 rounded text-[11px] font-bold border transition-all ${p.val===m.name?'bg-emerald-500 text-white border-emerald-500 shadow-sm':`${bgMain} ${borderSub} ${textSub} hover:border-emerald-400`}`}>{m.name}</button>))}
-        {savedMembers.length>5&&<span className={`text-xs ${textSub} self-center`}>+{savedMembers.length-5}</span>}
-      </div>
-      <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{p.lbl}</label>
-      <input type="text" placeholder={p.lbl} value={p.val} onChange={(e)=>p.set(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} />
+<div className="flex gap-3">
+  <div className="flex-1">
+    <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('t1Name')}</label>
+    <div className="flex gap-2">
+      <input type="text" placeholder={getT('t1Name')} value={t1PLeftInput} onChange={(e) => setT1PLeftInput(e.target.value)} className={`flex-1 px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} />
+      <button onClick={() => openPlayerSelect('t1Left')} className={`px-3 py-2.5 rounded-xl border ${borderSub} ${bgCard} ${textSub} hover:text-emerald-500 hover:border-emerald-500/50 transition-all active:scale-95`}><Users size={16}/></button>
     </div>
-  ))}
+  </div>
+  <div className="flex-1">
+    <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('t2Name')}</label>
+    <div className="flex gap-2">
+      <input type="text" placeholder={getT('t2Name')} value={t2PLeftInput} onChange={(e) => setT2PLeftInput(e.target.value)} className={`flex-1 px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} />
+      <button onClick={() => openPlayerSelect('t2Left')} className={`px-3 py-2.5 rounded-xl border ${borderSub} ${bgCard} ${textSub} hover:text-emerald-500 hover:border-emerald-500/50 transition-all active:scale-95`}><Users size={16}/></button>
+    </div>
+  </div>
 </div>
 ) : (
 <div className="space-y-3">
-  {[{lbl:getT('t1P1'),court:getT('oddCourt'),val:t1PLeftInput,set:setT1PLeftInput},{lbl:getT('t1P2'),court:getT('evenCourt'),val:t1PRightInput,set:setT1PRightInput},{lbl:getT('t2P1'),court:getT('oddCourt'),val:t2PLeftInput,set:setT2PLeftInput},{lbl:getT('t2P2'),court:getT('evenCourt'),val:t2PRightInput,set:setT2PRightInput}].map((p,idx)=>(
-    <div key={idx}>
-      <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1 ${textSub}`}>{getT('selectFromList')}</label>
-      <div className="flex flex-wrap gap-1.5 mb-1.5 min-h-[28px]">
-        {savedMembers.length===0&&<span className={`text-xs italic ${textSub}`}>{getT('noSaved')}</span>}
-        {savedMembers.slice(0,4).map(m=>(<button key={m.hexId} onClick={()=>p.set(m.name)} className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-all ${p.val===m.name?'bg-emerald-500 text-white border-emerald-500 shadow-sm':`${bgMain} ${borderSub} ${textSub} hover:border-emerald-400`}`}>{m.name}</button>))}
-      </div>
-      <div className="flex items-end gap-1.5 sm:gap-2">
-        <div className="flex-1 min-w-0"><label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{p.lbl} <span className="opacity-70 lowercase text-[8px]">{p.court}</span></label><input type="text" placeholder={p.lbl} value={p.val} onChange={(e)=>p.set(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
-        {(idx===0||idx===2)&&<button onClick={()=>{if(idx===0){const t=t1PLeftInput;setT1PLeftInput(t1PRightInput);setT1PRightInput(t);}else{const t=t2PLeftInput;setT2PLeftInput(t2PRightInput);setT2PRightInput(t);}}} className={`mb-1 p-2 rounded-full ${bgMain} border ${borderSub} text-stone-400 hover:text-emerald-500 hover:border-emerald-500/30 transition-all active:scale-95 shrink-0`} title="Swap"><ArrowRightLeft size={16}/></button>}
-        <div className="w-0"></div>
+  <div className="flex items-end gap-1.5 sm:gap-2">
+    <div className="flex-1 min-w-0">
+      <label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t1P1')} <span className="opacity-70 lowercase text-[8px]">{getT('oddCourt')}</span></label>
+      <div className="flex gap-1.5">
+        <input type="text" placeholder={getT('t1P1')} value={t1PLeftInput} onChange={(e) => setT1PLeftInput(e.target.value)} className={`flex-1 px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} />
+        <button onClick={() => openPlayerSelect('t1Left')} className={`px-3 py-2.5 rounded-xl border ${borderSub} ${bgCard} ${textSub} hover:text-emerald-500 hover:border-emerald-500/50 transition-all active:scale-95`}><Users size={16}/></button>
       </div>
     </div>
-  ))}
+    <button onClick={() => { const temp = t1PLeftInput; setT1PLeftInput(t1PRightInput); setT1PRightInput(temp); }} className={`mb-1 p-2 rounded-full ${bgMain} border ${borderSub} text-stone-400 hover:text-emerald-500 hover:border-emerald-500/30 transition-all active:scale-95 shrink-0`} title="Swap Players"><ArrowRightLeft size={16} /></button>
+    <div className="flex-1 min-w-0">
+      <label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t1P2')} <span className="opacity-70 lowercase text-[8px]">{getT('evenCourt')}</span></label>
+      <div className="flex gap-1.5">
+        <input type="text" placeholder={getT('t1P2')} value={t1PRightInput} onChange={(e) => setT1PRightInput(e.target.value)} className={`flex-1 px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} />
+        <button onClick={() => openPlayerSelect('t1Right')} className={`px-3 py-2.5 rounded-xl border ${borderSub} ${bgCard} ${textSub} hover:text-emerald-500 hover:border-emerald-500/50 transition-all active:scale-95`}><Users size={16}/></button>
+      </div>
+    </div>
+  </div>
+  <div className="flex items-end gap-1.5 sm:gap-2">
+    <div className="flex-1 min-w-0">
+      <label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t2P1')} <span className="opacity-70 lowercase text-[8px]">{getT('oddCourt')}</span></label>
+      <div className="flex gap-1.5">
+        <input type="text" placeholder={getT('t2P1')} value={t2PLeftInput} onChange={(e) => setT2PLeftInput(e.target.value)} className={`flex-1 px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} />
+        <button onClick={() => openPlayerSelect('t2Left')} className={`px-3 py-2.5 rounded-xl border ${borderSub} ${bgCard} ${textSub} hover:text-emerald-500 hover:border-emerald-500/50 transition-all active:scale-95`}><Users size={16}/></button>
+      </div>
+    </div>
+    <button onClick={() => { const temp = t2PLeftInput; setT2PLeftInput(t2PRightInput); setT2PRightInput(temp); }} className={`mb-1 p-2 rounded-full ${bgMain} border ${borderSub} text-stone-400 hover:text-emerald-500 hover:border-emerald-500/30 transition-all active:scale-95 shrink-0`} title="Swap Players"><ArrowRightLeft size={16} /></button>
+    <div className="flex-1 min-w-0">
+      <label className={`block w-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5 whitespace-nowrap truncate ${textSub}`}>{getT('t2P2')} <span className="opacity-70 lowercase text-[8px]">{getT('evenCourt')}</span></label>
+      <div className="flex gap-1.5">
+        <input type="text" placeholder={getT('t2P2')} value={t2PRightInput} onChange={(e) => setT2PRightInput(e.target.value)} className={`flex-1 px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} />
+        <button onClick={() => openPlayerSelect('t2Right')} className={`px-3 py-2.5 rounded-xl border ${borderSub} ${bgCard} ${textSub} hover:text-emerald-500 hover:border-emerald-500/50 transition-all active:scale-95`}><Users size={16}/></button>
+      </div>
+    </div>
+  </div>
 </div>
 )}
                         <div className="flex flex-col gap-1.5 mt-2 mb-2">
@@ -1829,28 +1885,52 @@ const saveOrUpdateMember = () => {
                 </div>
               )}
                 
-              {showMemberModal && (
+{showMemberModal && (
 <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={()=>setShowMemberModal(false)}></div>
   <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden`}>
-    <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50"><h2 className={`text-xl font-bold ${textMain}`}>{editMemberId ? getT('editMember') : getT('addMember')}</h2></div>
+    <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50 flex justify-between items-center">
+      <h2 className={`text-xl font-bold ${textMain}`}>{playerSelectTarget ? "Select Player" : (editMemberId ? getT('editMember') : getT('addMember'))}</h2>
+      {playerSelectTarget && <p className={`text-xs ${textSub}`}>Tap a player to fill the field</p>}
+    </div>
     <div className="px-6 py-4 overflow-y-auto muji-scrollbar flex-1 overscroll-contain space-y-4">
-      <div>
-        <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>Saved Players</label>
-        <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-1">
-          {savedMembers.length===0&&<span className={`text-xs italic ${textSub}`}>{getT('noSaved')}</span>}
-          {savedMembers.map(m=>(<button key={m.hexId} onClick={()=>openEditMember(m)} className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${editMemberId===m.hexId?'bg-emerald-500 text-white border-emerald-500 shadow-sm':`${bgMain} ${borderSub} ${textMain} hover:border-emerald-400/50`}`}>{m.name}</button>))}
+      {playerSelectTarget ? (
+        <div>
+          <div className={`text-xs ${textSub} mb-3`}>Currently selected: {Array.from(getSelectedPlayers()).join(', ') || 'None'}</div>
+          <div className="space-y-2">
+            {savedMembers.length===0 && <span className={`text-xs italic ${textSub}`}>No saved players yet.</span>}
+            {savedMembers.filter(m => !getSelectedPlayers().has(m.name)).map(m => (
+              <button key={m.hexId} onClick={() => handlePlayerSelect(m)} className={`w-full text-left px-4 py-3 rounded-xl border ${borderSub} ${bgMain} ${textMain} hover:border-emerald-500/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all active:scale-[0.99] flex items-center justify-between`}>
+                <span className="font-semibold">{m.name}</span>
+                <ChevronRight size={16} className={textSub} />
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
-      <div>
-        <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>Player Name</label>
-        <input type="text" value={memberFormName} onChange={(e)=>setMemberFormName(e.target.value)} placeholder="Type name..." className={`w-full px-4 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} focus:outline-none focus:ring-2 focus:ring-emerald-500/50`} />
-      </div>
+      ) : (
+        <>
+          <div>
+            <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>Saved Players</label>
+            <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-1">
+              {savedMembers.length===0&&<span className={`text-xs italic ${textSub}`}>No saved players yet.</span>}
+              {savedMembers.map(m=>(<button key={m.hexId} onClick={()=>{ setMemberFormName(m.name); setEditMemberId(m.hexId); }} className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${editMemberId===m.hexId?'bg-emerald-500 text-white border-emerald-500 shadow-sm':`${bgMain} ${borderSub} ${textMain} hover:border-emerald-400/50`}`}>{m.name}</button>))}
+            </div>
+          </div>
+          <div>
+            <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>Player Name</label>
+            <input type="text" value={memberFormName} onChange={(e)=>setMemberFormName(e.target.value)} placeholder="Type name..." className={`w-full px-4 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} focus:outline-none focus:ring-2 focus:ring-emerald-500/50`} />
+          </div>
+        </>
+      )}
     </div>
     <div className="p-6 pt-4 flex-shrink-0 border-t border-stone-100 dark:border-stone-800/50">
-      <button onClick={saveOrUpdateMember} disabled={!memberFormName.trim()} className={`w-full py-3 rounded-xl font-bold text-white transition-colors ${memberFormName.trim()?'bg-emerald-500 hover:bg-emerald-600 shadow-md':'bg-stone-400 cursor-not-allowed'}`}>
-        {editMemberId ? getT('updateMember') : getT('saveMember')}
-      </button>
+      {playerSelectTarget ? (
+        <button onClick={() => {setShowMemberModal(false); setPlayerSelectTarget(null);}} className={`w-full py-3 rounded-xl font-bold ${textSub} border ${borderSub} hover:${textMain}`}>Cancel</button>
+      ) : (
+        <button onClick={saveOrUpdateMember} disabled={!memberFormName.trim()} className={`w-full py-3 rounded-xl font-bold text-white transition-colors ${memberFormName.trim()?'bg-emerald-500 hover:bg-emerald-600 shadow-md':'bg-stone-400 cursor-not-allowed'}`}>
+          {editMemberId ? getT('updateMember') : getT('saveMember')}
+        </button>
+      )}
     </div>
   </div>
 </div>
