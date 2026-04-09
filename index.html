@@ -1470,7 +1470,6 @@ const [enableTimeouts, setEnableTimeouts] = useState(0);
                   <div className={`relative w-full max-w-sm flex flex-col ${bgCard} border ${borderSub} rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden`}>
                     <div className="p-6 pb-4 flex-shrink-0 border-b border-stone-100 dark:border-stone-800/50 flex justify-between items-center">
   <h2 className={`text-xl font-bold ${textMain} pr-4`}>{pendingGame.mode === 'single' ? getT('singles') : getT('doubles')} - {pendingGame.rules === 'standard' ? getT('stdTitle') : pendingGame.rules === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</h2>
-  <button onClick={() => setShowAddMemberModal(true)} className={`px-3 py-1.5 rounded-lg text-xs font-bold border ${borderSub} ${textSub} hover:text-emerald-500 hover:border-emerald-500/50 transition-colors flex items-center gap-1`}><Users size={14}/> {getT('manageMembers')}</button>
 </div>
                     <div className="px-6 py-4 overflow-y-auto muji-scrollbar flex-1 overscroll-contain">
                       <div className="space-y-4">
