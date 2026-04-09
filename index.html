@@ -622,6 +622,8 @@
           const [recoverGameData, setRecoverGameData] = useState(null);
           const [editingMatchId, setEditingMatchId] = useState(null);
           const [showLegacyAlert, setShowLegacyAlert] = useState(false);
+          const [showZeroPointAlert, setShowZeroPointAlert] = useState(false);
+          const [showHighPointWarning, setShowHighPointWarning] = useState(false);
           
           const [enableTimeouts, setEnableTimeouts] = useState(0);
           const [enableTimeoutsSetup, setEnableTimeoutsSetup] = useState(0);
@@ -733,7 +735,7 @@
           }, [appState, pendingGame]);
 
           // Guard previewData check safely
-         const isModalOpen = !!(pendingGame || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || (recoverGameData && appState !== 'splash') || showWinnerOverlay || secretGame || showTimeoutConfirm || isExporting || showResetModal || showShareAppModal || showLegacyAlert || previewData);
+         const isModalOpen = !!(pendingGame || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || (recoverGameData && appState !== 'splash') || showWinnerOverlay || secretGame || showTimeoutConfirm || isExporting || showResetModal || showShareAppModal || showLegacyAlert || showZeroPointAlert || showHighPointWarning || previewData);
 
           useEffect(() => {
               if (isModalOpen) document.body.style.overflow = 'hidden'; else document.body.style.overflow = '';
@@ -938,7 +940,28 @@
             setWinner(null); setWinReason('score'); setShowWinnerOverlay(false); setAppState('game'); setRecoverGameData(null);
           };
 
-          const startGame = (mode, rules, title, p1_left, p1_right, p2_left, p2_right, cPlayTo, cWinBy, enableSwitch, startServ, useTimeouts) => {
+          const confirmStartGame = () => {
+            startGame(pendingGame.mode, pendingGame.rules, matchTitleInput, pendingGame.mode === 'single' ? t1PLeftInput : t1PLeftInput, pendingGame.mode === 'single' ? '' : t1PRightInput, pendingGame.mode === 'single' ? t2PLeftInput : t2PLeftInput, pendingGame.mode === 'single' ? '' : t2PRightInput, parseInt(customPlayTo) || 11, customWinBy, enableSwitchEnds, startingServer, enableTimeoutsSetup);
+            setPendingGame(null);
+            setShowHighPointWarning(false);
+          };
+
+          const handleAttemptStartGame = () => {
+            if (pendingGame.rules === 'custom') {
+                const pTo = parseInt(customPlayTo);
+                if (isNaN(pTo) || pTo <= 0) {
+                    setShowZeroPointAlert(true);
+                    return;
+                }
+                if (pTo >= 26) {
+                    setShowHighPointWarning(true);
+                    return;
+                }
+            }
+            confirmStartGame();
+          };
+
+          const startGame = (mode, rules, title, p1_left, p1_right, p2_left, p2_right, cPlayTo, cWinBy, enableSwitch, startServ, useTimeouts) => {
             let pTo = 11; let wBy = 2; if (rules === '14-point') { pTo = 15; wBy = 1; } if (rules === 'custom') { pTo = cPlayTo; wBy = cWinBy; }
             setCurrentMatchId(Date.now()); setMatchTitle(title); setGameMode(mode); setRuleSet(rules); setPlayTo(pTo); setWinByMargin(wBy); setEnableSwitchEnds(enableSwitch);
             if (mode === 'single') { setT1PLeft(p1_left || getT('t1Name')); setT1PRight(''); setT2PLeft(p2_left || getT('t2Name')); setT2PRight(''); } 
@@ -1416,7 +1439,7 @@
                         </div>
                         {pendingGame.rules === 'custom' && (
                           <div className="flex gap-3">
-                            <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('playTo')}</label><input type="number" inputMode="numeric" pattern="[0-9]*" value={customPlayTo} onChange={(e) => setCustomPlayTo(parseInt(e.target.value)||11)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
+                            <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('playTo')}</label><input type="number" inputMode="numeric" pattern="[0-9]*" value={customPlayTo} onChange={(e) => setCustomPlayTo(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none`} /></div>
                             <div className="flex-1"><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('winBy')}</label><select value={customWinBy} onChange={(e) => setCustomWinBy(parseInt(e.target.value))} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none cursor-pointer`}><option value={1}>1</option><option value={2}>2</option></select></div>
                           </div>
                         )}
@@ -1448,7 +1471,7 @@
                     <div className="p-6 pt-4 flex-shrink-0 border-t border-stone-100 dark:border-stone-800/50">
                       <div className="flex gap-3">
                         <button onClick={() => setPendingGame(null)} className={`flex-1 py-3 rounded-xl font-semibold border ${borderSub} ${textSub} hover:${textMain}`}>{getT('cancel')}</button>
-                        <button onClick={() => { startGame(pendingGame.mode, pendingGame.rules, matchTitleInput, pendingGame.mode === 'single' ? t1PLeftInput : t1PLeftInput, pendingGame.mode === 'single' ? '' : t1PRightInput, pendingGame.mode === 'single' ? t2PLeftInput : t2PLeftInput, pendingGame.mode === 'single' ? '' : t2PRightInput, customPlayTo, customWinBy, enableSwitchEnds, startingServer, enableTimeoutsSetup); setPendingGame(null); }} className={`flex-1 py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-md transition-colors`}>{getT('startMatch')}</button>
+                        <button onClick={handleAttemptStartGame} className={`flex-1 py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-md transition-colors`}>{getT('startMatch')}</button>
                       </div>
                     </div>
                   </div>
@@ -1642,6 +1665,33 @@
                   </div>
                 </div>
               )}
+
+              {showZeroPointAlert && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowZeroPointAlert(false)}></div>
+                  <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl text-center animate-screen-enter`}>
+                    <AlertTriangle size={48} className="mx-auto text-amber-500 mb-4" />
+                    <h2 className={`text-lg font-bold mb-2 ${textMain}`}>Invalid Points</h2>
+                    <p className={`text-sm mb-6 ${textSub}`}>At least 1 point is required to start the game.</p>
+                    <button onClick={() => setShowZeroPointAlert(false)} className={`w-full py-3 rounded-xl font-bold text-white bg-amber-500 hover:bg-amber-600 shadow-md transition-colors`}>{getT('gotIt')}</button>
+                  </div>
+                </div>
+              )}
+
+              {showHighPointWarning && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setShowHighPointWarning(false)}></div>
+                  <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl text-center animate-screen-enter`}>
+                    <AlertTriangle size={48} className="mx-auto text-rose-500 mb-4" />
+                    <h2 className={`text-lg font-bold mb-2 ${textMain}`}>High Point Target</h2>
+                    <p className={`text-sm mb-6 ${textSub}`}>Are you sure you want to continue? This point target is more than human can handle.</p>
+                    <div className="flex gap-3">
+                      <button onClick={() => setShowHighPointWarning(false)} className={`flex-1 py-3 rounded-xl font-semibold border ${borderSub} ${textSub} hover:${textMain}`}>Cancel</button>
+                      <button onClick={confirmStartGame} className={`flex-1 py-3 rounded-xl font-bold text-white bg-rose-500 hover:bg-rose-600 shadow-md`}>Continue</button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {previewData && (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ touchAction: 'none' }}>
