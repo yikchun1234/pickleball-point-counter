@@ -671,6 +671,12 @@ const getSelectedPlayers = () => {
   return selected;
 };
 
+const deleteMember = (hexId) => {
+  const updated = savedMembers.filter(m => m.hexId !== hexId);
+  setSavedMembers(updated);
+  localStorage.setItem('pb_members', JSON.stringify(updated));
+  if (editMemberId === hexId) { setEditMemberId(null); setMemberFormName(''); }
+};
 const saveOrUpdateMember = () => {
   const name = memberFormName.trim();
   if (!name) return;
@@ -796,7 +802,7 @@ const [enableTimeouts, setEnableTimeouts] = useState(0);
           }, [appState, pendingGame]);
 
           // Guard previewData check safely
-         const isModalOpen = !!(pendingGame || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || (recoverGameData && appState !== 'splash') || showWinnerOverlay || secretGame || showTimeoutConfirm || isExporting || showResetModal || showShareAppModal || showLegacyAlert || showZeroPointAlert || showHighPointWarning || previewData);
+         const isModalOpen = !!(pendingGame || showMemberModal || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || (recoverGameData && appState !== 'splash') || showWinnerOverlay || secretGame || showTimeoutConfirm || isExporting || showResetModal || showShareAppModal || showLegacyAlert || showZeroPointAlert || showHighPointWarning || previewData);
 
           useEffect(() => {
               if (isModalOpen) document.body.style.overflow = 'hidden'; else document.body.style.overflow = '';
@@ -1900,13 +1906,18 @@ const [enableTimeouts, setEnableTimeouts] = useState(0);
         </div>
       ) : (
         <>
-          <div>
-            <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>Saved Players</label>
-            <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-1">
-              {savedMembers.length===0&&<span className={`text-xs italic ${textSub}`}>No saved players yet.</span>}
-              {savedMembers.map(m=>(<button key={m.hexId} onClick={()=>{ setMemberFormName(m.name); setEditMemberId(m.hexId); }} className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${editMemberId===m.hexId?'bg-emerald-500 text-white border-emerald-500 shadow-sm':`${bgMain} ${borderSub} ${textMain} hover:border-emerald-400/50`}`}>{m.name}</button>))}
-            </div>
-          </div>
+<div>
+<label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>Saved Players</label>
+<div className="flex flex-col gap-2 max-h-32 overflow-y-auto p-1">
+  {savedMembers.length===0 && <span className={`text-xs italic ${textSub}`}>{getT('noSaved')}</span>}
+  {savedMembers.map(m => (
+    <div key={m.hexId} className={`flex items-center justify-between p-1.5 rounded-lg border transition-all ${editMemberId===m.hexId ? 'bg-emerald-500/10 border-emerald-500/50' : `${bgMain} ${borderSub}`}`}>
+      <button onClick={() => openEditMember(m)} className={`flex-1 text-left text-xs font-bold px-2 py-1 truncate ${editMemberId===m.hexId ? 'text-emerald-500' : textMain}`}>{m.name}</button>
+      <button onClick={(e) => { e.stopPropagation(); deleteMember(m.hexId); }} className="p-1.5 text-stone-400 hover:text-rose-500 transition-colors"><Trash2 size={14} /></button>
+    </div>
+  ))}
+</div>
+</div>
           <div>
             <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>Player Name</label>
             <input type="text" value={memberFormName} onChange={(e)=>setMemberFormName(e.target.value)} placeholder="Type name..." className={`w-full px-4 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} focus:outline-none focus:ring-2 focus:ring-emerald-500/50`} />
