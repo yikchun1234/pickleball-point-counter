@@ -631,46 +631,22 @@ const [savedMembers, setSavedMembers] = useState([]);
 const [editMemberId, setEditMemberId] = useState(null);
 const [memberFormName, setMemberFormName] = useState('');
 const [playerSelectTarget, setPlayerSelectTarget] = useState(null); // 't1Left','t1Right','t2Left','t2Right'
-// --- DRAG & DROP STATE (MOBILE + DESKTOP) ---
+// --- DRAG & DROP STATE ---
 const [dragIdx, setDragIdx] = useState(null);
 const [overIdx, setOverIdx] = useState(null);
-const [isDragging, setIsDragging] = useState(false);
-
-const handlePointerDown = (idx) => (e) => {
-  if (e.pointerType === 'touch') e.preventDefault(); // Prevents page scroll on mobile
-  setDragIdx(idx);
-  setOverIdx(idx);
-  setIsDragging(true);
+const handleDragStart = (idx) => setDragIdx(idx);
+const handleDragOver = (e, idx) => { e.preventDefault(); setOverIdx(idx); };
+const handleDragEnd = () => { setDragIdx(null); setOverIdx(null); };
+const handleDrop = (e, idx) => {
+e.preventDefault();
+if (dragIdx === null || dragIdx === idx) return;
+const updated = [...savedMembers];
+const [item] = updated.splice(dragIdx, 1);
+updated.splice(idx, 0, item);
+setSavedMembers(updated);
+localStorage.setItem('pb_members', JSON.stringify(updated));
+handleDragEnd();
 };
-
-useEffect(() => {
-  const handleMove = (e) => {
-    if (!isDragging || dragIdx === null) return;
-    const touch = e.touches ? e.touches[0] : e;
-    const el = document.elementFromPoint(touch.clientX, touch.clientY);
-    if (el && el.dataset.idx !== undefined) {
-      setOverIdx(parseInt(el.dataset.idx));
-    }
-  };
-  const handleUp = () => {
-    if (dragIdx !== null && overIdx !== null && dragIdx !== overIdx) {
-      const updated = [...savedMembers];
-      const [item] = updated.splice(dragIdx, 1);
-      updated.splice(overIdx, 0, item);
-      setSavedMembers(updated);
-      localStorage.setItem('pb_members', JSON.stringify(updated));
-    }
-    setDragIdx(null); setOverIdx(null); setIsDragging(false);
-  };
-  if (isDragging) {
-    window.addEventListener('pointermove', handleMove);
-    window.addEventListener('pointerup', handleUp);
-  }
-  return () => {
-    window.removeEventListener('pointermove', handleMove);
-    window.removeEventListener('pointerup', handleUp);
-  };
-}, [isDragging, dragIdx, overIdx, savedMembers]);
 
 useEffect(() => {
   try { 
@@ -1951,10 +1927,16 @@ const [enableTimeouts, setEnableTimeouts] = useState(0);
               {savedMembers.map((m, idx) => (
 <div
 key={m.hexId}
-onPointerDown={handlePointerDown(idx)}
-className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-grab active:cursor-grabbing select-none touch-none ${overIdx === idx ? 'border-emerald-500 bg-emerald-500/10 scale-[1.02]' : dragIdx === idx ? 'opacity-40 border-stone-400' : `${bgMain} ${borderSub}`}`}
+data-idx={idx}
+draggable="true"
+onDragStart={(e) => { e.dataTransfer.effectAllowed = 'move'; handleDragStart(idx); }}
+onDragOver={(e) => handleDragOver(e, idx)}
+onDragEnter={(e) => e.preventDefault()}
+onDrop={(e) => handleDrop(e, idx)}
+onDragEnd={handleDragEnd}
+className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-grab active:cursor-grabbing select-none ${dragOverIdx === idx ? 'border-emerald-500 bg-emerald-500/10 scale-[1.02]' : dragIdx === idx ? 'opacity-40 border-stone-400' : `${bgMain} ${borderSub}`}`}
 >
-<div className="p-2 cursor-grab active:cursor-grabbing" draggable="true" onClick={(e) => e.stopPropagation()}>
+<div className="p-2 cursor-grab active:cursor-grabbing" style={{ touchAction: 'none' }}>
 <GripVertical size={20} className={textSub} />
 </div>
 <button onClick={() => openEditMember(m)} className={`flex-1 text-left text-sm font-bold px-2 py-2 truncate ${editMemberId === m.hexId ? 'text-emerald-500' : textMain}`}>
