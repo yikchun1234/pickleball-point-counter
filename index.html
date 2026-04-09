@@ -695,14 +695,7 @@ const getSelectedPlayers = () => {
   if (t2PRightInput) selected.add(t2PRightInput);
   return selected;
 };
-
-const deleteMember = (hexId) => {
-  const updated = savedMembers.filter(m => m.hexId !== hexId);
-  setSavedMembers(updated);
-  localStorage.setItem('pb_members', JSON.stringify(updated));
-  if (editMemberId === hexId) { setEditMemberId(null); setMemberFormName(''); }
-};
-            
+          
 const saveOrUpdateMember = () => {
   const name = memberFormName.trim();
   if (!name) return;
