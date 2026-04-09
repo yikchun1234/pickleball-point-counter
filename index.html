@@ -631,21 +631,29 @@ const [savedMembers, setSavedMembers] = useState([]);
 const [editMemberId, setEditMemberId] = useState(null);
 const [memberFormName, setMemberFormName] = useState('');
 const [playerSelectTarget, setPlayerSelectTarget] = useState(null); // 't1Left','t1Right','t2Left','t2Right'
-// --- DRAG & DROP STATE ---
+// --- DRAG & DROP & DELETE LOGIC ---
 const [dragIdx, setDragIdx] = useState(null);
 const [overIdx, setOverIdx] = useState(null);
+
 const handleDragStart = (idx) => setDragIdx(idx);
 const handleDragOver = (e, idx) => { e.preventDefault(); setOverIdx(idx); };
 const handleDragEnd = () => { setDragIdx(null); setOverIdx(null); };
 const handleDrop = (e, idx) => {
-e.preventDefault();
-if (dragIdx === null || dragIdx === idx) return;
-const updated = [...savedMembers];
-const [item] = updated.splice(dragIdx, 1);
-updated.splice(idx, 0, item);
-setSavedMembers(updated);
-localStorage.setItem('pb_members', JSON.stringify(updated));
-handleDragEnd();
+  e.preventDefault();
+  if (dragIdx === null || dragIdx === idx) return;
+  const updated = [...savedMembers];
+  const [item] = updated.splice(dragIdx, 1);
+  updated.splice(idx, 0, item);
+  setSavedMembers(updated);
+  localStorage.setItem('pb_members', JSON.stringify(updated));
+  handleDragEnd();
+};
+
+const deleteMember = (hexId) => {
+  const updated = savedMembers.filter(m => m.hexId !== hexId);
+  setSavedMembers(updated);
+  localStorage.setItem('pb_members', JSON.stringify(updated));
+  if (editMemberId === hexId) { setEditMemberId(null); setMemberFormName(''); }
 };
 
 useEffect(() => {
@@ -1924,28 +1932,28 @@ const [enableTimeouts, setEnableTimeouts] = useState(0);
             <label className={`block text-[11px] font-bold uppercase tracking-widest mb-2 ${textSub}`}>Saved Players</label>
             <div className="flex flex-col gap-3 max-h-64 overflow-y-auto p-2 muji-scrollbar">
               {savedMembers.length === 0 && <span className={`text-sm italic ${textSub}`}>{getT('noSaved')}</span>}
-              {savedMembers.map((m, idx) => (
-<div
-key={m.hexId}
-data-idx={idx}
-draggable="true"
-onDragStart={(e) => { e.dataTransfer.effectAllowed = 'move'; handleDragStart(idx); }}
-onDragOver={(e) => handleDragOver(e, idx)}
-onDragEnter={(e) => e.preventDefault()}
-onDrop={(e) => handleDrop(e, idx)}
-onDragEnd={handleDragEnd}
-className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-grab active:cursor-grabbing select-none ${dragOverIdx === idx ? 'border-emerald-500 bg-emerald-500/10 scale-[1.02]' : dragIdx === idx ? 'opacity-40 border-stone-400' : `${bgMain} ${borderSub}`}`}
->
-<div className="p-2 cursor-grab active:cursor-grabbing" style={{ touchAction: 'none' }}>
-<GripVertical size={20} className={textSub} />
-</div>
-<button onClick={() => openEditMember(m)} className={`flex-1 text-left text-sm font-bold px-2 py-2 truncate ${editMemberId === m.hexId ? 'text-emerald-500' : textMain}`}>
-{m.name}
-</button>
-<button onClick={(e) => { e.stopPropagation(); deleteMember(m.hexId); }} className="p-2 rounded-lg text-stone-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors shrink-0">
-<Trash2 size={18} />
-</button>
-</div>
+{savedMembers.map((m, idx) => (
+  <div
+    key={m.hexId}
+    data-idx={idx}
+    draggable="true"
+    onDragStart={(e) => { e.dataTransfer.effectAllowed = 'move'; handleDragStart(idx); }}
+    onDragOver={(e) => handleDragOver(e, idx)}
+    onDragEnter={(e) => e.preventDefault()}
+    onDrop={(e) => handleDrop(e, idx)}
+    onDragEnd={handleDragEnd}
+    className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-grab active:cursor-grabbing select-none ${overIdx === idx ? 'border-emerald-500 bg-emerald-500/10 scale-[1.02]' : dragIdx === idx ? 'opacity-50 border-stone-400' : `${bgMain} ${borderSub}`}`}
+  >
+    <div className="p-2 cursor-grab active:cursor-grabbing text-stone-400 hover:text-emerald-500 transition-colors">
+      <GripVertical size={18} />
+    </div>
+    <button onClick={() => openEditMember(m)} className={`flex-1 text-left text-sm font-bold px-1 truncate ${editMemberId === m.hexId ? 'text-emerald-500' : textMain}`}>
+      {m.name}
+    </button>
+    <button onClick={(e) => { e.stopPropagation(); deleteMember(m.hexId); }} className="p-2 rounded-lg text-stone-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors shrink-0">
+      <Trash2 size={18} />
+    </button>
+  </div>
 ))}
             </div>
           </div>
