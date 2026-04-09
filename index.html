@@ -1477,15 +1477,19 @@ const [enableTimeouts, setEnableTimeouts] = useState(0);
                         <div><label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('matchTitlePlaceholder')}</label><input type="text" placeholder={getT('untitledMatch')} value={matchTitleInput} onChange={(e) => setMatchTitleInput(e.target.value)} className={`w-full px-4 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} focus:outline-none focus:ring-2 focus:ring-emerald-500/50`} /></div>
 {pendingGame.mode === 'single' ? (
 <div className="flex gap-3">
-  <div className="flex-1 relative">
+  <div className="flex-1">
     <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('t1Name')}</label>
-    <input type="text" placeholder={getT('t1Name')} value={t1PLeftInput} onChange={(e) => setT1PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none pr-10`} />
-    <button onClick={() => openPlayerSelect('t1Left')} className={`absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg ${textSub} hover:text-emerald-500 transition-colors`} title="Select Player"><Users size={16}/></button>
+    <div className="relative">
+      <input type="text" placeholder={getT('t1Name')} value={t1PLeftInput} onChange={(e) => setT1PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none pr-10`} />
+      <button onClick={() => openPlayerSelect('t1Left')} className={`absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg ${textSub} hover:text-emerald-500 transition-colors`} title="Select Player"><Users size={16}/></button>
+    </div>
   </div>
-  <div className="flex-1 relative">
+  <div className="flex-1">
     <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1.5 ${textSub}`}>{getT('t2Name')}</label>
-    <input type="text" placeholder={getT('t2Name')} value={t2PLeftInput} onChange={(e) => setT2PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none pr-10`} />
-    <button onClick={() => openPlayerSelect('t2Left')} className={`absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg ${textSub} hover:text-emerald-500 transition-colors`} title="Select Player"><Users size={16}/></button>
+    <div className="relative">
+      <input type="text" placeholder={getT('t2Name')} value={t2PLeftInput} onChange={(e) => setT2PLeftInput(e.target.value)} className={`w-full px-3 py-2.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-sm focus:outline-none pr-10`} />
+      <button onClick={() => openPlayerSelect('t2Left')} className={`absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg ${textSub} hover:text-emerald-500 transition-colors`} title="Select Player"><Users size={16}/></button>
+    </div>
   </div>
 </div>
 ) : (
