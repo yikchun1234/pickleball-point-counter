@@ -636,14 +636,14 @@ const [dragIndex, setDragIndex] = useState(null);
 const [hoverIndex, setHoverIndex] = useState(null);
 const pressTimer = useRef(null);
 
-// 1. Start Timer on Press
+// 1. Start Timer on Press (0.5 Seconds)
 const handleItemPointerDown = (index, e) => {
   if (e.target.closest('button')) return; // Ignore buttons (Edit/Delete)
   pressTimer.current = setTimeout(() => {
     setDragIndex(index);
     setHoverIndex(index);
     if (navigator.vibrate) navigator.vibrate(20); // Haptic Feedback
-  }, 1000); // 1 Second Delay
+  }, 500); // ⬅️ CHANGED TO 0.5 SECONDS
 };
 
 // 2. Global Move Handler
@@ -1966,16 +1966,17 @@ const [enableTimeouts, setEnableTimeouts] = useState(0);
             <div className="flex flex-col gap-3 max-h-64 overflow-y-auto p-2 muji-scrollbar">
               {savedMembers.length === 0 && <span className={`text-sm italic ${textSub}`}>{getT('noSaved')}</span>}
 {savedMembers.map((m, idx) => (
-<div
-key={m.hexId}
-data-idx={idx}
-onPointerDown={(e) => handleItemPointerDown(idx, e)}
-className={`flex items-center gap-3 p-3 rounded-xl border transition-all select-none ${
-  dragIndex === idx ? 'opacity-40 scale-105 pointer-events-none shadow-lg border-emerald-500 bg-emerald-500/10' : 
-  hoverIndex === idx ? 'border-emerald-500 bg-emerald-500/10 scale-[1.02]' : 
-  `${bgMain} ${borderSub} cursor-grab`
-}`}
->
+  <div
+    key={m.hexId}
+    onPointerDown={(e) => handleItemPointerDown(idx, e)}
+    className={`flex items-center gap-3 p-3 rounded-xl border transition-all select-none ${
+      dragIndex === idx 
+        ? 'opacity-40 scale-105 pointer-events-none shadow-lg border-emerald-500 bg-emerald-500/10' 
+        : hoverIndex === idx 
+          ? 'border-emerald-500 bg-emerald-500/10 scale-[1.02] z-10' 
+          : `${bgMain} ${borderSub} cursor-grab active:cursor-grabbing`
+    }`}
+  >
 <div className={`p-2 rounded-lg ${dragIndex === idx ? 'bg-emerald-500 text-white' : 'bg-stone-100 dark:bg-stone-800'}`}>
 <GripVertical size={18} className={dragIndex === idx ? 'text-white' : textSub} />
 </div>
