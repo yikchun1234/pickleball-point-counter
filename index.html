@@ -2062,7 +2062,7 @@ const [enableTimeouts, setEnableTimeouts] = useState(0);
                 className={`fixed pointer-events-none flex items-center gap-2 p-2 rounded-xl border border-emerald-500 bg-emerald-50 dark:bg-emerald-900/90 shadow-[0_15px_30px_rgba(16,185,129,0.3)] z-[9999] opacity-95`}
                 style={{
                   left: dragPos.x - dragOffset.x,
-                  top: dragPos.y - dragOffset.y + 1, // Reduced from 15 to 1 for a much tighter alignment
+                  top: dragPos.y - dragOffset.y - 2, // Reduced from 15 to 1 for a much tighter alignment
                   width: dragOffset.width || 'auto',
                   transform: 'scale(1.02)',
                   transformOrigin: 'center center',
