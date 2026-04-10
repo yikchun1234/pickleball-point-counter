@@ -631,157 +631,171 @@ const [savedMembers, setSavedMembers] = useState([]);
 const [editMemberId, setEditMemberId] = useState(null);
 const [memberFormName, setMemberFormName] = useState('');
 const [playerSelectTarget, setPlayerSelectTarget] = useState(null); // 't1Left','t1Right','t2Left','t2Right'
-// --- ADVANCED DRAG & DROP ---
-const listRef = useRef(null);
-const [dragState, setDragState] = useState({
-  active: false,
-  index: -1,
-  clone: null,
-  startX: 0,
-  startY: 0,
-  currentX: 0,
-  currentY: 0,
-  hoverIndex: -1
-});
-const pressTimer = useRef(null);
-const scrollInterval = useRef(null);
+// --- ADVANCED DRAG & DROP (GHOST + AUTO-SCROLL + 0.5s DEBOUNCE) ---
+const handlePointerDown = (idx, e) => {
+  if (e.button !== 0) return; // Only left click
+  e.preventDefault();
+  e.stopPropagation();
+  
+  const el = e.currentTarget;
+  const rect = el.getBoundingClientRect();
+  dragRef.current.initialRect = rect;
 
-// 1. Start Timer on Press
-const handlePointerDown = (index, e) => {
-  if (e.button !== 0 && e.pointerType === 'mouse') return; // Only left click
-  if (e.target.closest('button')) return; // Ignore buttons
+  // Create Floating Ghost Element
+  const ghost = el.cloneNode(true);
+  ghost.style.position = 'fixed';
+  ghost.style.left = `${rect.left}px`;
+  ghost.style.top = `${rect.top}px`;
+  ghost.style.width = `${rect.width}px`;
+  ghost.style.height = `${rect.height}px`;
+  ghost.style.pointerEvents = 'none';
+  ghost.style.zIndex = '9999';
+  ghost.style.opacity = '0.9';
+  ghost.style.transform = 'scale(1.05)';
+  ghost.style.boxShadow = '0 12px 30px rgba(0,0,0,0.25)';
+  ghost.style.transition = 'none';
+  ghost.style.borderRadius = '12px';
+  document.body.appendChild(ghost);
+  dragRef.current.ghostEl = ghost;
 
-  // Start the 0.5s timer
-  pressTimer.current = setTimeout(() => {
-    if (navigator.vibrate) navigator.vibrate(30);
-    
-    // Get element dimensions for clone
-    const el = e.currentTarget;
-    const rect = el.getBoundingClientRect();
-    
-    // Create Ghost Element
-    const clone = el.cloneNode(true);
-    clone.style.position = 'fixed';
-    clone.style.left = `${rect.left}px`;
-    clone.style.top = `${rect.top}px`;
-    clone.style.width = `${rect.width}px`;
-    clone.style.height = `${rect.height}px`;
-    clone.style.opacity = '0.85';
-    clone.style.zIndex = '9999';
-    clone.style.pointerEvents = 'none'; // Allow finger to sense items below
-    clone.style.boxShadow = '0 10px 25px rgba(0,0,0,0.3)';
-    clone.style.transform = 'scale(1.05)';
-    clone.style.transition = 'none';
-    document.body.appendChild(clone);
+  // Update drag state
+  dragRef.current = { ...dragRef.current, isDragging: true, dragIdx: idx, hoverIdx: idx };
+  setIsDragging(true);
+  setHoverIdx(idx);
 
-    setDragState(prev => ({
-      ...prev,
-      active: true,
-      index: index,
-      clone: clone,
-      startX: e.clientX,
-      startY: e.clientY,
-      currentX: e.clientX,
-      currentY: e.clientY,
-      hoverIndex: index
-    }));
-  }, 500); // 0.5 Second Delay
+  // Attach global listeners
+  window.addEventListener('pointermove', handlePointerMove, { passive: false });
+  window.addEventListener('pointerup', handlePointerUp);
+  window.addEventListener('pointercancel', handlePointerUp);
 };
 
-// 2. Global Move Handler (Inside useEffect)
+const handlePointerMove = (e) => {
+  if (!dragRef.current.isDragging) return;
+  e.preventDefault();
+
+  // Smooth Ghost Movement (centered on cursor)
+  if (dragRef.current.ghostEl && dragRef.current.initialRect) {
+    const w = dragRef.current.initialRect.width;
+    const h = dragRef.current.initialRect.height;
+    dragRef.current.ghostEl.style.left = `${e.clientX - w / 2}px`;
+    dragRef.current.ghostEl.style.top = `${e.clientY - h / 2}px`;
+  }
+
+  // 🔄 AUTO-SCROLL LOGIC (with 0.5s cooldown)
+  if (scrollContainerRef.current) {
+    const container = scrollContainerRef.current;
+    const rect = container.getBoundingClientRect();
+    const threshold = 60;
+    const speed = 12;
+    const now = Date.now();
+
+    const stopScroll = () => { 
+      if (autoScrollRef.current) { 
+        clearInterval(autoScrollRef.current); 
+        autoScrollRef.current = null; 
+      } 
+    };
+
+    // Only scroll if 0.5s has passed since last scroll action (prevents jitter)
+    if (now - dragRef.current.lastScrollTime > 500) {
+      if (e.clientY < rect.top + threshold) {
+        if (!autoScrollRef.current) {
+          autoScrollRef.current = setInterval(() => {
+            container.scrollTop -= speed;
+            dragRef.current.lastScrollTime = Date.now();
+          }, 16);
+        }
+      } else if (e.clientY > rect.bottom - threshold) {
+        if (!autoScrollRef.current) {
+          autoScrollRef.current = setInterval(() => {
+            container.scrollTop += speed;
+            dragRef.current.lastScrollTime = Date.now();
+          }, 16);
+        }
+      } else { 
+        stopScroll(); 
+      }
+    }
+  }
+
+  // 🔍 Detect Hover Target (with 0.5s debounce to prevent flicker)
+  if (dragRef.current.ghostEl) dragRef.current.ghostEl.style.display = 'none';
+  const elBelow = document.elementFromPoint(e.clientX, e.clientY);
+  if (dragRef.current.ghostEl) dragRef.current.ghostEl.style.display = 'block';
+
+  if (elBelow) {
+    const item = elBelow.closest('[data-member-idx]');
+    if (item) {
+      const idx = parseInt(item.dataset.memberIdx);
+      if (dragRef.current.hoverIdx !== idx) {
+        // Debounce hover changes by 0.5 seconds
+        if (hoverDebounceRef.current) clearTimeout(hoverDebounceRef.current);
+        hoverDebounceRef.current = setTimeout(() => {
+          dragRef.current.hoverIdx = idx;
+          setHoverIdx(idx);
+        }, 500); // ← 0.5 second debounce
+      }
+    }
+  }
+};
+
+const handlePointerUp = () => {
+  // Cleanup listeners
+  window.removeEventListener('pointermove', handlePointerMove);
+  window.removeEventListener('pointerup', handlePointerUp);
+  window.removeEventListener('pointercancel', handlePointerUp);
+  
+  // Stop auto-scroll
+  if (autoScrollRef.current) clearInterval(autoScrollRef.current);
+  if (hoverDebounceRef.current) clearTimeout(hoverDebounceRef.current);
+
+  // Apply Reorder (if valid)
+  if (dragRef.current.isDragging && 
+      dragRef.current.dragIdx !== dragRef.current.hoverIdx && 
+      dragRef.current.hoverIdx !== null) {
+    
+    const newMembers = [...savedMembers];
+    const [item] = newMembers.splice(dragRef.current.dragIdx, 1);
+    newMembers.splice(dragRef.current.hoverIdx, 0, item);
+    setSavedMembers(newMembers);
+    localStorage.setItem('pb_members', JSON.stringify(newMembers));
+  }
+
+  // Cleanup Ghost with 0.5s fade-out animation
+  if (dragRef.current.ghostEl) {
+    dragRef.current.ghostEl.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+    dragRef.current.ghostEl.style.opacity = '0';
+    dragRef.current.ghostEl.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      dragRef.current.ghostEl?.remove();
+    }, 500); // ← 0.5 second cleanup delay
+  }
+
+  // Reset state
+  dragRef.current = { 
+    isDragging: false, 
+    dragIdx: null, 
+    hoverIdx: null, 
+    ghostEl: null, 
+    initialRect: null,
+    lastScrollTime: 0 
+  };
+  setIsDragging(false);
+  setHoverIdx(null);
+};
+
+// Cleanup drag listeners on unmount
 useEffect(() => {
-  if (!dragState.active) return;
-
-  const handleMove = (e) => {
-    // Update Ghost Position
-    if (dragState.clone) {
-      const rect = dragState.clone.getBoundingClientRect();
-      const width = rect.width;
-      const height = rect.height;
-      
-      dragState.clone.style.left = `${e.clientX - width / 2}px`;
-      dragState.clone.style.top = `${e.clientY - height / 2}px`;
-    }
-
-    setDragState(prev => ({ ...prev, currentX: e.clientX, currentY: e.clientY }));
-
-    // Detect Hover Target
-    // Temporarily hide clone to find element underneath
-    if (dragState.clone) dragState.clone.style.display = 'none';
-    const elBelow = document.elementFromPoint(e.clientX, e.clientY);
-    if (dragState.clone) dragState.clone.style.display = 'block';
-
-    if (elBelow) {
-      const itemDiv = elBelow.closest('[data-member-idx]');
-      if (itemDiv) {
-        const idx = parseInt(itemDiv.getAttribute('data-member-idx'));
-        setDragState(prev => ({ ...prev, hoverIndex: idx }));
-      }
-    }
-
-    // Auto-Scroll Logic
-    if (listRef.current) {
-      const containerRect = listRef.current.getBoundingClientRect();
-      const threshold = 60;
-      const speed = 10;
-
-      if (e.clientY < containerRect.top + threshold) {
-        if (!scrollInterval.current) {
-          scrollInterval.current = setInterval(() => {
-            listRef.current.scrollTop -= speed;
-          }, 16);
-        }
-      } else if (e.clientY > containerRect.bottom - threshold) {
-        if (!scrollInterval.current) {
-          scrollInterval.current = setInterval(() => {
-            listRef.current.scrollTop += speed;
-          }, 16);
-        }
-      } else {
-        clearInterval(scrollInterval.current);
-        scrollInterval.current = null;
-      }
-    }
-  };
-
-  const handleUp = () => {
-    clearTimeout(pressTimer.current);
-    clearInterval(scrollInterval.current);
-    scrollInterval.current = null;
-
-    if (dragState.active) {
-      // Reorder List
-      if (dragState.index !== dragState.hoverIndex && dragState.hoverIndex !== -1) {
-        const newMembers = [...savedMembers];
-        const [item] = newMembers.splice(dragState.index, 1);
-        newMembers.splice(dragState.hoverIndex, 0, item);
-        setSavedMembers(newMembers);
-        localStorage.setItem('pb_members', JSON.stringify(newMembers));
-      }
-
-      // Cleanup
-      if (dragState.clone) {
-        dragState.clone.style.transition = 'opacity 0.2s';
-        dragState.clone.style.opacity = '0';
-        setTimeout(() => {
-          if (dragState.clone) dragState.clone.remove();
-        }, 200);
-      }
-      
-      setDragState({ active: false, index: -1, clone: null, startX: 0, startY: 0, currentX: 0, currentY: 0, hoverIndex: -1 });
-    }
-  };
-
-  window.addEventListener('pointermove', handleMove);
-  window.addEventListener('pointerup', handleUp);
-
   return () => {
-    window.removeEventListener('pointermove', handleMove);
-    window.removeEventListener('pointerup', handleUp);
-    clearInterval(scrollInterval.current);
+    if (autoScrollRef.current) clearInterval(autoScrollRef.current);
+    if (hoverDebounceRef.current) clearTimeout(hoverDebounceRef.current);
+    if (dragRef.current.ghostEl) dragRef.current.ghostEl.remove();
+    window.removeEventListener('pointermove', handlePointerMove);
+    window.removeEventListener('pointerup', handlePointerUp);
+    window.removeEventListener('pointercancel', handlePointerUp);
   };
-}, [dragState.active, dragState.clone, dragState.index, dragState.hoverIndex, savedMembers]);
-
+}, []);
+            
 // Normal Delete Function
 const deleteMember = (hexId) => {
   const updated = savedMembers.filter(m => m.hexId !== hexId);
@@ -2064,41 +2078,52 @@ const [enableTimeouts, setEnableTimeouts] = useState(0);
         <>
           <div>
             <label className={`block text-[11px] font-bold uppercase tracking-widest mb-2 ${textSub}`}>Saved Players</label>
-            <div className="flex flex-col gap-3 max-h-64 overflow-y-auto p-2 muji-scrollbar">
+            <div ref={scrollContainerRef} className="flex flex-col gap-3 max-h-64 overflow-y-auto p-2 muji-scrollbar">
               {savedMembers.length === 0 && <span className={`text-sm italic ${textSub}`}>{getT('noSaved')}</span>}
 <div ref={listRef} className="flex flex-col gap-3 max-h-64 overflow-y-auto p-2 muji-scrollbar touch-none">
-{savedMembers.map((m, idx) => {
-  const isDragging = dragState.active && dragState.index === idx;
-  const isHoverTarget = dragState.active && dragState.hoverIndex === idx && !isDragging;
-
-  return (
-    <div
-      key={m.hexId}
-      data-member-idx={idx}
-      onPointerDown={(e) => handlePointerDown(idx, e)}
-      className={`flex items-center gap-3 p-3 rounded-xl border transition-all select-none relative ${
-        isDragging ? 'opacity-30 scale-95 border-stone-300 bg-stone-100 dark:bg-stone-800' :
-        isHoverTarget ? 'border-emerald-500 bg-emerald-500/10 scale-[1.02] z-10' :
-        `${bgMain} ${borderSub} cursor-grab`
+{savedMembers.map((m, idx) => (
+  <div
+    key={m.hexId}
+    data-member-idx={idx}
+    onPointerDown={(e) => handlePointerDown(idx, e)}
+    style={{ 
+      touchAction: 'none',
+      userSelect: isDragging ? 'none' : 'auto'
+    }}
+    className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 select-none
+      ${isDragging && hoverIdx === idx && dragRef.current.dragIdx !== idx 
+        ? 'border-emerald-500 bg-emerald-500/15 scale-[1.02] shadow-lg' 
+        : isDragging && dragRef.current.dragIdx === idx 
+          ? 'opacity-30 border-stone-400 scale-95' 
+          : `${bgMain} ${borderSub} hover:border-emerald-400/50 cursor-grab active:cursor-grabbing`
       }`}
+  >
+    {/* Drag Handle */}
+    <div 
+      className="p-2 cursor-grab active:cursor-grabbing" 
+      onPointerDown={(e) => { e.stopPropagation(); }}
     >
-      {/* Grip Icon */}
-      <div className={`p-2 rounded-lg transition-colors ${isDragging ? 'bg-stone-300 text-stone-500' : 'bg-stone-100 dark:bg-stone-800 text-stone-400'}`}>
-        <GripVertical size={18} />
-      </div>
-
-      {/* Name */}
-      <button onClick={() => openEditMember(m)} className={`flex-1 text-left text-sm font-bold px-2 py-2 truncate ${editMemberId === m.hexId ? 'text-emerald-500' : textMain}`}>
-        {m.name}
-      </button>
-
-      {/* Delete Button */}
-      <button onClick={(e) => { e.stopPropagation(); deleteMember(m.hexId); }} className="p-2 rounded-lg text-stone-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors shrink-0">
-        <Trash2 size={18} />
-      </button>
+      <GripVertical size={20} className={textSub} />
     </div>
-  );
-})}
+    
+    {/* Member Name */}
+    <button 
+      onClick={() => openEditMember(m)} 
+      className={`flex-1 text-left text-sm font-bold px-2 py-2 truncate 
+        ${editMemberId === m.hexId ? 'text-emerald-500' : textMain}`}
+    >
+      {m.name}
+    </button>
+    
+    {/* Delete Button */}
+    <button 
+      onClick={(e) => { e.stopPropagation(); deleteMember(m.hexId); }} 
+      className="p-2 rounded-lg text-stone-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors shrink-0"
+    >
+      <Trash2 size={18} />
+    </button>
+  </div>
+))}
 </div>
             </div>
           </div>
