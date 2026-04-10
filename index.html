@@ -635,6 +635,7 @@ const [playerSelectTarget, setPlayerSelectTarget] = useState(null); // 't1Left',
 const [dragIndex, setDragIndex] = useState(null);
 const [hoverIndex, setHoverIndex] = useState(null);
 const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
+const [dragOffset, setDragOffset] = useState({ x: 0, y: 0, width: 0 });
 const pressTimer = useRef(null);
 const scrollInterval = useRef(null);
 
@@ -643,7 +644,14 @@ const handleItemPointerDown = (index, e) => {
   const clientX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
   const clientY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
   
-  // Track initial position immediately so ghost spawns correctly
+  // Calculate exact offset and width to prevent jumping
+  const rect = e.currentTarget.getBoundingClientRect();
+  setDragOffset({
+    x: clientX - rect.left,
+    y: clientY - rect.top,
+    width: rect.width
+  });
+  
   setDragPos({ x: clientX, y: clientY });
 
   pressTimer.current = setTimeout(() => {
@@ -2051,12 +2059,14 @@ const [enableTimeouts, setEnableTimeouts] = useState(0);
             {/* GHOST SHADOW */}
             {dragIndex !== null && savedMembers[dragIndex] && (
               <div
-                className={`fixed pointer-events-none flex items-center gap-2 p-2 rounded-xl border border-emerald-500 bg-emerald-50 dark:bg-emerald-900/90 shadow-[0_10px_20px_rgba(16,185,129,0.25)] z-[9999] opacity-95 scale-105 w-[calc(100%-3.5rem)] max-w-[390px]`}
+                className={`fixed pointer-events-none flex items-center gap-2 p-2 rounded-xl border border-emerald-500 bg-emerald-50 dark:bg-emerald-900/90 shadow-[0_15px_30px_rgba(16,185,129,0.3)] z-[9999] opacity-95`}
                 style={{
-                  left: dragPos.x,
-                  top: dragPos.y,
-                  transform: 'translate(-50%, -50%)',
-                  transition: 'transform 0.05s linear'
+                  left: dragPos.x - dragOffset.x,
+                  top: dragPos.y - dragOffset.y + 15, // +15 shifts it slightly lower as requested
+                  width: dragOffset.width || 'auto', // Locks the width exactly to the list
+                  transform: 'scale(1.02)', // Subtle zoom effect without shifting alignment
+                  transformOrigin: 'center center',
+                  transition: 'top 0.05s linear, left 0.05s linear'
                 }}
               >
                 <div className="p-1.5 rounded-lg bg-emerald-500 text-white shadow-sm">
