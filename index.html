@@ -631,55 +631,84 @@ const [savedMembers, setSavedMembers] = useState([]);
 const [editMemberId, setEditMemberId] = useState(null);
 const [memberFormName, setMemberFormName] = useState('');
 const [playerSelectTarget, setPlayerSelectTarget] = useState(null); // 't1Left','t1Right','t2Left','t2Right'
-// --- DRAG & DROP (LONG PRESS 1 SEC) ---
+// --- DRAG & DROP (LONG PRESS 0.5 SEC) WITH GHOST & SCROLL ---
 const [dragIndex, setDragIndex] = useState(null);
 const [hoverIndex, setHoverIndex] = useState(null);
+const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
 const pressTimer = useRef(null);
+const scrollInterval = useRef(null);
 
-// 1. Start Timer on Press (0.5 Seconds)
 const handleItemPointerDown = (index, e) => {
-  if (e.target.closest('button')) return; // Ignore buttons (Edit/Delete)
-  pressTimer.current = setTimeout(() => {
-    setDragIndex(index);
-    setHoverIndex(index);
-    if (navigator.vibrate) navigator.vibrate(20); // Haptic Feedback
-  }, 500); // ⬅️ CHANGED TO 0.5 SECONDS
+  if (e.target.closest('button')) return;
+  const clientX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+  const clientY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+  pressTimer.current = setTimeout(() => {
+    setDragIndex(index);
+    setHoverIndex(index);
+    setDragPos({ x: clientX, y: clientY });
+    if (navigator.vibrate) navigator.vibrate(20); 
+  }, 500); 
 };
 
-// 2. Global Move Handler
 useEffect(() => {
-  const handleMove = (e) => {
-    if (dragIndex === null) {
-      // Not dragging yet? Moving means cancel long-press (User is scrolling)
-      clearTimeout(pressTimer.current);
-      return;
-    }
-    // Dragging: Detect element under finger
-    const el = document.elementFromPoint(e.clientX, e.clientY);
-    if (el && el.dataset.idx !== undefined) {
-      setHoverIndex(parseInt(el.dataset.idx));
-    }
-  };
+  const handleMove = (e) => {
+    if (dragIndex !== null && e.cancelable) e.preventDefault(); // Stop native scrolling while dragging
+    
+    const clientX = e.clientX || (e.touches && e.touches.length > 0 ? e.touches[0].clientX : 0);
+    const clientY = e.clientY || (e.touches && e.touches.length > 0 ? e.touches[0].clientY : 0);
 
-  const handleUp = () => {
-    clearTimeout(pressTimer.current);
-    if (dragIndex !== null && hoverIndex !== null && dragIndex !== hoverIndex) {
-      const updated = [...savedMembers];
-      const [item] = updated.splice(dragIndex, 1);
-      updated.splice(hoverIndex, 0, item);
-      setSavedMembers(updated);
-      localStorage.setItem('pb_members', JSON.stringify(updated));
-    }
-    setDragIndex(null);
-    setHoverIndex(null);
-  };
+    if (dragIndex === null) {
+      clearTimeout(pressTimer.current);
+      return;
+    }
 
-  window.addEventListener('pointermove', handleMove);
-  window.addEventListener('pointerup', handleUp);
-  return () => {
-    window.removeEventListener('pointermove', handleMove);
-    window.removeEventListener('pointerup', handleUp);
-  };
+    setDragPos({ x: clientX, y: clientY });
+
+    // 1. Auto-scroll logic
+    const scrollContainer = document.getElementById('player-list-scroll');
+    if (scrollContainer) {
+      const rect = scrollContainer.getBoundingClientRect();
+      const scrollSpeed = 6;
+      clearInterval(scrollInterval.current);
+
+      if (clientY < rect.top + 40) {
+        scrollInterval.current = setInterval(() => { scrollContainer.scrollTop -= scrollSpeed; }, 20);
+      } else if (clientY > rect.bottom - 40) {
+        scrollInterval.current = setInterval(() => { scrollContainer.scrollTop += scrollSpeed; }, 20);
+      }
+    }
+
+    // 2. Detect element under finger
+    const el = document.elementFromPoint(clientX, clientY);
+    const listEl = el ? el.closest('[data-idx]') : null;
+    if (listEl && listEl.dataset.idx !== undefined) {
+      setHoverIndex(parseInt(listEl.dataset.idx));
+    }
+  };
+
+  const handleUp = () => {
+    clearTimeout(pressTimer.current);
+    clearInterval(scrollInterval.current);
+    if (dragIndex !== null && hoverIndex !== null && dragIndex !== hoverIndex) {
+      const updated = [...savedMembers];
+      const [item] = updated.splice(dragIndex, 1);
+      updated.splice(hoverIndex, 0, item);
+      setSavedMembers(updated);
+      localStorage.setItem('pb_members', JSON.stringify(updated));
+    }
+    setDragIndex(null);
+    setHoverIndex(null);
+  };
+
+  window.addEventListener('pointermove', handleMove, { passive: false });
+  window.addEventListener('pointerup', handleUp);
+  window.addEventListener('pointercancel', handleUp);
+  return () => {
+    window.removeEventListener('pointermove', handleMove);
+    window.removeEventListener('pointerup', handleUp);
+    window.removeEventListener('pointercancel', handleUp);
+    clearInterval(scrollInterval.current);
+  };
 }, [dragIndex, hoverIndex, savedMembers]);
 
 const deleteMember = (hexId) => {
@@ -1961,23 +1990,25 @@ const [enableTimeouts, setEnableTimeouts] = useState(0);
         </div>
       ) : (
         <>
-          <div>
-            <label className={`block text-[11px] font-bold uppercase tracking-widest mb-2 ${textSub}`}>Saved Players</label>
-            <div className="flex flex-col gap-3 max-h-64 overflow-y-auto p-2 muji-scrollbar">
-              {savedMembers.length === 0 && <span className={`text-sm italic ${textSub}`}>{getT('noSaved')}</span>}
+          <div className="relative">
+            <label className={`block text-[11px] font-bold uppercase tracking-widest mb-2 ${textSub}`}>Saved Players</label>
+            <div id="player-list-scroll" className="flex flex-col gap-3 max-h-64 overflow-y-auto p-2 muji-scrollbar touch-pan-y">
+              {savedMembers.length === 0 && <span className={`text-sm italic ${textSub}`}>{getT('noSaved')}</span>}
 {savedMembers.map((m, idx) => (
-  <div
-    key={m.hexId}
-    onPointerDown={(e) => handleItemPointerDown(idx, e)}
-    className={`flex items-center gap-3 p-3 rounded-xl border transition-all select-none ${
-      dragIndex === idx 
-        ? 'opacity-40 scale-105 pointer-events-none shadow-lg border-emerald-500 bg-emerald-500/10' 
-        : hoverIndex === idx 
-          ? 'border-emerald-500 bg-emerald-500/10 scale-[1.02] z-10' 
-          : `${bgMain} ${borderSub} cursor-grab active:cursor-grabbing`
-    }`}
-  >
-<div className={`p-2 rounded-lg ${dragIndex === idx ? 'bg-emerald-500 text-white' : 'bg-stone-100 dark:bg-stone-800'}`}>
+  <div
+    key={m.hexId}
+    data-idx={idx}
+    onPointerDown={(e) => handleItemPointerDown(idx, e)}
+    style={{ touchAction: dragIndex !== null ? 'none' : 'auto' }}
+    className={`flex items-center gap-3 p-3 rounded-xl border transition-all select-none ${
+      dragIndex === idx 
+        ? 'opacity-30 scale-[0.98] shadow-inner border-stone-500 bg-stone-500/10 grayscale' 
+        : hoverIndex === idx && dragIndex !== null
+          ? 'border-emerald-500 bg-emerald-500/10 scale-[1.02] z-10 shadow-md translate-y-[-2px]' 
+          : `${bgMain} ${borderSub} cursor-grab active:cursor-grabbing`
+    }`}
+  >
+<div className={`p-2 rounded-lg ${dragIndex === idx ? 'bg-stone-500 text-white' : 'bg-stone-100 dark:bg-stone-800'}`}>
 <GripVertical size={18} className={dragIndex === idx ? 'text-white' : textSub} />
 </div>
 <button onClick={() => openEditMember(m)} className={`flex-1 text-left text-sm font-bold px-2 py-2 truncate ${editMemberId === m.hexId ? 'text-emerald-500' : textMain}`}>
@@ -1988,8 +2019,29 @@ const [enableTimeouts, setEnableTimeouts] = useState(0);
 </button>
 </div>
 ))}
-            </div>
-          </div>
+            </div>
+
+            {/* FLOATING GHOST SHADOW */}
+            {dragIndex !== null && savedMembers[dragIndex] && (
+              <div
+                className={`fixed pointer-events-none flex items-center gap-3 p-3 rounded-xl border border-emerald-500 bg-emerald-50 dark:bg-emerald-900/40 shadow-[0_20px_40px_rgba(0,0,0,0.3)] backdrop-blur-md z-[9999] opacity-95 scale-105 w-[calc(100%-3rem)] max-w-[380px]`}
+                style={{
+                  left: dragPos.x,
+                  top: dragPos.y,
+                  transform: 'translate(-50%, -50%)',
+                  transition: 'transform 0.05s ease'
+                }}
+              >
+                <div className="p-2 rounded-lg bg-emerald-500 text-white shadow-md">
+                  <GripVertical size={18} className="text-white" />
+                </div>
+                <div className={`flex-1 text-left text-sm font-bold px-2 py-2 truncate text-emerald-600 dark:text-emerald-400`}>
+                  {savedMembers[dragIndex].name}
+                </div>
+              </div>
+            )}
+
+          </div>
           <div>
             <label className={`block text-[11px] font-bold uppercase tracking-widest mb-2 ${textSub}`}>Player Name</label>
             <input type="text" value={memberFormName} onChange={(e)=>setMemberFormName(e.target.value)} placeholder="Type name..." className={`w-full px-5 py-3.5 rounded-xl border ${borderSub} ${bgMain} ${textMain} text-base focus:outline-none focus:ring-2 focus:ring-emerald-500/50`} />
