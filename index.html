@@ -631,57 +631,158 @@ const [savedMembers, setSavedMembers] = useState([]);
 const [editMemberId, setEditMemberId] = useState(null);
 const [memberFormName, setMemberFormName] = useState('');
 const [playerSelectTarget, setPlayerSelectTarget] = useState(null); // 't1Left','t1Right','t2Left','t2Right'
-// --- DRAG & DROP (LONG PRESS 1 SEC) ---
-const [dragIndex, setDragIndex] = useState(null);
-const [hoverIndex, setHoverIndex] = useState(null);
+// --- ADVANCED DRAG & DROP ---
+const listRef = useRef(null);
+const [dragState, setDragState] = useState({
+  active: false,
+  index: -1,
+  clone: null,
+  startX: 0,
+  startY: 0,
+  currentX: 0,
+  currentY: 0,
+  hoverIndex: -1
+});
 const pressTimer = useRef(null);
+const scrollInterval = useRef(null);
 
-// 1. Start Timer on Press (0.5 Seconds)
-const handleItemPointerDown = (index, e) => {
-  if (e.target.closest('button')) return; // Ignore buttons (Edit/Delete)
+// 1. Start Timer on Press
+const handlePointerDown = (index, e) => {
+  if (e.button !== 0 && e.pointerType === 'mouse') return; // Only left click
+  if (e.target.closest('button')) return; // Ignore buttons
+
+  // Start the 0.5s timer
   pressTimer.current = setTimeout(() => {
-    setDragIndex(index);
-    setHoverIndex(index);
-    if (navigator.vibrate) navigator.vibrate(20); // Haptic Feedback
-  }, 500); // ⬅️ CHANGED TO 0.5 SECONDS
+    if (navigator.vibrate) navigator.vibrate(30);
+    
+    // Get element dimensions for clone
+    const el = e.currentTarget;
+    const rect = el.getBoundingClientRect();
+    
+    // Create Ghost Element
+    const clone = el.cloneNode(true);
+    clone.style.position = 'fixed';
+    clone.style.left = `${rect.left}px`;
+    clone.style.top = `${rect.top}px`;
+    clone.style.width = `${rect.width}px`;
+    clone.style.height = `${rect.height}px`;
+    clone.style.opacity = '0.85';
+    clone.style.zIndex = '9999';
+    clone.style.pointerEvents = 'none'; // Allow finger to sense items below
+    clone.style.boxShadow = '0 10px 25px rgba(0,0,0,0.3)';
+    clone.style.transform = 'scale(1.05)';
+    clone.style.transition = 'none';
+    document.body.appendChild(clone);
+
+    setDragState(prev => ({
+      ...prev,
+      active: true,
+      index: index,
+      clone: clone,
+      startX: e.clientX,
+      startY: e.clientY,
+      currentX: e.clientX,
+      currentY: e.clientY,
+      hoverIndex: index
+    }));
+  }, 500); // 0.5 Second Delay
 };
 
-// 2. Global Move Handler
+// 2. Global Move Handler (Inside useEffect)
 useEffect(() => {
+  if (!dragState.active) return;
+
   const handleMove = (e) => {
-    if (dragIndex === null) {
-      // Not dragging yet? Moving means cancel long-press (User is scrolling)
-      clearTimeout(pressTimer.current);
-      return;
+    // Update Ghost Position
+    if (dragState.clone) {
+      const rect = dragState.clone.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
+      
+      dragState.clone.style.left = `${e.clientX - width / 2}px`;
+      dragState.clone.style.top = `${e.clientY - height / 2}px`;
     }
-    // Dragging: Detect element under finger
-    const el = document.elementFromPoint(e.clientX, e.clientY);
-    if (el && el.dataset.idx !== undefined) {
-      setHoverIndex(parseInt(el.dataset.idx));
+
+    setDragState(prev => ({ ...prev, currentX: e.clientX, currentY: e.clientY }));
+
+    // Detect Hover Target
+    // Temporarily hide clone to find element underneath
+    if (dragState.clone) dragState.clone.style.display = 'none';
+    const elBelow = document.elementFromPoint(e.clientX, e.clientY);
+    if (dragState.clone) dragState.clone.style.display = 'block';
+
+    if (elBelow) {
+      const itemDiv = elBelow.closest('[data-member-idx]');
+      if (itemDiv) {
+        const idx = parseInt(itemDiv.getAttribute('data-member-idx'));
+        setDragState(prev => ({ ...prev, hoverIndex: idx }));
+      }
+    }
+
+    // Auto-Scroll Logic
+    if (listRef.current) {
+      const containerRect = listRef.current.getBoundingClientRect();
+      const threshold = 60;
+      const speed = 10;
+
+      if (e.clientY < containerRect.top + threshold) {
+        if (!scrollInterval.current) {
+          scrollInterval.current = setInterval(() => {
+            listRef.current.scrollTop -= speed;
+          }, 16);
+        }
+      } else if (e.clientY > containerRect.bottom - threshold) {
+        if (!scrollInterval.current) {
+          scrollInterval.current = setInterval(() => {
+            listRef.current.scrollTop += speed;
+          }, 16);
+        }
+      } else {
+        clearInterval(scrollInterval.current);
+        scrollInterval.current = null;
+      }
     }
   };
 
   const handleUp = () => {
     clearTimeout(pressTimer.current);
-    if (dragIndex !== null && hoverIndex !== null && dragIndex !== hoverIndex) {
-      const updated = [...savedMembers];
-      const [item] = updated.splice(dragIndex, 1);
-      updated.splice(hoverIndex, 0, item);
-      setSavedMembers(updated);
-      localStorage.setItem('pb_members', JSON.stringify(updated));
+    clearInterval(scrollInterval.current);
+    scrollInterval.current = null;
+
+    if (dragState.active) {
+      // Reorder List
+      if (dragState.index !== dragState.hoverIndex && dragState.hoverIndex !== -1) {
+        const newMembers = [...savedMembers];
+        const [item] = newMembers.splice(dragState.index, 1);
+        newMembers.splice(dragState.hoverIndex, 0, item);
+        setSavedMembers(newMembers);
+        localStorage.setItem('pb_members', JSON.stringify(newMembers));
+      }
+
+      // Cleanup
+      if (dragState.clone) {
+        dragState.clone.style.transition = 'opacity 0.2s';
+        dragState.clone.style.opacity = '0';
+        setTimeout(() => {
+          if (dragState.clone) dragState.clone.remove();
+        }, 200);
+      }
+      
+      setDragState({ active: false, index: -1, clone: null, startX: 0, startY: 0, currentX: 0, currentY: 0, hoverIndex: -1 });
     }
-    setDragIndex(null);
-    setHoverIndex(null);
   };
 
   window.addEventListener('pointermove', handleMove);
   window.addEventListener('pointerup', handleUp);
+
   return () => {
     window.removeEventListener('pointermove', handleMove);
     window.removeEventListener('pointerup', handleUp);
+    clearInterval(scrollInterval.current);
   };
-}, [dragIndex, hoverIndex, savedMembers]);
+}, [dragState.active, dragState.clone, dragState.index, dragState.hoverIndex, savedMembers]);
 
+// Normal Delete Function
 const deleteMember = (hexId) => {
   const updated = savedMembers.filter(m => m.hexId !== hexId);
   setSavedMembers(updated);
@@ -1965,29 +2066,40 @@ const [enableTimeouts, setEnableTimeouts] = useState(0);
             <label className={`block text-[11px] font-bold uppercase tracking-widest mb-2 ${textSub}`}>Saved Players</label>
             <div className="flex flex-col gap-3 max-h-64 overflow-y-auto p-2 muji-scrollbar">
               {savedMembers.length === 0 && <span className={`text-sm italic ${textSub}`}>{getT('noSaved')}</span>}
-{savedMembers.map((m, idx) => (
-  <div
-    key={m.hexId}
-    onPointerDown={(e) => handleItemPointerDown(idx, e)}
-    className={`flex items-center gap-3 p-3 rounded-xl border transition-all select-none ${
-      dragIndex === idx 
-        ? 'opacity-40 scale-105 pointer-events-none shadow-lg border-emerald-500 bg-emerald-500/10' 
-        : hoverIndex === idx 
-          ? 'border-emerald-500 bg-emerald-500/10 scale-[1.02] z-10' 
-          : `${bgMain} ${borderSub} cursor-grab active:cursor-grabbing`
-    }`}
-  >
-<div className={`p-2 rounded-lg ${dragIndex === idx ? 'bg-emerald-500 text-white' : 'bg-stone-100 dark:bg-stone-800'}`}>
-<GripVertical size={18} className={dragIndex === idx ? 'text-white' : textSub} />
+<div ref={listRef} className="flex flex-col gap-3 max-h-64 overflow-y-auto p-2 muji-scrollbar touch-none">
+{savedMembers.map((m, idx) => {
+  const isDragging = dragState.active && dragState.index === idx;
+  const isHoverTarget = dragState.active && dragState.hoverIndex === idx && !isDragging;
+
+  return (
+    <div
+      key={m.hexId}
+      data-member-idx={idx}
+      onPointerDown={(e) => handlePointerDown(idx, e)}
+      className={`flex items-center gap-3 p-3 rounded-xl border transition-all select-none relative ${
+        isDragging ? 'opacity-30 scale-95 border-stone-300 bg-stone-100 dark:bg-stone-800' :
+        isHoverTarget ? 'border-emerald-500 bg-emerald-500/10 scale-[1.02] z-10' :
+        `${bgMain} ${borderSub} cursor-grab`
+      }`}
+    >
+      {/* Grip Icon */}
+      <div className={`p-2 rounded-lg transition-colors ${isDragging ? 'bg-stone-300 text-stone-500' : 'bg-stone-100 dark:bg-stone-800 text-stone-400'}`}>
+        <GripVertical size={18} />
+      </div>
+
+      {/* Name */}
+      <button onClick={() => openEditMember(m)} className={`flex-1 text-left text-sm font-bold px-2 py-2 truncate ${editMemberId === m.hexId ? 'text-emerald-500' : textMain}`}>
+        {m.name}
+      </button>
+
+      {/* Delete Button */}
+      <button onClick={(e) => { e.stopPropagation(); deleteMember(m.hexId); }} className="p-2 rounded-lg text-stone-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors shrink-0">
+        <Trash2 size={18} />
+      </button>
+    </div>
+  );
+})}
 </div>
-<button onClick={() => openEditMember(m)} className={`flex-1 text-left text-sm font-bold px-2 py-2 truncate ${editMemberId === m.hexId ? 'text-emerald-500' : textMain}`}>
-{m.name}
-</button>
-<button onClick={(e) => { e.stopPropagation(); deleteMember(m.hexId); }} className="p-2 rounded-lg text-stone-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors shrink-0">
-<Trash2 size={18} />
-</button>
-</div>
-))}
             </div>
           </div>
           <div>
