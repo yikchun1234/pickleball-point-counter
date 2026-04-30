@@ -22,6 +22,20 @@ export default {
       return new Response("API is active and ready!", { headers: corsHeaders, status: 200 });
     }
 
+    // --- RATE LIMITING (Stop Spam) ---
+    // 1. Get the user's IP address
+    const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+    
+    // 2. Check the Rate Limiter
+    const { success } = await env.RATE_LIMITER.limit({ key: ip });
+    
+    if (!success) {
+      return new Response(JSON.stringify({ error: "Too many requests. Please wait 1 minute." }), { 
+        status: 429, // 429 means "Too Many Requests"
+        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      });
+    }
+
     // -- EXPORT ROUTE (Frontend sends JSON, gets a PIN) --
     if (url.pathname === "/api/export" && request.method === "POST") {
       try {
