@@ -896,7 +896,7 @@
                     setSyncStatus('success');
                 } catch (e) {
                     setSyncStatus('error');
-                    setSyncErrorMsg('Network error. Please try again.');
+                    setSyncErrorMsg("Error: " + e.message); // This prints the REAL error!
                 }
             };
             
