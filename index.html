@@ -1881,39 +1881,45 @@
                       <div className={`text-sm ${textSub} text-left space-y-5`}>
                         <div><h3 className={`font-bold ${textMain} mb-2`}>{getT('infoHowToTitle')}</h3><ul className="space-y-2 list-none pl-1 text-xs md:text-sm"><li>{getT('infoHowTo1')}</li><li>{getT('infoHowTo2')}</li><li>{getT('infoHowTo3')}</li><li>{getT('infoHowTo4')}</li><li>{getT('infoHowTo5')}</li><li>{getT('infoHowTo6')}</li></ul></div>
                         <div className={`w-full h-px bg-stone-200 dark:bg-stone-700`}></div>
-                        <div className="flex flex-col gap-3">
-                          <div className="flex items-start gap-3">
-                            <HardDrive size={18} className={`mt-0.5 flex-shrink-0 ${accentRed}`} />
-                            <p className="leading-relaxed">
-                              {getT('infoData')} We allow secure migration from device to device using a temporary PIN.
-                            </p>
-                          </div>
-                          
-                        {/* Export / Import UI Buttons */}
-                        <div className="flex gap-3 pl-7 pt-1">
-                          <button 
-                            onClick={() => { 
-                                setShowInfo(false); 
-                                setSyncMode('export'); 
-                                setSyncStatus('idle');
-                                setShowSyncModal(true);
-                                handleExportData(); // Auto-starts generating the PIN when clicked
-                            }} 
-                            className={`flex-1 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors shadow-md flex items-center justify-center`}>
-                            Generate Export PIN
-                          </button>
-                          <button 
-                            onClick={() => { 
-                                setShowInfo(false); 
-                                setSyncMode('import'); 
-                                setSyncStatus('idle');
-                                setSyncPin('');
-                                setShowSyncModal(true);
-                            }} 
-                            className={`flex-1 py-2.5 rounded-xl text-xs font-bold border ${borderSub} ${textSub} hover:${textMain} bg-stone-50 dark:bg-stone-800/50 transition-colors shadow-sm flex items-center justify-center`}>
-                            Import from PIN
-                          </button>
+                        <div className="flex items-start gap-3">
+                          <HardDrive size={18} className={`mt-0.5 flex-shrink-0 ${accentRed}`} />
+                          <p className="leading-relaxed">{getT('infoData')}</p>
                         </div>
+                        
+                        {/* --- SEPARATED SYNC GROUP --- */}
+                        <div className={`mt-2 p-4 rounded-xl border ${borderSub} bg-stone-50 dark:bg-stone-900/30 flex flex-col gap-3`}>
+                          <div className="flex items-center gap-2">
+                            <RefreshCw size={16} className={accentGreen} />
+                            <h3 className={`font-bold text-sm ${textMain}`}>Device Sync</h3>
+                          </div>
+                          <p className={`text-xs ${textSub}`}>
+                            Securely migrate your match history and players to another device using a temporary PIN.
+                          </p>
+                          
+                          <div className="flex gap-3 pt-1">
+                            <button 
+                              onClick={() => { 
+                                  setShowInfo(false); 
+                                  setSyncMode('export'); 
+                                  setSyncStatus('idle');
+                                  setShowSyncModal(true);
+                                  handleExportData(); 
+                              }} 
+                              className={`flex-1 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors shadow-md flex items-center justify-center`}>
+                              Export PIN
+                            </button>
+                            <button 
+                              onClick={() => { 
+                                  setShowInfo(false); 
+                                  setSyncMode('import'); 
+                                  setSyncStatus('idle');
+                                  setSyncPin('');
+                                  setShowSyncModal(true);
+                              }} 
+                              className={`flex-1 py-2.5 rounded-xl text-xs font-bold border ${borderSub} ${textSub} hover:${textMain} bg-white dark:bg-stone-800 transition-colors shadow-sm flex items-center justify-center`}>
+                              Import PIN
+                            </button>
+                          </div>
                         </div>
                         <div className="flex items-start gap-3"><Github size={18} className={`mt-0.5 flex-shrink-0 ${textMain}`} /><p className="leading-relaxed">{getT('infoUsage')}</p></div>
                         <p className={`text-center pt-2 italic text-xs ${textSub}`}>{getT('infoFooter')}</p>
