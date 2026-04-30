@@ -865,40 +865,62 @@
           const [syncStatus, setSyncStatus] = React.useState('idle'); // 'idle', 'loading', 'success', 'error'
           const [syncErrorMsg, setSyncErrorMsg] = React.useState('');
             
-                      // --- CLOUD SYNC FUNCTIONS ---
+            // --- CLOUD SYNC FUNCTIONS ---
             const handleExportData = async () => {
-                setSyncStatus('loading');
-                try {
-                    // 1. Gather all Pickleball data from localStorage
-                    const exportData = {};
-                    for (let i = 0; i < localStorage.length; i++) {
-                        const key = localStorage.key(i);
-                        if (key && key.startsWith('pb_')) {
-                            exportData[key] = localStorage.getItem(key);
-                        }
+            setSyncStatus('loading');
+            try {
+                // 1. Gather all Pickleball data from localStorage
+                const exportData = {};
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    // Naturally ignores our 'sync_' cache keys because they don't start with 'pb_'
+                    if (key && key.startsWith('pb_')) {
+                        exportData[key] = localStorage.getItem(key);
                     }
-                    
-                    // 2. Compress the massive JSON into a tiny string
-                    const jsonStr = JSON.stringify(exportData);
-                    const compressed = LZString.compressToEncodedURIComponent(jsonStr);
-            
-                    // 3. Send to your Cloudflare Worker
-                    const response = await fetch('https://pickleball-sync-api.yikchun1234.workers.dev/api/export', {
-                        method: 'POST',
-                        body: compressed
-                    });
-            
-                    if (!response.ok) throw new Error('Failed to connect to server');
-                    const data = await response.json();
-                    
-                    // 4. Show the PIN to the user
-                    setSyncPin(data.pin);
-                    setSyncStatus('success');
-                } catch (e) {
-                    setSyncStatus('error');
-                    setSyncErrorMsg("Error: " + e.message); // This prints the REAL error!
                 }
-            };
+                
+                const jsonStr = JSON.stringify(exportData);
+        
+                // --- THE NEW CACHE LOGIC ---
+                const lastPin = localStorage.getItem('sync_last_pin');
+                const lastTime = localStorage.getItem('sync_last_time');
+                const lastPayload = localStorage.getItem('sync_last_payload');
+                const now = Date.now();
+        
+                // If under 14 mins (840,000 ms) AND the data hasn't changed, reuse the PIN!
+                if (lastPin && lastTime && lastPayload === jsonStr && (now - parseInt(lastTime)) < 840000) {
+                    setSyncPin(lastPin);
+                    setSyncStatus('success');
+                    return; // STOP HERE! We skip the API and save database limits.
+                }
+                // ---------------------------
+        
+                // 2. Compress the massive JSON into a tiny string
+                const compressed = LZString.compressToEncodedURIComponent(jsonStr);
+        
+                // 3. Send to your Cloudflare Worker
+                const response = await fetch('https://pickleball-sync-api.yikchun1234.workers.dev/api/export', {
+                    method: 'POST',
+                    body: compressed
+                });
+        
+                if (!response.ok) throw new Error('Failed to connect to server');
+                const data = await response.json();
+                
+                // --- SAVE THE CACHE METADATA ---
+                localStorage.setItem('sync_last_pin', data.pin);
+                localStorage.setItem('sync_last_time', now.toString());
+                localStorage.setItem('sync_last_payload', jsonStr); 
+                // -------------------------------
+        
+                // 4. Show the PIN to the user
+                setSyncPin(data.pin);
+                setSyncStatus('success');
+            } catch (e) {
+                setSyncStatus('error');
+                setSyncErrorMsg("Error: " + e.message); 
+            }
+        };
             
             const handleImportData = async () => {
                 if (!syncPin || syncPin.length !== 5) {
