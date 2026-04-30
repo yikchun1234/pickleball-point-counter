@@ -2005,6 +2005,16 @@
                         {/* IMPORT VIEW */}
                         {syncMode === 'import' && (
                             <div className="mb-6">
+                                
+                                {/* --- NEW WARNING BANNER --- */}
+                                <div className="mb-4 px-3 py-2.5 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800/50 rounded-xl text-left flex items-start gap-2">
+                                    <AlertTriangle size={16} className="text-rose-500 shrink-0 mt-0.5" />
+                                    <p className="text-xs font-bold text-rose-600 dark:text-rose-400 leading-tight">
+                                        Warning: Importing will permanently overwrite all existing matches and players currently saved on this device.
+                                    </p>
+                                </div>
+                                {/* -------------------------- */}
+                        
                                 <input 
                                     type="number" 
                                     maxLength={5}
