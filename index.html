@@ -1912,10 +1912,10 @@
                         <div className={`mt-2 p-4 rounded-xl border ${borderSub} bg-stone-50 dark:bg-stone-900/30 flex flex-col gap-3`}>
                           <div className="flex items-center gap-2">
                             <RefreshCw size={16} className={accentGreen} />
-                            <h3 className={`font-bold text-sm ${textMain}`}>Device Sync</h3>
+                            <h3 className={`font-bold text-sm ${textMain}`}>{getT('syncTitle')}</h3>
                           </div>
                           <p className={`text-xs ${textSub}`}>
-                            Securely migrate your match history and players to another device using a temporary PIN.
+                            {getT('syncDesc')}
                           </p>
                           
                           <div className="flex gap-3 pt-1">
@@ -1928,7 +1928,7 @@
                                   handleExportData(); 
                               }} 
                               className={`flex-1 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors shadow-md flex items-center justify-center`}>
-                              Export PIN
+                              {getT('exportPinBtn')}
                             </button>
                             <button 
                               onClick={() => { 
@@ -1939,7 +1939,7 @@
                                   setShowSyncModal(true);
                               }} 
                               className={`flex-1 py-2.5 rounded-xl text-xs font-bold border ${borderSub} ${textSub} hover:${textMain} bg-white dark:bg-stone-800 transition-colors shadow-sm flex items-center justify-center`}>
-                              Import PIN
+                              {getT('importPinBtn')}
                             </button>
                           </div>
                         </div>
