@@ -870,14 +870,16 @@
             setSyncStatus('loading');
             try {
                 // 1. Gather all Pickleball data from localStorage
-                const exportData = {};
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    // Naturally ignores our 'sync_' cache keys because they don't start with 'pb_'
-                    if (key && key.startsWith('pb_')) {
-                        exportData[key] = localStorage.getItem(key);
-                    }
+            const exportData = {};
+            // Ignore UI settings so changing them doesn't break the PIN cache
+            const ignoredKeys = ['pb_lang_pref', 'pb_theme_pref', 'pb_sound_pref']; 
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('pb_') && !ignoredKeys.includes(key)) {
+                    exportData[key] = localStorage.getItem(key);
                 }
+            }
                 
                 const jsonStr = JSON.stringify(exportData);
         
