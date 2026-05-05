@@ -901,7 +901,7 @@
                 const compressed = LZString.compressToEncodedURIComponent(jsonStr);
         
                 // 3. Send to your Cloudflare Worker
-                const response = await fetch('https://pickleball-sync-api.yikchun1234.workers.dev/api/export', {
+                const response = await fetch('https://cloud-sync-api.yikchun1234.workers.dev/api/export', {
                     method: 'POST',
                     body: compressed
                 });
@@ -932,7 +932,7 @@
                 setSyncStatus('loading');
                 try {
                     // 1. Fetch the compressed data using the PIN
-                    const response = await fetch(`https://pickleball-sync-api.yikchun1234.workers.dev/api/import?pin=${syncPin}`);
+                    const response = await fetch(`https://cloud-sync-api.yikchun1234.workers.dev/api/import?pin=${syncPin}`);
                     if (!response.ok) {
                         if (response.status === 404) throw new Error('Invalid or expired PIN');
                         throw new Error('Network error');
