@@ -30,6 +30,9 @@
                         <p style="font-size:0.8rem; color:#78716c; margin-top:20px;">Domain recorded: ${currentDomain || 'Unknown'}</p>
                     </div>
                 </div>`;
+            
+            // This is the magic command that completely kills the rest of the website!
+            window.stop();
             throw new Error("Execution halted: Unauthorized domain theft detected.");
         }
 
