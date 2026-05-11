@@ -929,8 +929,8 @@
         };
             
             const handleImportData = async () => {
-                if (!syncPin || syncPin.length !== 5) {
-                    setSyncErrorMsg('Please enter a 5-digit PIN');
+                if (!syncPin || syncPin.length !== 6) {
+                    setSyncErrorMsg('Please enter a 6-digit PIN');
                     return;
                 }
                 setSyncStatus('loading');
