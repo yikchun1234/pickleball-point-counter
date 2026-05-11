@@ -2042,8 +2042,8 @@
                             {syncMode === 'import' && syncStatus !== 'success' && (
                                 <button 
                                     onClick={handleImportData}
-                                    disabled={syncStatus === 'loading' || syncPin.length !== 5}
-                                    className={`flex-1 py-3 rounded-xl font-bold text-white shadow-md transition-all ${syncStatus === 'loading' || syncPin.length !== 5 ? 'bg-emerald-500/50 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-600'}`}>
+                                    disabled={syncStatus === 'loading' || syncPin.length !== 6}
+                                    className={`flex-1 py-3 rounded-xl font-bold text-white shadow-md transition-all ${syncStatus === 'loading' || syncPin.length !== 6 ? 'bg-emerald-500/50 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-600'}`}>
                                     {syncStatus === 'loading' ? getT('loading') : getT('importBtn')}
                                 </button>
                             )}
