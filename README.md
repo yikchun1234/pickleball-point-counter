@@ -1,6 +1,6 @@
 <div align="center">
   <h1>🎾 Pickleball Point Counter</h1>
-  <p><i>A minimalist, Muji-inspired Pickleball Point Counter built with React & Tailwind. PWA-ready and runs entirely as a single HTML file!</i></p>
+  <p><i>A beautifully minimal, zero-build Pickleball scoreboard. Runs entirely in your browser as a single HTML file with offline PWA support.</i></p>
   
   <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React">
   <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS">
@@ -12,54 +12,49 @@
 
 ### ✨ Features
 
-* 🧘 **Zen, Muji-Inspired UI:** Clean, distraction-free interface with smooth animations and interactive dot-matrix backgrounds. Seamlessly adapts to your device's Light & Dark modes.
-* 📜 **Multiple Rule Sets:**
-    * **Standard Scoring:** 0-0 (Singles) or 0-0-2 (Doubles) rules, play to 11, win by 2.
-    * **14-Point Rule:** Rally scoring to 15, with an optional "Must Serve to Win" sudden-death toggle at 14-14.
-    * **Custom Rules:** Fully adjust the 'Play To' score, 'Win By' margin, and toggle 'Serve to Score' on or off.
-* 🗣️ **Smart Voice Announcer & Haptics:** Built-in Text-to-Speech acts as your digital referee, announcing scores, second servers, and side-outs using high-quality voices. Includes **Smart Language Detection** to pronounce international player names natively! Subtle haptics provide tactile feedback.
-* 📍 **Court Positioning Tracker:** A dynamic, rotating mini-court visualizes exactly who is serving, receiving, and which side (Odd/Even) players should be standing on.
-* ⏱️ **Advanced Match Controls:** Track timeouts, prompt players to switch ends at half-points, safely "Undo" mistakes (even after the match ends), and easily "Reset" to play again.
-* 📊 **Visual Rally Timeline & Stats:** View a beautiful heatmap for every match to track how the game unfolded. Automatically saves completed matches to local storage to view win rates and average durations.
-* 📸 **Export as Image:** Instantly generate and share a sleek, Instagram-ready (4:5) graphic of your final scorecard to your camera roll.
-* 🌍 **Multi-Language Support (12 Languages):** English, 简体中文, 繁體中文, Bahasa Melayu, Español, Français, Tiếng Việt, ไทย, 日本語, 한국어, Deutsch, and Português.
-* 🎮 **Hidden Arcade Room:** Tap the "SOMEWHERE" 5 times to unlock a secret retro arcade featuring 8 mini-games!
+* **🧘 Zen UI & Court Positioning:** A clean, distraction-free interface. Includes a dynamic, rotating mini-court that visualizes exactly who is serving, receiving, and which side (Odd/Even) players should stand on.
+* **📜 Flexible Rule Sets:** * **Standard:** 0-0-2 (Doubles) or 0-0 (Singles), play to 11, win by 2.
+  * **14-Point Rally:** Play to 15, with an optional "Must Serve to Win" toggle at 14-14 sudden death.
+  * **Custom:** Define your own 'Play To', 'Win By', and 'Serve to Score' rules.
+* **🗣️ Smart Voice Announcer:** Built-in Text-to-Speech acts as your referee, announcing scores and side-outs using high-quality native voices across 12 languages.
+* **👻 Ghost Replay & Timeline:** A visual dot-matrix timeline of every match. Click any point in the history to view a "Ghost Replay" of exactly where players were standing at that exact moment.
+* **☁️ Cloud Sync (PIN Transfer):** Securely migrate your match history and saved player roster to another device in seconds using a 5-digit temporary PIN (Powered by Cloudflare Workers).
+* **📸 Shareable Scorecards:** Instantly generate and export a sleek, Instagram-ready (4:5) graphic of your final match results.
+* **🎮 Hidden Arcade Room:** Tap the title "Pickleball" 5 times to unlock a secret retro arcade featuring 8 mini-games (Tic-Tac-Toe, Quick Dink, Memory Match, and more!).
+* **🌍 12 Languages Supported:** English, 简体中文, 繁體中文, Bahasa Melayu, Español, Français, Tiếng Việt, ไทย, 日本語, 한국어, Deutsch, and Português.
 
 ---
 
 ### 🚀 Zero-Build Setup
 
-No Node.js, Webpack, or Vite required! The entire application runs natively in a **single `index.html` file** using CDNs. Just open the file in your browser and you're ready to go.
+No Node.js, Webpack, or Vite required! The entire application runs natively in a **single `index.html` file** utilizing CDNs for React, Babel, and Tailwind. 
 
----
-
-### 📖 How to Use
-
-#### Playing a Match
-1.  Open the app and tap the screen to start.
-2.  Select your match format (Singles/Doubles) and rule set (Standard, 14-Point, Custom).
-3.  *(Optional)* Customize the match title, enter team names, choose who serves first, and toggle Timeouts/Switch Ends.
-4.  During the game, simply tap the **Team 1** or **Team 2** buttons to award a point or side-out.
-5.  Check the rotating court map in the center to confirm server and receiver positions.
-6.  Made a mistake? Hit the **Undo** button to reverse the last action.
-
-#### Viewing History & Exporting
-1.  On the main menu, click the **History (clock)** or **Stats (chart)** icons in the top right corner.
-2.  The History drawer reveals all your past matches and point-by-point visual timelines.
-3.  Click the **Share icon** on any completed match to instantly generate a beautiful scorecard image.
+1. Clone or download the repository.
+2. Open `index.html` directly in any modern web browser.
+3. *Note: For security, the app is domain-locked to `localhost`, `127.0.0.1`, or `pickleball-point-counter.pages.dev`.*
 
 ---
 
 ### 📱 Installing on your Phone (PWA)
 
-You can use this app offline just like a native mobile app!
-* **iOS (Safari):** Tap the "Share" icon at the bottom of the screen and select **"Add to Home Screen"**.
-* **Android (Chrome):** Scroll to the bottom of the main menu and click **"Install as a native app"**, or use the browser menu to "Add to Home screen".
+You can install this app to use offline directly from your mobile browser!
+
+* **iOS (Safari):** Tap the **Share** icon at the bottom of the screen and select **"Add to Home Screen"**.
+* **Android (Chrome):** Tap the browser menu (three dots) and select **"Install App"** or "Add to Home screen".
+
+---
+
+### 📖 How to Use
+
+1. **Setup Match:** Choose Singles/Doubles, select your rules, and add players from your saved roster.
+2. **Score:** Tap a team's card to award a point. The app automatically calculates side-outs, second servers, and court swaps.
+3. **Mistakes?** Use the **Undo** button to safely reverse the last action.
+4. **Timeouts & Swaps:** Track timeouts and prompt players to switch ends at the half-point mark.
+5. **Review:** Access the **Stats** menu to see your overall win rates, average match durations, and format breakdowns.
 
 ---
 
 <div align="center">
-  <b>Designed and Developed by Amos</b>
-  <br>
-  <sub><i>Perfect for tracking matches on the go!</i></sub>
+  <b>Designed and Developed by Amos © 2026</b><br>
+  <i>Built with ❤️ for the Pickleball community.</i>
 </div>
