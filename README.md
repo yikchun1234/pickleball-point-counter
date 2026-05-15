@@ -31,7 +31,9 @@ No Node.js, Webpack, or Vite required! The entire application runs natively in a
 
 1. Clone or download the repository.
 2. Open `index.html` directly in any modern web browser.
-3. *Note: For security, the app is domain-locked to `localhost`, `127.0.0.1`, or `pickleball-point-counter.pages.dev`.*
+
+> [!WARNING]
+> **Domain Security Lock:** For security purposes, this application is domain-locked. If you wish to host it yourself, you must add your domain to the `allowedDomains` array in the `index.html` file, otherwise it will trigger an Unauthorized Error.
 
 ---
 
