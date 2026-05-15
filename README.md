@@ -54,7 +54,14 @@ You can install this app to use offline directly from your mobile browser!
 
 ---
 
+### 📄 License & Usage
+
+* **Non-Commercial Use Only:** This project is strictly for personal, educational, and non-commercial use. You may not use this application or its source code for any business, commercial, or monetized purposes.
+* **Forks & Attribution:** You are welcome to fork, modify, and experiment with this code for your own personal projects! However, if you share your forked version, **you must provide proper citation** to the original author (Amos) and include a direct link back to this repository.
+
+---
+
 <div align="center">
-  <b>Designed and Developed by Amos © 2026</b><br>
+  <b>Designed and Developed by Amos</b><br>
   <i>Built with ❤️ for the Pickleball community.</i>
 </div>
