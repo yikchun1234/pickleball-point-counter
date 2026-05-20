@@ -6,7 +6,7 @@
     <img src="https://img.shields.io/badge/🔥_LIVE_APP-pickleball--point--counter.pages.dev-FF416C?style=for-the-badge&logo=cloudflare&logoColor=white" alt="Live View">
   </a>
   
-  <br><
+  <br>
   
 <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React">
   <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS">
