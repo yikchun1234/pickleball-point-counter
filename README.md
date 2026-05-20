@@ -2,6 +2,12 @@
   <h1>🎾 Pickleball Point Counter</h1>
   <p><i>A beautifully minimal, zero-build Pickleball scoreboard. Runs entirely in your browser as a single HTML file with offline PWA support.</i></p>
   
+  <a href="https://pickleball-point-counter.pages.dev">
+    <img src="https://img.shields.io/badge/🔥_LIVE_APP-pickleball--point--counter.pages.dev-FF416C?style=for-the-badge&logo=cloudflare&logoColor=white" alt="Live View">
+  </a>
+  
+  <br><
+  
 <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React">
   <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS">
   <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
