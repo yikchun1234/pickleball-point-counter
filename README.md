@@ -9,7 +9,11 @@
 <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
 <img src="https://img.shields.io/badge/Babel-F9DC3E?style=for-the-badge&logo=babel&logoColor=black" alt="Babel">
 <img src="https://img.shields.io/badge/Cloudflare-F38020?style=for-the-badge&logo=cloudflare&logoColor=white" alt="Cloudflare">
+<br>
+<br>
 <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3">
+<img src="https://img.shields.io/github/last-commit/yikchun1234/pickleball-point-counter?style=for-the-badge&logo=github" alt="Last Commit">
+<img src="https://img.shields.io/github/repo-size/yikchun1234/pickleball-point-counter?style=for-the-badge&logo=github" alt="Repo Size">
 </div>
 
 ---
