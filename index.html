@@ -637,17 +637,19 @@
           const [showClearConfirm, setShowClearConfirm] = useState(false);
           const [matchToDelete, setMatchToDelete] = useState(null); // <-- You will find this line
 
-          // Paste this right below it:
           const [showScrollTop, setShowScrollTop] = useState(false);
-        
-          const handleHistoryScroll = (e) => {
-              // Show the button after scrolling down 200px
-              setShowScrollTop(e.target.scrollTop > 200);
-          };
+
+          // Listen to the window scroll instead!
+          useEffect(() => {
+              const handleScroll = () => {
+                  setShowScrollTop(window.scrollY > 200);
+              };
+              window.addEventListener('scroll', handleScroll);
+              return () => window.removeEventListener('scroll', handleScroll);
+          }, []);
         
           const scrollToTop = () => {
-              const el = document.getElementById('history-main-scroll');
-              if (el) el.scrollTo({ top: 0, behavior: 'smooth' });
+              window.scrollTo({ top: 0, behavior: 'smooth' });
           };
           const [showLangMenu, setShowLangMenu] = useState(false);
           const [showInstallInstructions, setShowInstallInstructions] = useState(false);
@@ -1633,7 +1635,7 @@
                     {showScrollTop && (
                         <button 
                             onClick={scrollToTop} 
-                            className="absolute bottom-6 right-2 p-3 rounded-full bg-emerald-500 text-white shadow-xl hover:bg-emerald-600 transition-all active:scale-95 z-50 animate-screen-enter"
+                            className="fixed bottom-8 right-6 p-3 rounded-full bg-emerald-500 text-white shadow-xl hover:bg-emerald-600 transition-all active:scale-95 z-50 animate-screen-enter"
                             title="Scroll to Top"
                         >
                             <ChevronUp size={24} />
