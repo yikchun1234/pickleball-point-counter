@@ -766,7 +766,21 @@
               clearInterval(scrollInterval.current);
             };
           }, [dragIndex, hoverIndex, savedMembers]);
-          
+
+            // --- PASTE THE NEW USEEFFECT HERE ---
+            useEffect(() => {
+                const scrollContainer = document.getElementById('history-main-scroll');
+                if (!scrollContainer) return;
+            
+                const handleScroll = () => {
+                    // Button appears after scrolling 200px
+                    setShowScrollTop(scrollContainer.scrollTop > 200);
+                };
+            
+                scrollContainer.addEventListener('scroll', handleScroll);
+                return () => scrollContainer.removeEventListener('scroll', handleScroll);
+            }, [appState]);
+            
           const deleteMember = (hexId) => {
             const updated = savedMembers.filter(m => m.hexId !== hexId);
             setSavedMembers(updated);
@@ -1631,17 +1645,15 @@
                         )}
                     </main>
                     
-                    {/* SCROLL TO TOP BUTTON - Floating & Fixed */}
-                    {showScrollTop && (
-                        <button 
-                            onClick={scrollToTop} 
-                            className="fixed bottom-8 right-6 p-4 rounded-full bg-emerald-500 text-white shadow-2xl hover:bg-emerald-600 transition-all active:scale-95 z-[9999] animate-screen-enter"
-                            title="Scroll to Top"
-                            style={{ position: 'fixed' }}
-                        >
-                            <ChevronUp size={24} />
-                        </button>
-                    )}
+                    {/* SCROLL TO TOP BUTTON - Static & Animated */}
+                    <button 
+                        onClick={scrollToTop} 
+                        className={`fixed bottom-8 right-6 z-[100] p-4 rounded-full bg-emerald-500 text-white shadow-2xl transition-all duration-300 ease-out 
+                        ${showScrollTop ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-10 scale-90 pointer-events-none'}`}
+                        title="Scroll to Top"
+                    >
+                        <ChevronUp size={24} />
+                    </button>
                 </div>
             )}
             {appState === 'game' && (
