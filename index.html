@@ -1055,12 +1055,26 @@
               }
           }, []);
 
-          useEffect(() => {
-              const scrollTimer = setTimeout(() => {
-                  window.scrollTo(0, 0); document.documentElement.scrollTop = 0; document.body.scrollTop = 0;
-              }, 50);
-              return () => clearTimeout(scrollTimer);
-          }, [appState, pendingGame]);
+            // Add this inside PickleballApp component
+            useEffect(() => {
+                const handleScroll = () => {
+                    // Look at the scroll container
+                    const scrollContainer = document.getElementById('history-main-scroll');
+                    if (scrollContainer) {
+                        setShowScrollTop(scrollContainer.scrollTop > 200);
+                    }
+                };
+                
+                // We attach the listener to the container
+                const container = document.getElementById('history-main-scroll');
+                if (container) {
+                    container.addEventListener('scroll', handleScroll);
+                }
+                
+                return () => {
+                    if (container) container.removeEventListener('scroll', handleScroll);
+                };
+            }, [appState]);
 
           // Guard previewData check safely
           const isModalOpen = !!(matchToDelete || pendingGame || showMemberModal || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || (recoverGameData && appState !== 'splash') || showWinnerOverlay || secretGame || showTimeoutConfirm || isExporting || showResetModal || showShareAppModal || showLegacyAlert || showZeroPointAlert || showHighPointWarning || previewData);
@@ -1652,20 +1666,6 @@
                       </div>
                         )}
                     </main>
-                    
-                    {/* To Top Button - Animated & Adaptive */}
-                    <button 
-                        onClick={scrollToTop} 
-                        style={{ position: 'absolute', bottom: '80px', right: '24px', zIndex: 9999 }}
-                        className={`p-4 rounded-full bg-emerald-500 text-white shadow-2xl transition-all duration-300 ease-out 
-                        ${showScrollTop 
-                            ? 'opacity-100 translate-y-0 scale-100' 
-                            : 'opacity-0 translate-y-10 scale-90 pointer-events-none'
-                        }`}
-                        title="Scroll to Top"
-                    >
-                        <ChevronUp size={24} />
-                    </button>
                 </div>
             )}
             {appState === 'game' && (
@@ -2516,7 +2516,19 @@
                     {secretGame === 'guess' && <GameGuess />}
                   </div>
                 </div>
-              )} 
+              )}
+                {/* To Top Button - Fixed to Screen */}
+                <button 
+                    onClick={scrollToTop} 
+                    className={`fixed bottom-8 right-6 z-[9999] p-4 rounded-full bg-emerald-500 text-white shadow-2xl transition-all duration-300 ease-out 
+                    ${showScrollTop 
+                        ? 'opacity-100 translate-y-0 scale-100' 
+                        : 'opacity-0 translate-y-10 scale-90 pointer-events-none'
+                    }`}
+                    title="Scroll to Top"
+                >
+                    <ChevronUp size={24} />
+                </button>
             </div>
           );
         }
