@@ -2517,18 +2517,20 @@
                   </div>
                 </div>
               )}
-                {/* To Top Button - Fixed to Screen */}
-                <button 
-                    onClick={scrollToTop} 
-                    className={`fixed bottom-8 right-6 z-[9999] p-4 rounded-full bg-emerald-500 text-white shadow-2xl transition-all duration-200 ease-out 
-                    ${showScrollTop 
-                        ? 'opacity-100 translate-y-0 scale-100' 
-                        : 'opacity-0 translate-y-4 scale-90 pointer-events-none'
-                    }`}
-                    title="Scroll to Top"
-                >
-                    <ChevronUp size={24} />
-                </button>
+                {/* To Top Button - Displays ONLY in History */}
+                {appState === 'history' && (
+                    <button 
+                        onClick={scrollToTop} 
+                        className={`fixed bottom-8 right-6 z-[9999] p-4 rounded-full bg-emerald-500 text-white shadow-2xl transition-all duration-200 ease-out 
+                        ${showScrollTop 
+                            ? 'opacity-100 translate-y-0 scale-100' 
+                            : 'opacity-0 translate-y-4 scale-90 pointer-events-none'
+                        }`}
+                        title="Scroll to Top"
+                    >
+                        <ChevronUp size={24} />
+                    </button>
+                )}
             </div>
           );
         }
