@@ -915,6 +915,7 @@
           const [stateHistory, setStateHistory] = useState([]);
           const [savedMatches, setSavedMatches] = useState([]);
           const [isExporting, setIsExporting] = useState(false);
+          const [visibleHistoryCount, setVisibleHistoryCount] = useState(5);
           const [showResetModal, setShowResetModal] = useState(false);
           const [showShareAppModal, setShowShareAppModal] = useState(false);
           const [linkCopied, setLinkCopied] = useState(false);
@@ -1093,7 +1094,11 @@
               setClosingScreen('menu');
               setTimeout(() => {
                   setClosingScreen(null); setAppState(screenName); window.scrollTo(0, 0);
-                  if (screenName === 'history') { setIsHistoryLoading(true); setTimeout(() => setIsHistoryLoading(false), 400); }
+                  if (screenName === 'history') {
+                      setVisibleHistoryCount(5); // <-- Added this line to reset the count
+                      setIsHistoryLoading(true);
+                      setTimeout(() => setIsHistoryLoading(false), 400);
+                  }
               }, 280); 
           };
 
@@ -1264,7 +1269,14 @@
 
           const handleSoundClick = () => { const newSound = !soundEnabled; setSoundEnabled(newSound); localStorage.setItem('pb_sound_pref', newSound.toString()); };
           const handleSecretClick = () => { secretClickCount.current += 1; if (secretClickCount.current >= 5) { setSecretGame('menu'); secretClickCount.current = 0; triggerHaptic('win'); } };
-          const handleLanguageChange = (code) => { setLang(code); setShowLangMenu(false); localStorage.setItem('pb_lang_pref', code); };
+          const handleLanguageChange = (code) => {
+            // startTransition prevents the heavy list from freezing the UI when translating
+            React.startTransition(() => {
+                setLang(code);
+                setShowLangMenu(false);
+            });
+            localStorage.setItem('pb_lang_pref', code);
+          };
           const deleteSingleMatch = () => {
               if (!matchToDelete) return;
               const updatedMatches = savedMatches.filter(m => m.id !== matchToDelete.id);
@@ -1636,7 +1648,7 @@
                     : savedMatches.length === 0 ? <div className={`flex flex-col items-center justify-center h-64 text-center ${textSub}`}><HistoryIcon size={48} className="mb-4 opacity-50" /><p>{getT('noHistory')}</p></div>
                     : (
                       <div className="space-y-8 pb-12">
-                        {savedMatches.map((match) => (
+                        {savedMatches.slice(0, visibleHistoryCount).map((match) => (
                           <div key={match.id} className="relative">
                             <div className="flex flex-col md:flex-row md:items-end justify-between mb-4 px-2">
                               <div>
@@ -1663,10 +1675,23 @@
                             {renderTimeline(match.history, match, false, false)}
                           </div>
                         ))}
-                      </div>
+                        
+                        {/* --- NEW LOAD MORE BUTTON --- */}
+                        {savedMatches.length > visibleHistoryCount && (
+                            <div className="flex justify-center pt-4 pb-8">
+                                <button 
+                                    onClick={() => setVisibleHistoryCount(prev => prev + 5)} 
+                                    className={`px-6 py-3 rounded-xl font-bold border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-all active:scale-95`}
+                                >
+                                    Load More Matches
+                                </button>
+                            </div>
                         )}
-                    </main>
-                </div>
+                        
+                    </div>
+                )}
+            </main>
+        </div>
             )}
             {appState === 'game' && (
                 <div className="flex-1 flex flex-col pb-8 w-full max-w-4xl mx-auto relative z-10 animate-screen-enter" style={{ paddingTop: 'max(5rem, calc(3rem + env(safe-area-inset-top)))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))', paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
