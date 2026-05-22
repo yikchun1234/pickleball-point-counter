@@ -767,19 +767,24 @@
             };
           }, [dragIndex, hoverIndex, savedMembers]);
 
-            // --- PASTE THE NEW USEEFFECT HERE ---
+            // Replace your old scroll-to-top useEffect with this:
             useEffect(() => {
                 const scrollContainer = document.getElementById('history-main-scroll');
                 if (!scrollContainer) return;
             
                 const handleScroll = () => {
-                    // Button appears after scrolling 200px
+                    // Show button if scrolled down more than 200px
                     setShowScrollTop(scrollContainer.scrollTop > 200);
                 };
             
                 scrollContainer.addEventListener('scroll', handleScroll);
                 return () => scrollContainer.removeEventListener('scroll', handleScroll);
-            }, [appState]);
+            }, [appState]); // Only runs when we are on the history page
+            
+            const scrollToTop = () => {
+                const el = document.getElementById('history-main-scroll');
+                if (el) el.scrollTo({ top: 0, behavior: 'smooth' });
+            };
             
           const deleteMember = (hexId) => {
             const updated = savedMembers.filter(m => m.hexId !== hexId);
@@ -1648,7 +1653,7 @@
                     {/* SCROLL TO TOP BUTTON - Static & Animated */}
                     <button 
                         onClick={scrollToTop} 
-                        className={`fixed bottom-8 right-6 z-[100] p-4 rounded-full bg-emerald-500 text-white shadow-2xl transition-all duration-300 ease-out 
+                        className={`fixed bottom-8 right-6 z-[200] p-4 rounded-full bg-emerald-500 text-white shadow-2xl transition-all duration-300 ease-out 
                         ${showScrollTop ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-10 scale-90 pointer-events-none'}`}
                         title="Scroll to Top"
                     >
