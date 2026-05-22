@@ -232,6 +232,7 @@
         const Zap = (props) => <IconWrapper iconObj={lucide.icons.Zap} {...props} />;
         const AlertTriangle = (props) => <IconWrapper iconObj={lucide.icons.AlertTriangle} {...props} />;
         const ChevronRight = (props) => <IconWrapper iconObj={lucide.icons.ChevronRight} {...props} />;
+        const ChevronUp = (props) => <IconWrapper iconObj={lucide.icons.ChevronUp} {...props} />;
         const Moon = (props) => <IconWrapper iconObj={lucide.icons.Moon} {...props} />;
         const Sun = (props) => <IconWrapper iconObj={lucide.icons.Sun} {...props} />;
         const Globe = (props) => <IconWrapper iconObj={lucide.icons.Globe} {...props} />;
@@ -634,7 +635,20 @@
           const [zoomActive, setZoomActive] = useState(false);
           const [pendingGame, setPendingGame] = useState(null);
           const [showClearConfirm, setShowClearConfirm] = useState(false);
-          const [matchToDelete, setMatchToDelete] = useState(null);
+          const [matchToDelete, setMatchToDelete] = useState(null); // <-- You will find this line
+
+          // Paste this right below it:
+          const [showScrollTop, setShowScrollTop] = useState(false);
+        
+          const handleHistoryScroll = (e) => {
+              // Show the button after scrolling down 200px
+              setShowScrollTop(e.target.scrollTop > 200);
+          };
+        
+          const scrollToTop = () => {
+              const el = document.getElementById('history-main-scroll');
+              if (el) el.scrollTo({ top: 0, behavior: 'smooth' });
+          };
           const [showLangMenu, setShowLangMenu] = useState(false);
           const [showInstallInstructions, setShowInstallInstructions] = useState(false);
           const [showInfo, setShowInfo] = useState(false);
@@ -1579,7 +1593,7 @@
                     <div className="w-8 flex justify-end">{savedMatches.length > 0 && !isHistoryLoading && (<button onClick={() => setShowClearConfirm(true)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors`}><Trash2 size={16} /> <span className="hidden sm:inline">{getT('clearHistory')}</span></button>)}</div>
                   </header>
 
-                  <main className="flex-1 overflow-y-auto muji-scrollbar pr-2 pb-12" style={{ touchAction: 'pan-y' }}>
+                  <main id="history-main-scroll" onScroll={handleHistoryScroll} className="flex-1 overflow-y-auto muji-scrollbar pr-2 pb-12" style={{ touchAction: 'pan-y' }}>
                     {isHistoryLoading ? <div className={`flex flex-col items-center justify-center h-64 text-center ${textSub}`}><div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div><p>{getT('loading')}</p></div>
                     : savedMatches.length === 0 ? <div className={`flex flex-col items-center justify-center h-64 text-center ${textSub}`}><HistoryIcon size={48} className="mb-4 opacity-50" /><p>{getT('noHistory')}</p></div>
                     : (
@@ -1612,12 +1626,23 @@
                           </div>
                         ))}
                       </div>
+                        )}
+                    </main>
+                    
+                    {/* SCROLL TO TOP BUTTON */}
+                    {showScrollTop && (
+                        <button 
+                            onClick={scrollToTop} 
+                            className="absolute bottom-6 right-2 p-3 rounded-full bg-emerald-500 text-white shadow-xl hover:bg-emerald-600 transition-all active:scale-95 z-50 animate-screen-enter"
+                            title="Scroll to Top"
+                        >
+                            <ChevronUp size={24} />
+                        </button>
                     )}
-                  </main>
-                </div>
-              )}
 
-              {appState === 'game' && (
+                </div>
+            )}
+            {appState === 'game' && (
                 <div className="flex-1 flex flex-col pb-8 w-full max-w-4xl mx-auto relative z-10 animate-screen-enter" style={{ paddingTop: 'max(5rem, calc(3rem + env(safe-area-inset-top)))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))', paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
                   <header className={`flex items-center justify-between mb-4 pb-4 border-b ${borderSub}`}>
                     <div className="flex-1 flex justify-start"><button onClick={() => { if (!winner && history.length > 0) setShowBackConfirm(true); else setAppState('menu'); }} className={`transition-all duration-300 flex items-center gap-1.5 -ml-2 rounded-lg active:scale-95 ${winner !== null ? `px-3 py-1.5 bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900 font-bold shadow-md` : `p-2 ${textSub} hover:${textMain}`}`}><ArrowLeft size={20} />{winner !== null && <span className="text-xs uppercase tracking-widest">{getT('menu')}</span>}</button></div>
