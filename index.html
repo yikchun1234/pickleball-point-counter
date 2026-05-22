@@ -771,19 +771,23 @@
             };
           }, [dragIndex, hoverIndex, savedMembers]);
 
-            // --- PASTE THE NEW USEEFFECT HERE ---
+            // Paste this in your main component
             useEffect(() => {
-                const scrollContainer = document.getElementById('history-main-scroll');
-                if (!scrollContainer) return;
-            
-                const handleScroll = () => {
-                    // Button appears after scrolling 200px
-                    setShowScrollTop(scrollContainer.scrollTop > 200);
+                const checkContainer = () => {
+                    const scrollContainer = document.getElementById('history-main-scroll');
+                    if (scrollContainer) {
+                        const handleScroll = () => {
+                            setShowScrollTop(scrollContainer.scrollTop > 200);
+                        };
+                        scrollContainer.addEventListener('scroll', handleScroll);
+                        return () => scrollContainer.removeEventListener('scroll', handleScroll);
+                    }
                 };
-            
-                scrollContainer.addEventListener('scroll', handleScroll);
-                return () => scrollContainer.removeEventListener('scroll', handleScroll);
-            }, [appState]);
+                
+                // Use a small timeout to ensure the element is rendered in the DOM
+                const timer = setTimeout(checkContainer, 100);
+                return () => clearTimeout(timer);
+            }, [appState]); // This ensures it re-runs when you switch screens
             
           const deleteMember = (hexId) => {
             const updated = savedMembers.filter(m => m.hexId !== hexId);
@@ -1652,7 +1656,7 @@
                     {/* To Top Button - Animated & Adaptive */}
                     <button 
                         onClick={scrollToTop} 
-                        style={{ position: 'fixed', bottom: '32px', right: '24px', zIndex: 9999 }}
+                        style={{ position: 'absolute', bottom: '32px', right: '24px', zIndex: 9999 }}
                         className={`p-4 rounded-full bg-emerald-500 text-white shadow-2xl transition-all duration-300 ease-out 
                         ${showScrollTop 
                             ? 'opacity-100 translate-y-0 scale-100' 
