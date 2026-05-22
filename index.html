@@ -618,6 +618,7 @@
           const [zoomActive, setZoomActive] = useState(false);
           const [pendingGame, setPendingGame] = useState(null);
           const [showClearConfirm, setShowClearConfirm] = useState(false);
+          const [matchToDelete, setMatchToDelete] = useState(null);
           const [showLangMenu, setShowLangMenu] = useState(false);
           const [showInstallInstructions, setShowInstallInstructions] = useState(false);
           const [showInfo, setShowInfo] = useState(false);
@@ -1007,8 +1008,8 @@
           }, [appState, pendingGame]);
 
           // Guard previewData check safely
-         const isModalOpen = !!(pendingGame || showMemberModal || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || (recoverGameData && appState !== 'splash') || showWinnerOverlay || secretGame || showTimeoutConfirm || isExporting || showResetModal || showShareAppModal || showLegacyAlert || showZeroPointAlert || showHighPointWarning || previewData);
-
+          const isModalOpen = !!(matchToDelete || pendingGame || showMemberModal || showClearConfirm || showLangMenu || showInstallInstructions || showInfo || showRetreatModal || showBackConfirm || showSwitchModal || (recoverGameData && appState !== 'splash') || showWinnerOverlay || secretGame || showTimeoutConfirm || isExporting || showResetModal || showShareAppModal || showLegacyAlert || showZeroPointAlert || showHighPointWarning || previewData);
+          
           useEffect(() => {
               if (isModalOpen) document.body.style.overflow = 'hidden'; else document.body.style.overflow = '';
               return () => { document.body.style.overflow = ''; };
@@ -1195,6 +1196,13 @@
           const handleSoundClick = () => { const newSound = !soundEnabled; setSoundEnabled(newSound); localStorage.setItem('pb_sound_pref', newSound.toString()); };
           const handleSecretClick = () => { secretClickCount.current += 1; if (secretClickCount.current >= 5) { setSecretGame('menu'); secretClickCount.current = 0; triggerHaptic('win'); } };
           const handleLanguageChange = (code) => { setLang(code); setShowLangMenu(false); localStorage.setItem('pb_lang_pref', code); };
+          const deleteSingleMatch = () => {
+              if (!matchToDelete) return;
+              const updatedMatches = savedMatches.filter(m => m.id !== matchToDelete.id);
+              setSavedMatches(updatedMatches);
+              localStorage.setItem('pb_history_matches', JSON.stringify(updatedMatches));
+              setMatchToDelete(null);
+          };
           const clearHistory = () => { setSavedMatches([]); localStorage.removeItem('pb_history_matches'); setShowClearConfirm(false); };
           const toggleTheme = () => { const newTheme = !isDark; setIsDark(newTheme); localStorage.setItem('pb_theme_pref', newTheme ? 'dark' : 'light'); };
 
@@ -1564,7 +1572,17 @@
                           <div key={match.id} className="relative">
                             <div className="flex flex-col md:flex-row md:items-end justify-between mb-4 px-2">
                               <div>
-                                <div className={`text-xs font-bold uppercase tracking-widest ${accentGreen} mb-1 flex justify-between items-center w-full`}><span>{match.date} • {formatTime(match.elapsedTime || 0)}</span><button onClick={() => shareMatch(match)} className="text-stone-400 hover:text-emerald-500 transition-colors"><Share2 size={14}/></button></div>
+                                <div className={`text-xs font-bold uppercase tracking-widest ${accentGreen} mb-1 flex justify-between items-center w-full`}>
+                                    <span>{match.date} • {formatTime(match.elapsedTime || 0)}</span>
+                                    <div className="flex items-center gap-4">
+                                        <button onClick={() => setMatchToDelete(match)} className="text-stone-400 hover:text-rose-500 transition-colors" title="Delete Match">
+                                            <Trash2 size={14}/>
+                                        </button>
+                                        <button onClick={() => shareMatch(match)} className="text-stone-400 hover:text-emerald-500 transition-colors" title="Share Match">
+                                            <Share2 size={14}/>
+                                        </button>
+                                    </div>
+                                </div>
                                 {editingMatchId === match.id ? <input type="text" defaultValue={match.title} onBlur={(e) => handleEditSave(match.id, e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleEditSave(match.id, e.target.value)} autoFocus className={`text-2xl font-bold ${textMain} bg-transparent border-b ${borderSub} outline-none w-full`} /> : <h2 className={`text-2xl font-bold ${textMain} flex items-center gap-2 cursor-pointer group`} onClick={() => setEditingMatchId(match.id)}>{match.title} <Edit2 size={14} className="opacity-0 group-hover:opacity-100 transition-opacity text-stone-400"/></h2>}
                                 <div className={`text-xs font-semibold ${textSub} mt-1 flex flex-wrap items-center gap-2`}><span>{match.mode === 'single' ? getT('singles') : getT('doubles')} • {match.rules === 'standard' ? getT('stdTitle') : match.rules === '14-point' ? getT('fourteenTitle') : getT('customFormat')}</span>{match.winReason === 'retreat' && <span className="px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 text-[9px] uppercase font-bold tracking-widest border border-rose-200 dark:border-rose-800">{match.winner === 1 ? getT('t2Retreat') : getT('t1Retreat')}</span>}</div>
                               </div>
@@ -2064,6 +2082,27 @@
                     </div>
                   </div>
                 </div>
+              )}
+
+              {matchToDelete && (
+                  <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+                      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{touchAction: 'none'}} onClick={() => setMatchToDelete(null)}></div>
+                      <div className={`relative w-full max-w-sm p-6 ${bgCard} border ${borderSub} rounded-2xl shadow-2xl text-center animate-screen-enter`}>
+                          <Trash2 size={48} className="mx-auto text-rose-500 mb-4" />
+                          <h2 className={`text-lg font-bold mb-2 ${textMain}`}>Delete Match?</h2>
+                          <p className={`text-sm mb-6 ${textSub}`}>
+                              Are you sure you want to delete <span className="font-bold text-emerald-500">"{matchToDelete.title}"</span>? This will permanently remove its stats and Ghost Replay data.
+                          </p>
+                          <div className="flex gap-3">
+                              <button onClick={() => setMatchToDelete(null)} className={`flex-1 py-3 rounded-xl font-semibold border ${borderSub} ${textSub} hover:${textMain}`}>
+                                  {getT('cancel')}
+                              </button>
+                              <button onClick={deleteSingleMatch} className={`flex-1 py-3 rounded-xl font-bold text-white bg-rose-500 hover:bg-rose-600 shadow-md`}>
+                                  Delete
+                              </button>
+                          </div>
+                      </div>
+                  </div>
               )}
 
               {isExporting && (
