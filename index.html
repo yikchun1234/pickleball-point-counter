@@ -653,14 +653,7 @@
         }, []);
         
         const scrollToTop = () => {
-            // 1. Force the container to scroll using native browser API
-            const el = document.getElementById('history-main-scroll');
-            if (el) {
-                el.scrollTo({
-                    top: 0,
-                    behavior: 'auto' // Changed from 'smooth' to 'auto' to make it instant and lag-free
-                });
-            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         };
             
           const [showLangMenu, setShowLangMenu] = useState(false);
@@ -1271,15 +1264,7 @@
 
           const handleSoundClick = () => { const newSound = !soundEnabled; setSoundEnabled(newSound); localStorage.setItem('pb_sound_pref', newSound.toString()); };
           const handleSecretClick = () => { secretClickCount.current += 1; if (secretClickCount.current >= 5) { setSecretGame('menu'); secretClickCount.current = 0; triggerHaptic('win'); } };
-          // In your PickleballApp component:
-            const handleLanguageChange = (code) => {
-                // Wrap in startTransition to keep the UI responsive during the update
-                React.startTransition(() => {
-                    setLang(code);
-                    setShowLangMenu(false);
-                    localStorage.setItem('pb_lang_pref', code);
-                });
-            };
+          const handleLanguageChange = (code) => { setLang(code); setShowLangMenu(false); localStorage.setItem('pb_lang_pref', code); };
           const deleteSingleMatch = () => {
               if (!matchToDelete) return;
               const updatedMatches = savedMatches.filter(m => m.id !== matchToDelete.id);
@@ -2536,17 +2521,11 @@
                 {appState === 'history' && (
                     <button 
                         onClick={scrollToTop} 
-                        style={{ 
-                            position: 'fixed', 
-                            bottom: '32px', 
-                            right: '24px', 
-                            zIndex: 9999,
-                            // Add will-change to tell the browser this button will animate, 
-                            // so it caches it in the GPU instead of calculating it every frame
-                            willChange: 'transform, opacity' 
-                        }}
-                        className={`p-4 rounded-full bg-emerald-500 text-white shadow-2xl transition-opacity duration-150 ease-linear 
-                        ${showScrollTop ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                        className={`fixed bottom-8 right-6 z-[9999] p-4 rounded-full bg-emerald-500 text-white shadow-2xl transition-all duration-200 ease-out 
+                        ${showScrollTop 
+                            ? 'opacity-100 translate-y-0 scale-100' 
+                            : 'opacity-0 translate-y-4 scale-90 pointer-events-none'
+                        }`}
                         title="Scroll to Top"
                     >
                         <ChevronUp size={24} />
