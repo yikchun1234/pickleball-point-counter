@@ -1025,8 +1025,16 @@
                     const parsedData = JSON.parse(jsonStr);
             
                     // 3. Save it all over existing localStorage
+                    const ignoredKeys = ['pb_lang_pref', 'pb_theme_pref', 'pb_sound_pref'];
                     Object.keys(parsedData).forEach(key => {
-                        localStorage.setItem(key, parsedData[key]);
+                        let val = parsedData[key];
+                        
+                        // 🚀 AUTO-COMPRESS: If the downloaded cloud data is an old, readable backup, crush it!
+                        if (!ignoredKeys.includes(key) && val && (val.startsWith('{') || val.startsWith('['))) {
+                            val = LZString.compressToUTF16(val);
+                        }
+                        
+                        localStorage.setItem(key, val);
                     });
             
                     setSyncStatus('success');
