@@ -204,6 +204,27 @@
         </div>
     </div>
     <script type="text/babel">
+        // --- LOCAL STORAGE COMPRESSION HELPERS ---
+        function loadSafeStorage(key) {
+            const raw = localStorage.getItem(key);
+            if (!raw) return null;
+            try {
+                // Backward compatibility: If it's normal JSON from an old save, load it normally
+                if (raw.startsWith('{') || raw.startsWith('[')) return JSON.parse(raw);
+                // Otherwise, decompress the UTF16 string
+                return JSON.parse(LZString.decompressFromUTF16(raw));
+            } catch (e) {
+                console.error("Storage parse error for key", key, ":", e);
+                return null;
+            }
+        }
+
+        function saveSafeStorage(key, data) {
+            // Compress heavily before saving to bypass the 5MB browser limit
+            const compressed = LZString.compressToUTF16(JSON.stringify(data));
+            localStorage.setItem(key, compressed);
+        }
+        // -----------------------------------------
         const { useState, useEffect, useRef } = React;
 
         const IconWrapper = ({ iconObj, size = 24, className = "" }) => {
@@ -750,7 +771,7 @@
                 const [item] = updated.splice(dragIndex, 1);
                 updated.splice(hoverIndex, 0, item);
                 setSavedMembers(updated);
-                localStorage.setItem('pb_members', JSON.stringify(updated));
+                saveSafeStorage('pb_members', updated);
               }
               setDragIndex(null);
               setHoverIndex(null);
@@ -792,15 +813,13 @@
           const deleteMember = (hexId) => {
             const updated = savedMembers.filter(m => m.hexId !== hexId);
             setSavedMembers(updated);
-            localStorage.setItem('pb_members', JSON.stringify(updated));
+            saveSafeStorage('pb_members', updated);
             if (editMemberId === hexId) { setEditMemberId(null); setMemberFormName(''); }
           };
           
           useEffect(() => {
-            try { 
-              const s = localStorage.getItem('pb_members'); 
-              if(s) setSavedMembers(JSON.parse(s)); 
-            } catch(e){}
+            const members = loadSafeStorage('pb_members'); 
+            if (members) setSavedMembers(members); 
           }, []);
           
           const openAddMember = () => { 
@@ -848,7 +867,7 @@
               updated.push({ hexId: hex, name, created: Date.now() });
             }
             setSavedMembers(updated);
-            localStorage.setItem('pb_members', JSON.stringify(updated));
+            saveSafeStorage('pb_members', updated);
             // REMOVED: setShowMemberModal(false); // Keeps the popup open for batch adding
             setEditMemberId(null);
             setMemberFormName('');
@@ -1103,23 +1122,28 @@
           };
 
           useEffect(() => {
-            const saved = localStorage.getItem('pb_history_matches');
-            if (saved) { try { setSavedMatches(JSON.parse(saved)); } catch (e) {} }
+            // Load compressed history
+            const savedMatches = loadSafeStorage('pb_history_matches');
+            if (savedMatches) setSavedMatches(savedMatches);
+
+            // Settings stay as normal strings
             let savedLang = localStorage.getItem('pb_lang_pref');
             if (savedLang === 'zh') savedLang = 'zh_CN'; 
             if (savedLang && dict[savedLang]) setLang(savedLang);
             if (localStorage.getItem('pb_theme_pref') === 'dark') setIsDark(true);
             if (localStorage.getItem('pb_sound_pref') === 'false') setSoundEnabled(false);
-            const savedActive = localStorage.getItem('pb_active_game');
-            if (savedActive) { try { const parsed = JSON.parse(savedActive); if (parsed && !parsed.winner) setRecoverGameData(parsed); } catch (e) {} }
+            
+            // Load compressed active game
+            const savedActive = loadSafeStorage('pb_active_game');
+            if (savedActive && !savedActive.winner) setRecoverGameData(savedActive);
           }, []);
 
           useEffect(() => {
             if (appState === 'game' && !winner) {
-              localStorage.setItem('pb_active_game', JSON.stringify({ currentMatchId, matchTitle, gameMode, ruleSet, playTo, winByMargin, t1PLeft, t1PRight, t2PLeft, t2PRight, team1Score, team2Score, servingTeam, serverNumber, serveToWinAt14, enableSwitchEnds, hasSwitchedEnds, elapsedTime, history, stateHistory, enableTimeouts, t1Timeouts, t2Timeouts, courtRotation, initialServer }));
+              saveSafeStorage('pb_active_game', { currentMatchId, matchTitle, gameMode, ruleSet, playTo, winByMargin, t1PLeft, t1PRight, t2PLeft, t2PRight, team1Score, team2Score, servingTeam, serverNumber, serveToWinAt14, enableSwitchEnds, hasSwitchedEnds, elapsedTime, history, stateHistory, enableTimeouts, t1Timeouts, t2Timeouts, courtRotation, initialServer });
             } else if (winner) localStorage.removeItem('pb_active_game');
           }, [team1Score, team2Score, servingTeam, serverNumber, history, appState, winner, elapsedTime, t1Timeouts, t2Timeouts, courtRotation, initialServer]);
-
+            
           useEffect(() => {
             let timer;
             if (appState === 'game' && !winner && !showRetreatModal && !showBackConfirm && !showSwitchModal && !showTimeoutConfirm && activeTimeoutRemaining === 0) timer = setInterval(() => setElapsedTime(prev => prev + 1), 1000);
@@ -1144,7 +1168,7 @@
                 const existingIndex = prev.findIndex(m => m.id === currentMatchId);
                 let updated = existingIndex >= 0 ? [...prev] : [newMatch, ...prev];
                 if (existingIndex >= 0) updated[existingIndex] = newMatch;
-                localStorage.setItem('pb_history_matches', JSON.stringify(updated));
+                saveSafeStorage('pb_history_matches', updated);
                 return updated;
               });
             }
@@ -1281,7 +1305,7 @@
               if (!matchToDelete) return;
               const updatedMatches = savedMatches.filter(m => m.id !== matchToDelete.id);
               setSavedMatches(updatedMatches);
-              localStorage.setItem('pb_history_matches', JSON.stringify(updatedMatches));
+              saveSafeStorage('pb_history_matches', updatedMatches);
               setMatchToDelete(null);
           };
           const clearHistory = () => { setSavedMatches([]); localStorage.removeItem('pb_history_matches'); setShowClearConfirm(false); };
@@ -1338,7 +1362,7 @@
 
           const handleUndo = () => {
             if (stateHistory.length === 0) return;
-            if (winner !== null) { setSavedMatches(prev => { const updated = prev.filter(m => m.id !== currentMatchId); localStorage.setItem('pb_history_matches', JSON.stringify(updated)); return updated; }); setShowWinnerOverlay(false); }
+            if (winner !== null) { setSavedMatches(prev => { const updated = prev.filter(m => m.id !== currentMatchId); saveSafeStorage('pb_history_matches', updated); return updated; }); setShowWinnerOverlay(false); }
             const prev = stateHistory[stateHistory.length - 1];
             setTeam1Score(prev.team1Score); setTeam2Score(prev.team2Score); setServingTeam(prev.servingTeam); setServerNumber(prev.serverNumber); setWinner(prev.winner); setWinReason(prev.winReason || 'score');
             if (prev.t1Timeouts !== undefined) setT1Timeouts(prev.t1Timeouts); if (prev.t2Timeouts !== undefined) setT2Timeouts(prev.t2Timeouts); if (prev.courtRotation !== undefined) setCourtRotation(prev.courtRotation);
@@ -1401,7 +1425,7 @@
             checkWin(newT1, newT2, newServTeam, newServNum, newHist, isServeToScoreMode);
           };
 
-          const handleEditSave = (id, newTitle) => { const updated = savedMatches.map(m => m.id === id ? { ...m, title: newTitle } : m); setSavedMatches(updated); localStorage.setItem('pb_history_matches', JSON.stringify(updated)); setEditingMatchId(null); };
+          const handleEditSave = (id, newTitle) => { const updated = savedMatches.map(m => m.id === id ? { ...m, title: newTitle } : m); setSavedMatches(updated); saveSafeStorage('pb_history_matches', updated); setEditingMatchId(null); };
           const formatTime = (sec) => { const m = Math.floor(sec / 60).toString().padStart(2, '0'); const s = (sec % 60).toString().padStart(2, '0'); return `${m}:${s}`; };
 
           // --- GHOST COURT ENGINE ---
