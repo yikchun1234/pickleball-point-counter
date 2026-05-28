@@ -169,6 +169,10 @@
         @keyframes pulse-static { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
         @keyframes spin-static { 100% { transform: rotate(360deg); } }
         .animate-spin-static { animation: spin-static 1.5s linear infinite; }
+        /* Custom Chart Animations for Stats Dashboard */
+        .pb-chart-bar { transition: height 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .pb-pie-segment { transition: stroke-dasharray 1.5s cubic-bezier(0.2, 1, 0.4, 1); }
+        .pb-progress-bar { transition: width 1.2s cubic-bezier(0.2, 1, 0.4, 1); }
     </style>
 </head>
 <body style="background-color: var(--app-bg); color: var(--app-text);">
@@ -660,6 +664,18 @@
 
         // Add these to your state declarations
         const [showScrollTop, setShowScrollTop] = useState(false);
+  
+          // 🚀 ADD THIS NEW BLOCK FOR STATS ANIMATIONS:
+          const [statsMounted, setStatsMounted] = useState(false);
+          useEffect(() => {
+              if (appState === 'stats') {
+                  const timer = setTimeout(() => setStatsMounted(true), 100);
+                  return () => clearTimeout(timer);
+              } else {
+                  setStatsMounted(false);
+              }
+          }, [appState]);
+          // ------------------------------------------
         
         // Add this useEffect to listen to the global window scroll
         useEffect(() => {
@@ -1639,33 +1655,90 @@
                     <div className={`muji-card p-6 flex flex-col items-center text-center col-span-2 md:col-span-1`}><Timer size={24} className={`mb-2 ${textSub}`} /><span className={`text-3xl font-black ${textMain}`}>{savedMatches.length ? formatTime(Math.round(savedMatches.reduce((a,b)=>a+(b.elapsedTime||0),0)/savedMatches.length)) : '00:00'}</span><span className={`text-xs font-bold uppercase tracking-widest ${textSub} mt-1`}>{getT('avgDuration')}</span></div>
                   </div>
                   {savedMatches.length > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className={`muji-card p-6`}>
-                          <h3 className={`text-[10px] font-bold uppercase tracking-widest ${textSub} mb-6`}>{getT('winDist')}</h3>
-                          <div className="relative w-32 h-32 mx-auto rounded-full" style={{ background: totalMatchesCount === 0 ? (isDark ? '#44403c' : '#e7e5e4') : `conic-gradient(#10b981 ${t1WinPct}%, #f43f5e 0)` }}>
-                              <div className={`absolute inset-[12%] ${bgCard} rounded-full flex flex-col items-center justify-center shadow-inner`}><span className={`text-2xl font-black ${textMain}`}>{totalMatchesCount}</span></div>
-                          </div>
-                          <div className="flex justify-center gap-6 mt-6">
-                               <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-emerald-500 rounded-[3px]"></div><span className={`text-xs font-bold ${textSub}`}>T1 ({t1WinPct}%)</span></div><div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-rose-500 rounded-[3px]"></div><span className={`text-xs font-bold ${textSub}`}>T2 ({t2WinPct}%)</span></div>
-                          </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        
+                        {/* 1. Animated SVG Donut Chart (Win Distribution) */}
+                        <div className={`muji-card p-6 flex flex-col items-center justify-center`}>
+                            <h3 className={`w-full text-left text-[10px] font-bold uppercase tracking-widest ${textSub} mb-6`}>{getT('winDist')}</h3>
+                            <div className="flex items-center justify-center gap-6 w-full">
+                                <div className="relative w-36 h-36 flex-shrink-0">
+                                    <svg width="100%" height="100%" viewBox="0 0 42 42" className="transform -rotate-90 drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]">
+                                        <circle cx="21" cy="21" r="15.91549430918954" fill="none" stroke={isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"} strokeWidth="6"></circle>
+                                        <circle className="pb-pie-segment" cx="21" cy="21" r="15.91549430918954" fill="none" stroke="#10b981" strokeWidth="6" strokeDasharray={statsMounted ? `${t1WinPct} ${100 - t1WinPct}` : `0 100`} strokeDashoffset="0"></circle>
+                                        <circle className="pb-pie-segment" cx="21" cy="21" r="15.91549430918954" fill="none" stroke="#f43f5e" strokeWidth="6" strokeDasharray={statsMounted ? `${t2WinPct} ${100 - t2WinPct}` : `0 100`} strokeDashoffset={-t1WinPct}></circle>
+                                    </svg>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                        <span className={`text-3xl font-black ${textMain}`}>{totalMatchesCount}</span>
+                                        <span className={`text-[9px] font-bold uppercase tracking-widest ${textSub}`}>Matches</span>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col gap-3 justify-center w-full max-w-[100px]">
+                                    <div className="flex items-center justify-between w-full gap-2">
+                                        <div className="flex items-center gap-2 min-w-0">
+                                            <div className="w-3 h-3 rounded-full shrink-0 bg-emerald-500"></div>
+                                            <span className={`text-xs font-bold ${textMain}`}>T1</span>
+                                        </div>
+                                        <span className={`text-xs font-bold ${textSub}`}>({t1WinPct}%)</span>
+                                    </div>
+                                    <div className="flex items-center justify-between w-full gap-2">
+                                        <div className="flex items-center gap-2 min-w-0">
+                                            <div className="w-3 h-3 rounded-full shrink-0 bg-rose-500"></div>
+                                            <span className={`text-xs font-bold ${textMain}`}>T2</span>
+                                        </div>
+                                        <span className={`text-xs font-bold ${textSub}`}>({t2WinPct}%)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+            
+                        {/* 2. Animated Bar Chart (Total Points) */}
+                        <div className={`muji-card p-6 flex flex-col`}>
+                            <h3 className={`w-full text-left text-[10px] font-bold uppercase tracking-widest ${textSub} mb-4`}>{getT('totalPoints')}</h3>
+                            <div className="flex-1 flex items-end justify-center gap-12 h-32 mt-2 border-b border-stone-200 dark:border-stone-700/50 pb-0">
+                                <div className="flex flex-col items-center gap-2 w-16 group">
+                                    <span className={`text-sm font-bold ${textMain} opacity-0 transition-opacity duration-300 ${statsMounted ? 'opacity-100' : ''}`}>{totalT1Points}</span>
+                                    <div className="w-full bg-stone-100 dark:bg-stone-800 rounded-t-lg flex items-end h-full relative overflow-hidden">
+                                        <div className="pb-chart-bar w-full bg-gradient-to-t from-emerald-600 to-emerald-400 rounded-t-lg" style={{ height: statsMounted ? `${Math.max(t1PointHeight, 5)}%` : '0%' }}></div>
+                                    </div>
+                                    <span className={`text-[10px] font-bold ${textSub} uppercase tracking-widest mt-1`}>T1</span>
+                                </div>
+                                <div className="flex flex-col items-center gap-2 w-16 group">
+                                    <span className={`text-sm font-bold ${textMain} opacity-0 transition-opacity duration-300 ${statsMounted ? 'opacity-100' : ''}`}>{totalT2Points}</span>
+                                    <div className="w-full bg-stone-100 dark:bg-stone-800 rounded-t-lg flex items-end h-full relative overflow-hidden">
+                                        <div className="pb-chart-bar w-full bg-gradient-to-t from-rose-600 to-rose-400 rounded-t-lg" style={{ height: statsMounted ? `${Math.max(t2PointHeight, 5)}%` : '0%' }}></div>
+                                    </div>
+                                    <span className={`text-[10px] font-bold ${textSub} uppercase tracking-widest mt-1`}>T2</span>
+                                </div>
+                            </div>
+                        </div>
+            
+                        {/* 3. Animated Progress Bars (Format Stats) */}
+                        <div className={`muji-card p-6 md:col-span-2`}>
+                            <h3 className={`text-[10px] font-bold uppercase tracking-widest ${textSub} mb-6`}>{getT('formatStats')}</h3>
+                            <div className="space-y-6">
+                                <div>
+                                    <div className="flex justify-between text-xs font-bold mb-2">
+                                        <span className={textMain}>{getT('singles')}</span>
+                                        <span className={textSub}>{singlesCount}</span>
+                                    </div>
+                                    <div className={`w-full h-3 rounded-full ${isDark ? 'bg-stone-800 border border-stone-700' : 'bg-stone-100 border border-stone-200'} overflow-hidden`}>
+                                        <div className="pb-progress-bar h-full bg-emerald-500 rounded-full" style={{ width: statsMounted && totalMatchesCount ? `${(singlesCount/totalMatchesCount)*100}%` : '0%' }}></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="flex justify-between text-xs font-bold mb-2">
+                                        <span className={textMain}>{getT('doubles')}</span>
+                                        <span className={textSub}>{doublesCount}</span>
+                                    </div>
+                                    <div className={`w-full h-3 rounded-full ${isDark ? 'bg-stone-800 border border-stone-700' : 'bg-stone-100 border border-stone-200'} overflow-hidden`}>
+                                        <div className="pb-progress-bar h-full bg-rose-500 rounded-full" style={{ width: statsMounted && totalMatchesCount ? `${(doublesCount/totalMatchesCount)*100}%` : '0%' }}></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+            
                       </div>
-                      <div className={`muji-card p-6 flex flex-col`}>
-                          <h3 className={`text-[10px] font-bold uppercase tracking-widest ${textSub} mb-4`}>{getT('totalPoints')}</h3>
-                          <div className="flex-1 flex items-end justify-center gap-8 h-32 mt-2 border-b border-stone-200 dark:border-stone-700/50 pb-0">
-                               <div className="flex flex-col items-center gap-2 w-12 group cursor-default"><span className={`text-sm font-bold ${textMain} translate-y-1 group-hover:-translate-y-0 transition-transform`}>{totalT1Points}</span><div className="w-full bg-emerald-500 rounded-t-md transition-all duration-1000 ease-[cubic-bezier(0.2,1,0.4,1)]" style={{ height: `${Math.max(t1PointHeight, 5)}%` }}></div></div>
-                               <div className="flex flex-col items-center gap-2 w-12 group cursor-default"><span className={`text-sm font-bold ${textMain} translate-y-1 group-hover:-translate-y-0 transition-transform`}>{totalT2Points}</span><div className="w-full bg-rose-500 rounded-t-md transition-all duration-1000 ease-[cubic-bezier(0.2,1,0.4,1)]" style={{ height: `${Math.max(t2PointHeight, 5)}%` }}></div></div>
-                          </div>
-                          <div className="flex justify-center gap-8 mt-3"><span className={`text-[10px] uppercase font-black tracking-widest ${accentGreen} w-12 text-center`}>T1</span><span className={`text-[10px] uppercase font-black tracking-widest ${accentRed} w-12 text-center`}>T2</span></div>
-                      </div>
-                      <div className={`muji-card p-6 md:col-span-2`}>
-                           <h3 className={`text-[10px] font-bold uppercase tracking-widest ${textSub} mb-6`}>{getT('formatStats')}</h3>
-                           <div className="space-y-5">
-                               <div><div className="flex justify-between text-xs font-bold mb-2"><span className={textMain}>{getT('singles')}</span><span className={textSub}>{singlesCount}</span></div><div className={`w-full h-2.5 rounded-full ${isDark ? 'bg-stone-800 border border-stone-700' : 'bg-stone-100 border border-stone-200'} overflow-hidden`}><div className="h-full bg-stone-400 dark:bg-stone-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${totalMatchesCount ? (singlesCount/totalMatchesCount)*100 : 0}%` }}></div></div></div>
-                               <div><div className="flex justify-between text-xs font-bold mb-2"><span className={textMain}>{getT('doubles')}</span><span className={textSub}>{doublesCount}</span></div><div className={`w-full h-2.5 rounded-full ${isDark ? 'bg-stone-800 border border-stone-700' : 'bg-stone-100 border border-stone-200'} overflow-hidden`}><div className="h-full bg-stone-400 dark:bg-stone-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${totalMatchesCount ? (doublesCount/totalMatchesCount)*100 : 0}%` }}></div></div></div>
-                           </div>
-                      </div>
-                    </div>
-                  )}
+                    )}
                 </div>
               )}
 
