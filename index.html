@@ -1412,8 +1412,36 @@
             if (mode === 'single') { setT1PLeft(p1_left || getT('t1Name')); setT1PRight(''); setT2PLeft(p2_left || getT('t2Name')); setT2PRight(''); } 
             else { setT1PLeft(p1_left || getT('t1P1')); setT1PRight(p1_right || getT('t1P2')); setT2PLeft(p2_left || getT('t2P1')); setT2PRight(p2_right || getT('t2P2')); }
             setInitialServer(startServ); setTeam1Score(0); setTeam2Score(0); setServingTeam(startServ); setServerNumber(mode === 'double' ? 2 : 1);
-            setEnableTimeouts(useTimeouts); setT1Timeouts(useTimeouts); setT2Timeouts(useTimeouts); setWinner(null); setWinReason('score'); setShowWinnerOverlay(false);
-            setHistory([]); setStateHistory([]); setHasSwitchedEnds(false); setElapsedTime(0); setCourtRotation(0); setActiveTimeoutRemaining(0);
+            setEnableTimeouts(useTimeouts);
+            setT1Timeouts(useTimeouts);
+            setT2Timeouts(useTimeouts);
+            setWinner(null);
+            setWinReason('score');
+            setShowWinnerOverlay(false);
+            
+            const initialServerPos = startServ === 1 ? 'bottom-right' : 'top-right';
+            const initialReceiverPos = startServ === 1 ? 'top-left' : 'bottom-left';
+            const startSnapshot = {
+                team1Score: 0,
+                team2Score: 0,
+                servingTeam: startServ,
+                serverNumber: mode === 'double' ? 2 : 1,
+                elapsedTime: 0,
+                t1Left: mode === 'single' ? (p1_left || getT('t1Name')) : (p1_left || getT('t1P1')),
+                t1Right: mode === 'single' ? '' : (p1_right || getT('t1P2')),
+                t2Left: mode === 'single' ? (p2_left || getT('t2Name')) : (p2_left || getT('t2P1')),
+                t2Right: mode === 'single' ? '' : (p2_right || getT('t2P2')),
+                serverPos: initialServerPos,
+                receiverPos: initialReceiverPos,
+                isSnapshot: true,
+                courtRotation: 0
+            };
+            
+            setHistory([{ id: Date.now(), type: 'START', team: null, point: 0, snapshot: startSnapshot }]);
+            setStateHistory([]);
+            setHasSwitchedEnds(false);
+            setElapsedTime(0);
+            setCourtRotation(0); setActiveTimeoutRemaining(0);
             setIsTimelineLocked(true); setPreviewData(null); setAppState('game'); window.scrollTo(0, 0); 
             setTimeout(() => { const isServeToScore = rules === 'standard' || (rules === 'custom' && serveToWinAt14); announceText(null, `0, 0${mode === 'double' && isServeToScore ? `, ${mode === 'double' ? 2 : 1}` : ''}`); }, 200);
           };
@@ -1430,8 +1458,35 @@
           };
 
           const handleResetPointsOnly = () => {
-              setTeam1Score(0); setTeam2Score(0); setServingTeam(initialServer); setServerNumber(gameMode === 'double' ? 2 : 1);
-              setWinner(null); setWinReason('score'); setShowWinnerOverlay(false); setHistory([]); setStateHistory([]); setHasSwitchedEnds(false); setElapsedTime(0); setCourtRotation(0);
+              setTeam1Score(0); setTeam2Score(0); setServingTeam(initialServer); 
+              setServerNumber(gameMode === 'double' ? 2 : 1);
+                setWinner(null);
+                setWinReason('score');
+                setShowWinnerOverlay(false);
+                
+                const initialServerPos = initialServer === 1 ? 'bottom-right' : 'top-right';
+                const initialReceiverPos = initialServer === 1 ? 'top-left' : 'bottom-left';
+                const startSnapshot = {
+                    team1Score: 0,
+                    team2Score: 0,
+                    servingTeam: initialServer,
+                    serverNumber: gameMode === 'double' ? 2 : 1,
+                    elapsedTime: 0,
+                    t1Left: t1PLeft,
+                    t1Right: t1PRight,
+                    t2Left: t2PLeft,
+                    t2Right: t2PRight,
+                    serverPos: initialServerPos,
+                    receiverPos: initialReceiverPos,
+                    isSnapshot: true,
+                    courtRotation: 0
+                };
+                
+                setHistory([{ id: Date.now(), type: 'START', team: null, point: 0, snapshot: startSnapshot }]);
+                setStateHistory([]);
+                setHasSwitchedEnds(false);
+                setElapsedTime(0);
+              setCourtRotation(0);
               setT1Timeouts(enableTimeouts); setT2Timeouts(enableTimeouts); setShowResetModal(false); setActiveTimeoutRemaining(0); setIsTimelineLocked(true); setPreviewData(null);
               setTimeout(() => { const isServeToScore = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14); announceText(null, `0, 0${gameMode === 'double' && isServeToScore ? `, ${gameMode === 'double' ? 2 : 1}` : ''}`); }, 200);
           };
@@ -1631,11 +1686,14 @@
                               : (<div className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-stone-600' : 'bg-stone-300'} z-10`}></div>)}
                             </div>
                             <div className="h-4 flex items-center justify-center w-full">
-                                {(event.type === 'SIDEOUT' || event.type === 'FAULT') && (
-                                  <div className={`w-4 h-4 rounded-sm rotate-45 border flex items-center justify-center shadow-sm z-10 ${event.team === 2 ? (isDark ? 'bg-emerald-900/40 border-emerald-600' : 'bg-emerald-100 border-emerald-300') : (isDark ? 'bg-rose-900/40 border-rose-600' : 'bg-rose-100 border-rose-300')}`} title={event.type}>
-                                    <span className={`text-[8px] font-black -rotate-45 ${event.team === 2 ? (isDark ? 'text-emerald-400' : 'text-emerald-700') : (isDark ? 'text-rose-400' : 'text-rose-700')}`}>{event.type === 'FAULT' ? 'F' : 'S'}</span>
-                                  </div>
-                                )}
+                            {(event.type === 'SIDEOUT' || event.type === 'FAULT') && (<div className={`w-4 h-4 rounded-sm rotate-45 border flex items-center justify-center shadow-sm z-10 ${event.team === 2 ? (isDark ? 'bg-emerald-900/40 border-emerald-600' : 'bg-emerald-100 border-emerald-300') : (isDark ? 'bg-rose-900/40 border-rose-600' : 'bg-rose-100 border-rose-300')}`} title={event.type}>
+                                <span className={`text-[8px] font-black -rotate-45 ${event.team === 2 ? (isDark ? 'text-emerald-400' : 'text-emerald-700') : (isDark ? 'text-rose-400' : 'text-rose-700')}`}>{event.type === 'FAULT' ? 'F' : 'S'}</span>
+                            </div>
+                            )}
+                            {event.type === 'START' && (<div className={`w-4 h-4 rounded-full border flex items-center justify-center shadow-sm z-10 ${isDark ? 'bg-stone-800 border-stone-500' : 'bg-stone-200 border-stone-400'}`} title="Match Start">
+                                <span className={`text-[8px] font-black ${isDark ? 'text-stone-300' : 'text-stone-600'}`}>0</span>
+                            </div>
+                            )}
                             </div>
                             <div className="h-6 flex items-center justify-center w-full">
                               {event.type === 'T2_POINT' ? (<div className={`w-5 h-5 rounded-full bg-rose-500 ring-4 ${isDark ? 'ring-[#292524]' : 'ring-white'} flex items-center justify-center text-[10px] font-bold text-white transition-transform hover:scale-110 cursor-default shadow-sm z-10`}>{event.point}</div>) 
@@ -2541,7 +2599,7 @@
 
                                   <div className="flex justify-between items-center w-full mt-6 pt-2">
                                       <button onClick={(e) => { e.stopPropagation(); setPreviewData(prev => ({...prev, index: prev.index - 1})); }} disabled={previewData.index === 0} className={`px-4 py-2 rounded-xl font-bold text-xs transition-colors ${previewData.index === 0 ? 'opacity-30 cursor-not-allowed bg-stone-200 dark:bg-stone-800 text-stone-400' : 'bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-900/50 dark:text-amber-400 dark:hover:bg-amber-800'}`}>&larr; {getT('prev')}</button>
-                                      <span className="text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-500">{getT('point')} {previewData.index + 1} / {previewData.history.length}</span>
+                                      <span className="text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-500">{previewData.history[previewData.index]?.type === 'START' ? 'START' : \${getT('point')} ${previewData.index + 1}`} / {previewData.history.length}</span>
                                       <button onClick={(e) => { e.stopPropagation(); setPreviewData(prev => ({...prev, index: prev.index + 1})); }} disabled={previewData.index === previewData.history.length - 1} className={`px-4 py-2 rounded-xl font-bold text-xs transition-colors ${previewData.index === previewData.history.length - 1 ? 'opacity-30 cursor-not-allowed bg-stone-200 dark:bg-stone-800 text-stone-400' : 'bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-900/50 dark:text-amber-400 dark:hover:bg-amber-800'}`}>{getT('next')} &rarr;</button>
                                   </div>
                               </>
