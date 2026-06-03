@@ -1478,9 +1478,83 @@
             if (isServeToScoreMode) { if (winningTeam === servingTeam) grantPoint(); else grantSideout(); } else { grantPoint(); if (winningTeam !== servingTeam) { newServTeam = winningTeam; newServNum = 1; } }
 
             setTeam1Score(newT1); setTeam2Score(newT2); setServingTeam(newServTeam); setServerNumber(newServNum);
-            const snapshot = { team1Score, team2Score, servingTeam, serverNumber, elapsedTime, t1Left: currentT1Left, t1Right: currentT1Right, t2Left: currentT2Left, t2Right: currentT2Right, serverPos: courtServerPos, receiverPos: courtReceiverPos, isSnapshot: true, courtRotation: courtRotation };
+            const newHistForCalc = [...history, { id: Date.now(), type: evType, team: winningTeam, point: evType === 'T1_POINT' ? newT1 : (evType === 'T2_POINT' ? newT2 : null) }];
+
+            let simT1Score = 0; let simT2Score = 0; let t1Swaps = 0; let t2Swaps = 0;
+            let simServeTeam = initialServer; let simServNum = gameMode === 'double' ? 2 : 1;
+            for (let i = 0; i < newHistForCalc.length; i++) {
+                const ev = newHistForCalc[i];
+                let isServeToScoreLoop = false;
+                let isStrictSuddenDeathLoop = false;
+                if (ruleSet === 'standard') isServeToScoreLoop = true;
+                else if (ruleSet === 'custom' && serveToWinAt14) isServeToScoreLoop = true;
+                else if (ruleSet === '14-point' && serveToWinAt14 && simT1Score === 14 && simT2Score === 14) {
+                    isServeToScoreLoop = true; isStrictSuddenDeathLoop = true;
+                }
+                if (ev.type === 'T1_POINT') {
+                    simT1Score++;
+                    if (isServeToScoreLoop) { if (simServeTeam === 1) t1Swaps++; }
+                    else { if (simServeTeam === 1) t1Swaps++; else { simServeTeam = 1; simServNum = 1; } }
+                } else if (ev.type === 'T2_POINT') {
+                    simT2Score++;
+                    if (isServeToScoreLoop) { if (simServeTeam === 2) t2Swaps++; }
+                    else { if (simServeTeam === 2) t2Swaps++; else { simServeTeam = 2; simServNum = 1; } }
+                } else if (ev.type === 'FAULT') {
+                    if (gameMode === 'double' && !isStrictSuddenDeathLoop) simServNum = 2;
+                } else if (ev.type === 'SIDEOUT') {
+                    simServeTeam = simServeTeam === 1 ? 2 : 1; simServNum = 1;
+                }
+            }
+            
+            const newT1Left = (t1Swaps % 2 === 0) ? t1PLeft : t1PRight;
+            const newT1Right = (t1Swaps % 2 === 0) ? t1PRight : t1PLeft;
+            const newT2Left = (t2Swaps % 2 === 0) ? t2PLeft : t2PRight;
+            const newT2Right = (t2Swaps % 2 === 0) ? t2PRight : t2PLeft;
+            
+            let newCourtServerPos = '';
+            let newCourtReceiverPos = '';
+            if (gameMode === 'single') {
+                newCourtServerPos = (newServTeam === 1 ? newT1 : newT2) % 2 === 0 ? 'Right' : 'Left';
+            } else {
+                let isServeToScoreCurrent = false;
+                let isStrictSuddenDeathCurrent = false;
+                if (ruleSet === 'standard') isServeToScoreCurrent = true;
+                else if (ruleSet === 'custom' && serveToWinAt14) isServeToScoreCurrent = true;
+                else if (ruleSet === '14-point' && serveToWinAt14 && newT1 === 14 && newT2 === 14) {
+                    isServeToScoreCurrent = true; isStrictSuddenDeathCurrent = true;
+                }
+                if (isServeToScoreCurrent) {
+                    let isFirstTurnOfMatch = true;
+                    for (let i = 0; i < newHistForCalc.length; i++) {
+                        if (newHistForCalc[i].type === 'SIDEOUT' || (!isServeToScoreCurrent && (newHistForCalc[i].type === 'T1_POINT' || newHistForCalc[i].type === 'T2_POINT'))) {
+                            isFirstTurnOfMatch = false; break;
+                        }
+                    }
+                    if (isStrictSuddenDeathCurrent) isFirstTurnOfMatch = false;
+                    let ptsWonThisTurn = 0;
+                    for (let i = newHistForCalc.length - 1; i >= 0; i--) {
+                        if (newHistForCalc[i].type === 'SIDEOUT') break;
+                        if (newHistForCalc[i].type === `T${newServTeam}_POINT`) ptsWonThisTurn++;
+                    }
+                    if (isFirstTurnOfMatch) newCourtServerPos = ptsWonThisTurn % 2 === 0 ? 'Right' : 'Left';
+                    else newCourtServerPos = ptsWonThisTurn % 2 === 0 ? (newServNum === 1 ? 'Right' : 'Left') : (newServNum === 1 ? 'Left' : 'Right');
+                } else {
+                    newCourtServerPos = (newServTeam === 1 ? newT1 : newT2) % 2 === 0 ? 'Right' : 'Left';
+                }
+            }
+            
+            if (newServTeam === 1) {
+                newCourtServerPos = newCourtServerPos === 'Right' ? 'bottom-right' : 'bottom-left';
+                newCourtReceiverPos = newCourtServerPos === 'bottom-right' ? 'top-left' : 'top-right';
+            } else {
+                newCourtServerPos = newCourtServerPos === 'Right' ? 'top-left' : 'top-right';
+                newCourtReceiverPos = newCourtServerPos === 'top-left' ? 'bottom-right' : 'bottom-left';
+            }
+            
+            const snapshot = { team1Score: newT1, team2Score: newT2, servingTeam: newServTeam, serverNumber: newServNum, elapsedTime, t1Left: newT1Left, t1Right: newT1Right, t2Left: newT2Left, t2Right: newT2Right, serverPos: newCourtServerPos, receiverPos: newCourtReceiverPos, isSnapshot: true, courtRotation: courtRotation };
             const newHist = [...history, { id: Date.now(), type: evType, team: winningTeam, point: evType === 'T1_POINT' ? newT1 : (evType === 'T2_POINT' ? newT2 : null), snapshot }];
-            setHistory(newHist); setIsTimelineLocked(true); setPreviewData(null);
+            setHistory(newHist); 
+            setIsTimelineLocked(true); setPreviewData(null);
             const switchPt = Math.ceil(playTo / 2); if (enableSwitchEnds && !hasSwitchedEnds && (newT1 === switchPt || newT2 === switchPt)) { setShowSwitchModal(true); setHasSwitchedEnds(true); }
             checkWin(newT1, newT2, newServTeam, newServNum, newHist, isServeToScoreMode);
           };
