@@ -1489,19 +1489,17 @@
           const formatTime = (sec) => { const m = Math.floor(sec / 60).toString().padStart(2, '0'); const s = (sec % 60).toString().padStart(2, '0'); return `${m}:${s}`; };
 
           // --- GHOST COURT ENGINE ---
-          const previewSnapshot = previewData && previewData.history[previewData.index] ? previewData.history[previewData.index].snapshot : null;
-          
-          const d_t1Score = previewSnapshot ? previewSnapshot.team1Score : team1Score;
-          const d_t2Score = previewSnapshot ? previewSnapshot.team2Score : team2Score;
-          const d_serveTeam = previewSnapshot ? previewSnapshot.servingTeam : servingTeam;
-          const d_serveNum = previewSnapshot ? previewSnapshot.serverNumber : serverNumber;
-
-          const d_t1Left = previewSnapshot ? previewSnapshot.t1Left : currentT1Left;
-          const d_t1Right = previewSnapshot ? previewSnapshot.t1Right : currentT1Right;
-          const d_t2Left = previewSnapshot ? previewSnapshot.t2Left : currentT2Left;
-          const d_t2Right = previewSnapshot ? previewSnapshot.t2Right : currentT2Right;
-          const d_srvPos = previewSnapshot ? previewSnapshot.serverPos : courtServerPos;
-          const d_rcvPos = previewSnapshot ? previewSnapshot.receiverPos : courtReceiverPos;
+            const previewSnapshot = previewData && previewData.history[previewData.index] ? previewData.history[previewData.index].snapshot : null;
+            const d_t1Score = team1Score;
+            const d_t2Score = team2Score;
+            const d_serveTeam = servingTeam;
+            const d_serveNum = serverNumber;
+            const d_t1Left = currentT1Left;
+            const d_t1Right = currentT1Right;
+            const d_t2Left = currentT2Left;
+            const d_t2Right = currentT2Right;
+            const d_srvPos = courtServerPos;
+            const d_rcvPos = courtReceiverPos;
 
           const isSuddenDeath = ruleSet === '14-point' && d_t1Score === 14 && d_t2Score === 14;
           const isServeToScoreModeUI = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14) || (ruleSet === '14-point' && serveToWinAt14 && d_t1Score === 14 && d_t2Score === 14);
@@ -1856,13 +1854,13 @@
                     <div className={`flex justify-center items-center gap-4 md:gap-8 mt-10 mb-8 relative z-10`}>
                       <div className="flex flex-col items-center relative w-24 md:w-32">
                         <span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest truncate w-[150%] text-center ${textSub}`}>{t1Name}</span>
-                        <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${previewData && previewSnapshot ? 'text-amber-500' : (d_serveTeam === 1 && !winner ? accentGreen : textMain)}`}>{d_t1Score}</span>
+                        <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${d_serveTeam === 1 && !winner ? accentGreen : textMain}`}>{d_t1Score}</span>
                         {enableTimeouts > 0 && !winner && (<div className="absolute top-full mt-3 flex gap-2 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t1Timeouts > 0 && setShowTimeoutConfirm(1)} title={getT('callTimeout')}>{[...Array(enableTimeouts)].map((_, i) => (<div key={i} className={`w-2.5 h-2.5 rounded-full transition-colors ${t1Timeouts >= i + 1 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>))}</div>)}
                       </div>
                       <span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span>
                       <div className="flex flex-col items-center relative w-24 md:w-32">
                         <span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest truncate w-[150%] text-center ${textSub}`}>{t2Name}</span>
-                        <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${previewData && previewSnapshot ? 'text-amber-500' : (d_serveTeam === 2 && !winner ? accentRed : textMain)}`}>{d_t2Score}</span>
+                        <span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${d_serveTeam === 2 && !winner ? accentRed : textMain}`}>{d_t2Score}</span>
                         {enableTimeouts > 0 && !winner && (<div className="absolute top-full mt-3 flex gap-2 px-3 py-2 rounded-full cursor-pointer hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors active:scale-95" onClick={() => t2Timeouts > 0 && setShowTimeoutConfirm(2)} title={getT('callTimeout')}>{[...Array(enableTimeouts)].map((_, i) => (<div key={i} className={`w-2.5 h-2.5 rounded-full transition-colors ${t2Timeouts >= i + 1 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-2 border-stone-300 dark:border-stone-600'}`}></div>))}</div>)}
                       </div>
                       {showServerNumberUI && (<><span className={`text-3xl md:text-5xl font-light ${textSub}`}>-</span><div className="flex flex-col items-center relative"><span className={`absolute bottom-full mb-3 text-xs font-semibold uppercase tracking-widest ${textSub}`}>{getT('server')}</span><span className={`text-8xl md:text-9xl font-bold tracking-tighter leading-none ${winner ? textMain : 'text-amber-500'}`}>{d_serveNum}</span></div></>)}
@@ -1911,15 +1909,15 @@
                              <button onClick={() => setActiveTimeoutRemaining(0)} className="px-5 py-2 mt-2 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-full text-xs font-bold uppercase tracking-widest transition-colors border border-stone-600 shadow-sm active:scale-95">Resume</button>
                           </div>
                         )}
-                        <button onClick={() => handleRallyWin(1)} disabled={winner !== null || (previewData && previewSnapshot !== null)} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${d_serveTeam === 1 && !winner && !previewSnapshot ? bgAccentGreen : `muji-card ${bgCard} ${winner || previewSnapshot ? 'opacity-50' : ''}`}`}>
-                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${d_serveTeam === 1 && !winner && !previewSnapshot ? accentGreen : textMain}`}>{t1Name}</span>
-                          <span className={`text-sm font-semibold ${d_serveTeam === 1 && !winner && !previewSnapshot ? accentGreen : textSub}`}>{getT('wonRally')}</span>
-                          {d_serveTeam === 1 && !winner && !previewSnapshot && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentGreen}`}><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>{getT('serving')}</div>}
+                        <button onClick={() => handleRallyWin(1)} disabled={winner !== null || (previewData && previewSnapshot !== null)} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${d_serveTeam === 1 && !winner ? bgAccentGreen : `muji-card ${bgCard}`} ${winner || previewSnapshot ? 'opacity-50' : ''}`}>
+                            <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${d_serveTeam === 1 && !winner ? accentGreen : textMain}`}>{t1Name}</span>
+                            <span className={`text-sm font-semibold ${d_serveTeam === 1 && !winner ? accentGreen : textSub}`}>{getT('wonRally')}</span>
+                            {d_serveTeam === 1 && !winner && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentGreen}`}><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>{getT('serving')}</div>}
                         </button>
-                        <button onClick={() => handleRallyWin(2)} disabled={winner !== null || (previewData && previewSnapshot !== null)} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${d_serveTeam === 2 && !winner && !previewSnapshot ? bgAccentRed : `muji-card ${bgCard} ${winner || previewSnapshot ? 'opacity-50' : ''}`}`}>
-                          <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${d_serveTeam === 2 && !winner && !previewSnapshot ? accentRed : textMain}`}>{t2Name}</span>
-                          <span className={`text-sm font-semibold ${d_serveTeam === 2 && !winner && !previewSnapshot ? accentRed : textSub}`}>{getT('wonRally')}</span>
-                          {d_serveTeam === 2 && !winner && !previewSnapshot && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentRed}`}><div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></div>{getT('serving')}</div>}
+                        <button onClick={() => handleRallyWin(2)} disabled={winner !== null || (previewData && previewSnapshot !== null)} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${d_serveTeam === 2 && !winner ? bgAccentRed : `muji-card ${bgCard}`} ${winner || previewSnapshot ? 'opacity-50' : ''}`}>
+                            <span className={`block text-xl md:text-2xl font-bold mb-1 truncate max-w-[90%] ${d_serveTeam === 2 && !winner ? accentRed : textMain}`}>{t2Name}</span>
+                            <span className={`text-sm font-semibold ${d_serveTeam === 2 && !winner ? accentRed : textSub}`}>{getT('wonRally')}</span>
+                            {d_serveTeam === 2 && !winner && <div className={`absolute top-4 flex items-center gap-1.5 text-[10px] font-bold uppercase ${accentRed}`}><div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></div>{getT('serving')}</div>}
                         </button>
                       </div>
                     </div>
