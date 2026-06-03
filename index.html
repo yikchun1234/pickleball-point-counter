@@ -1418,7 +1418,8 @@
             setWinner(null);
             setWinReason('score');
             setShowWinnerOverlay(false);
-            
+
+            // --- ADDED FOR GHOST REPLAY (POINT 0): Calculate initial starting positions ---
             const initialServerPos = startServ === 1 ? 'bottom-right' : 'top-right';
             const initialReceiverPos = startServ === 1 ? 'top-left' : 'bottom-left';
             const startSnapshot = {
@@ -1436,7 +1437,8 @@
                 isSnapshot: true,
                 courtRotation: 0
             };
-            
+
+            // --- ADDED FOR GHOST REPLAY (POINT 0): Inject the 0-0 START event into history ---
             setHistory([{ id: Date.now(), type: 'START', team: null, point: 0, snapshot: startSnapshot }]);
             setStateHistory([]);
             setHasSwitchedEnds(false);
@@ -1463,7 +1465,8 @@
                 setWinner(null);
                 setWinReason('score');
                 setShowWinnerOverlay(false);
-                
+
+              // --- ADDED FOR GHOST REPLAY (POINT 0): Calculate initial starting positions for reset ---
                 const initialServerPos = initialServer === 1 ? 'bottom-right' : 'top-right';
                 const initialReceiverPos = initialServer === 1 ? 'top-left' : 'bottom-left';
                 const startSnapshot = {
@@ -1481,7 +1484,8 @@
                     isSnapshot: true,
                     courtRotation: 0
                 };
-                
+
+              // --- ADDED FOR GHOST REPLAY (POINT 0): Inject the 0-0 START event into history ---
                 setHistory([{ id: Date.now(), type: 'START', team: null, point: 0, snapshot: startSnapshot }]);
                 setStateHistory([]);
                 setHasSwitchedEnds(false);
@@ -1533,6 +1537,7 @@
             if (isServeToScoreMode) { if (winningTeam === servingTeam) grantPoint(); else grantSideout(); } else { grantPoint(); if (winningTeam !== servingTeam) { newServTeam = winningTeam; newServNum = 1; } }
 
             setTeam1Score(newT1); setTeam2Score(newT2); setServingTeam(newServTeam); setServerNumber(newServNum);
+              // --- ADDED FOR GHOST REPLAY (SNAPSHOT FIX): Simulate the resulting score and positions before saving ---
             const newHistForCalc = [...history, { id: Date.now(), type: evType, team: winningTeam, point: evType === 'T1_POINT' ? newT1 : (evType === 'T2_POINT' ? newT2 : null) }];
 
             let simT1Score = 0; let simT2Score = 0; let t1Swaps = 0; let t2Swaps = 0;
@@ -1690,6 +1695,7 @@
                                 <span className={`text-[8px] font-black -rotate-45 ${event.team === 2 ? (isDark ? 'text-emerald-400' : 'text-emerald-700') : (isDark ? 'text-rose-400' : 'text-rose-700')}`}>{event.type === 'FAULT' ? 'F' : 'S'}</span>
                             </div>
                             )}
+                                {/* --- ADDED FOR GHOST REPLAY (POINT 0): Draw the '0' badge on the timeline --- */}
                             {event.type === 'START' && (<div className={`w-4 h-4 rounded-full border flex items-center justify-center shadow-sm z-10 ${isDark ? 'bg-stone-800 border-stone-500' : 'bg-stone-200 border-stone-400'}`} title="Match Start">
                                 <span className={`text-[8px] font-black ${isDark ? 'text-stone-300' : 'text-stone-600'}`}>0</span>
                             </div>
@@ -2599,6 +2605,7 @@
 
                                   <div className="flex justify-between items-center w-full mt-6 pt-2">
                                       <button onClick={(e) => { e.stopPropagation(); setPreviewData(prev => ({...prev, index: prev.index - 1})); }} disabled={previewData.index === 0} className={`px-4 py-2 rounded-xl font-bold text-xs transition-colors ${previewData.index === 0 ? 'opacity-30 cursor-not-allowed bg-stone-200 dark:bg-stone-800 text-stone-400' : 'bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-900/50 dark:text-amber-400 dark:hover:bg-amber-800'}`}>&larr; {getT('prev')}</button>
+                                      {/* --- ADDED FOR GHOST REPLAY (POINT 0): Change text to START when on Point 0 --- */}
                                       <span className="text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-500">{previewData.history[previewData.index]?.type === 'START' ? 'START' : `${getT('point')} ${previewData.index + 1}`} / {previewData.history.length}</span>
                                       <button onClick={(e) => { e.stopPropagation(); setPreviewData(prev => ({...prev, index: prev.index + 1})); }} disabled={previewData.index === previewData.history.length - 1} className={`px-4 py-2 rounded-xl font-bold text-xs transition-colors ${previewData.index === previewData.history.length - 1 ? 'opacity-30 cursor-not-allowed bg-stone-200 dark:bg-stone-800 text-stone-400' : 'bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-900/50 dark:text-amber-400 dark:hover:bg-amber-800'}`}>{getT('next')} &rarr;</button>
                                   </div>
