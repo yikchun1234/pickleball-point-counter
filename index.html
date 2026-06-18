@@ -1805,20 +1805,19 @@
                       ))}
                     </div>
                   </div>
-                  <div className="mt-12 mb-8 flex flex-col items-center gap-6">
-                    <div className={`text-center text-[10px] font-bold uppercase tracking-widest ${textSub}`}>
-                      <p>{getT('designBy')}</p>
+                  <div className="flex flex-wrap justify-center gap-3">
+                      {/* NEW DUPR SCHEDULER BUTTON */}
                       <a 
                         href="https://pb-fair-games.pages.dev/" 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        className="block mt-2 text-emerald-500 hover:text-emerald-600 transition-colors"
+                        className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 active:scale-95 text-[10px] font-bold uppercase tracking-widest`}
                       >
-                        Pickleball DUPR Fair Scheduler
+                        <Users size={14} /> DUPR Fair Scheduler
                       </a>
-                    </div>
-                    <div className="flex flex-wrap justify-center gap-3">
-                       <a href="https://github.com/yikchun1234" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 active:scale-95 text-[10px] font-bold uppercase tracking-widest`}><Github size={14} /> GitHub</a>
+                    
+                      {/* EXISTING GITHUB BUTTON */}
+                      <a href="https://github.com/yikchun1234" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 active:scale-95 text-[10px] font-bold uppercase tracking-widest`}><Github size={14} /> GitHub</a>
                        <a href="https://reclub.co/players/@amostan" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 active:scale-95 text-[10px] font-bold uppercase tracking-widest`}><img src="https://reclub.co/favicon.ico" alt="Reclub" className="w-3.5 h-3.5 rounded-sm" onError={(e) => { e.target.onerror = null; e.target.style.display='none'; }} /><span>Reclub</span></a>
                        <a href="https://reclub.co/clubs/@pick-to-sync" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 active:scale-95 text-[10px] font-bold uppercase tracking-widest`}><img src="https://reclub.co/favicon.ico" alt="Reclub Club" className="w-3.5 h-3.5 rounded-sm" onError={(e) => { e.target.onerror = null; e.target.style.display='none'; }} /><span>Reclub Club</span></a>
                     </div>
