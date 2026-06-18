@@ -120,7 +120,7 @@
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.6/babel.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lucide@0.450.0/dist/umd/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.292.0/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
     
     <script>
@@ -233,18 +233,27 @@
         const { useState, useEffect, useRef } = React;
 
         const IconWrapper = ({ iconObj, size = 24, className = "" }) => {
-            if (!iconObj || !Array.isArray(iconObj)) return null;
-            return React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", className: `lucide ${className}` },
-                iconObj.map((node, index) => {
-                    const [tag, attrs] = node;
-                    const reactAttrs = { key: index };
-                    for (const [key, value] of Object.entries(attrs || {})) {
-                        const reactKey = key === 'class' ? 'className' : key.replace(/-([a-z])/g, g => g[1].toUpperCase());
-                        reactAttrs[reactKey] = value;
-                    }
-                    return React.createElement(tag, reactAttrs);
-                })
-            );
+          if (!iconObj || !Array.isArray(iconObj)) return null;
+        
+          // MAGIC FIX: Automatically unwraps older Lucide data formats to prevent React from crashing
+          const safeIcons = (iconObj[0] === 'svg' && Array.isArray(iconObj[2])) ? iconObj[2] : iconObj;
+        
+          return React.createElement('svg', {
+            xmlns: "http://www.w3.org/2000/svg",
+            width: size, height: size, viewBox: "0 0 24 24",
+            fill: "none", stroke: "currentColor", strokeWidth: "2",
+            strokeLinecap: "round", strokeLinejoin: "round",
+            className: `lucide ${className}`
+          },
+          safeIcons.map((node, index) => {
+            const [tag, attrs] = node;
+            const reactAttrs = { key: index };
+            for (const [key, value] of Object.entries(attrs || {})) {
+              const reactKey = key === 'class' ? 'className' : key.replace(/-([a-z])/g, g => g[1].toUpperCase());
+              reactAttrs[reactKey] = value;
+            }
+            return React.createElement(tag, reactAttrs);
+          }));
         };
 
         const Play = (props) => <IconWrapper iconObj={lucide.icons.Play} {...props} />;
