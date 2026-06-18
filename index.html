@@ -120,8 +120,19 @@
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.6/babel.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lucide@0.292.0/dist/umd/lucide.js"></script>
+    <script src="https://unpkg.com/lucide@0.292.0"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+    
+    <script>
+      window.addEventListener('error', function(e) {
+        const loadingText = document.querySelector('p:nth-of-type(2)');
+        if (loadingText) {
+          loadingText.innerText = "ERROR: " + (e.message || "Network Timeout");
+          loadingText.style.color = "#f43f5e";
+          loadingText.style.animation = "none";
+        }
+      });
+    </script>
     
     <script>
         (function() {
