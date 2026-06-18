@@ -1814,24 +1814,26 @@
                       ))}
                     </div>
                   </div>
-                  <div className="flex flex-wrap justify-center gap-3">
-                      {/* NEW DUPR SCHEDULER BUTTON */}
-                      <a 
-                        href="https://pb-fair-games.pages.dev/" 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 active:scale-95 text-[10px] font-bold uppercase tracking-widest`}
-                      >
+                  {/* LEVEL 1: DUPR FAIR SCHEDULER */}
+                    <div className="flex justify-center mt-2 mb-3">
+                      <a href="https://pb-fair-games.pages.dev/" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 active:scale-95 text-[10px] font-bold uppercase tracking-widest`}>
                         <Users size={14} /> DUPR Fair Scheduler
                       </a>
-                    
-                      {/* EXISTING GITHUB BUTTON */}
-                      <a href="https://github.com/yikchun1234" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 active:scale-95 text-[10px] font-bold uppercase tracking-widest`}><Github size={14} /> GitHub</a>
-                       <a href="https://reclub.co/players/@amostan" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 active:scale-95 text-[10px] font-bold uppercase tracking-widest`}><img src="https://reclub.co/favicon.ico" alt="Reclub" className="w-3.5 h-3.5 rounded-sm" onError={(e) => { e.target.onerror = null; e.target.style.display='none'; }} /><span>Reclub</span></a>
-                       <a href="https://reclub.co/clubs/@pick-to-sync" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 active:scale-95 text-[10px] font-bold uppercase tracking-widest`}><img src="https://reclub.co/favicon.ico" alt="Reclub Club" className="w-3.5 h-3.5 rounded-sm" onError={(e) => { e.target.onerror = null; e.target.style.display='none'; }} /><span>Reclub Club</span></a>
                     </div>
-                    <div className="flex flex-col sm:flex-row items-center gap-3 mt-2">
+                    
+                    {/* LEVEL 2: GITHUB | RECLUB | PICK TO SYNC */}
+                    <div className="flex flex-wrap justify-center gap-3 mb-5">
+                      <a href="https://github.com/yikchun1234" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 active:scale-95 text-[10px] font-bold uppercase tracking-widest`}><Github size={14} /> GitHub</a>
+                      
+                      <a href="https://reclub.co/players/@amostan" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 active:scale-95 text-[10px] font-bold uppercase tracking-widest`}><img src="https://reclub.co/favicon.ico" alt="Reclub" className="w-3.5 h-3.5 rounded-sm" onError={(e) => { e.target.onerror = null; e.target.style.display='none'; }} /><span>Reclub</span></a>
+                      
+                      <a href="https://reclub.co/clubs/@pick-to-sync" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1.5 px-4 py-2 rounded-full ${bgCard} border ${borderSub} ${textSub} hover:${textMain} shadow-sm transition-transform hover:scale-105 active:scale-95 text-[10px] font-bold uppercase tracking-widest`}><img src="https://reclub.co/favicon.ico" alt="Pick To Sync" className="w-3.5 h-3.5 rounded-sm" onError={(e) => { e.target.onerror = null; e.target.style.display='none'; }} /><span>Pick To Sync</span></a>
+                    </div>
+                    
+                    {/* LEVEL 3 & 4: SHARE APP & INSTALL APP */}
+                    <div className="flex flex-col items-center gap-3">
                       <button onClick={() => setShowShareAppModal(true)} className={`flex items-center gap-2 px-6 py-3 rounded-full bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900 hover:scale-105 active:scale-95 transition-transform shadow-md font-bold text-xs uppercase tracking-widest`}><QrCode size={16} /> {getT('shareApp')}</button>
+                      
                       {!isInstalled && (<button onClick={handleInstallClick} className={`flex items-center gap-2 px-6 py-3 rounded-full bg-emerald-500 text-white hover:bg-emerald-600 transition-transform hover:scale-105 active:scale-95 shadow-md font-bold text-xs uppercase tracking-widest`}><Download size={16} /> {getT('installAsApp')}</button>)}
                     </div>
                   </div>
