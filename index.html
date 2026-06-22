@@ -987,6 +987,7 @@
           const [enableManualTime, setEnableManualTime] = useState(false);
           const [isTimerRunning, setIsTimerRunning] = useState(true);
           const [elapsedTime, setElapsedTime] = useState(0);
+          const [isTimeoutFinishedOverlay, setIsTimeoutFinishedOverlay] = useState(false);
           const [courtRotation, setCourtRotation] = useState(0);
           const [activeTimeoutRemaining, setActiveTimeoutRemaining] = useState(0);
           
@@ -1217,7 +1218,7 @@
             } else if (winner) localStorage.removeItem('pb_active_game');
           }, [team1Score, team2Score, servingTeam, serverNumber, history, appState, winner, elapsedTime, t1Timeouts, t2Timeouts, courtRotation, initialServer]);
             
-          useEffect(() => {let timer; if (appState === 'game' && !winner && !showRetreatModal && !showBackConfirm && !showSwitchModal && !showTimeoutConfirm && activeTimeoutRemaining === 0 && isTimerRunning) timer = setInterval(() => setElapsedTime(prev => prev + 1), 1000); return () => clearInterval(timer); }, [appState, winner, showRetreatModal, showBackConfirm, showSwitchModal, showTimeoutConfirm, activeTimeoutRemaining, isTimerRunning]);
+          useEffect(() => {let timer; if (appState === 'game' && !winner && !showRetreatModal && !showBackConfirm && !showSwitchModal && !showTimeoutConfirm && activeTimeoutRemaining === 0 && !isTimeoutFinishedOverlay && isTimerRunning) timer = setInterval(() => setElapsedTime(prev => prev + 1), 1000); return () => clearInterval(timer); }, [appState, winner, showRetreatModal, showBackConfirm, showSwitchModal, showTimeoutConfirm, activeTimeoutRemaining, isTimeoutFinishedOverlay, isTimerRunning]);
             
           useEffect(() => {
             let timer; if (activeTimeoutRemaining > 0) timer = setInterval(() => setActiveTimeoutRemaining(prev => prev - 1), 1000); return () => clearInterval(timer);
@@ -1427,6 +1428,7 @@
             setT2Timeouts(useTimeouts);
             setEnableManualTime(manualTime);
             setIsTimerRunning(!manualTime);
+            setIsTimeoutFinishedOverlay(false);
             setWinner(null);
             setWinReason('score');
             setShowWinnerOverlay(false);
@@ -1521,6 +1523,7 @@
              triggerHaptic('point');
              announceText(team === servingTeam ? getT('serverTimeout') : getT('receiverTimeout'));
              setActiveTimeoutRemaining(60);
+             setIsTimeoutFinishedOverlay(true);
              if (enableManualTime) setIsTimerRunning(false);
           };
 
@@ -2073,12 +2076,21 @@
 
                    <div className="mt-auto relative z-10">
                       <div className="grid grid-cols-2 gap-4 h-40 md:h-48 relative">
-                        {activeTimeoutRemaining > 0 && (
+                        {(activeTimeoutRemaining > 0 || isTimeoutFinishedOverlay) && (
                           <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-sm animate-in fade-in duration-200">
-                            <div className="text-white text-6xl font-black mb-6 drop-shadow-lg tabular-nums tracking-tighter">
-                              {formatTime(activeTimeoutRemaining)}
-                            </div>
-                            <button onClick={() => { setActiveTimeoutRemaining(0); if (enableManualTime) setIsTimerRunning(false); }} className="px-5 py-2 mt-2 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-full text-xs font-bold uppercase tracking-widest transition-colors border border-stone-600 shadow-sm active:scale-95">Time In</button>
+                            {activeTimeoutRemaining > 0 ? (
+                              <div className="text-white text-6xl font-black mb-6 drop-shadow-lg tabular-nums tracking-tighter">
+                                {formatTime(activeTimeoutRemaining)}
+                              </div>
+                            ) : (
+                              <>
+                                <div className="text-emerald-500 mb-4 drop-shadow-lg animate-pulse"><Play size={48} className="fill-current opacity-90" /></div>
+                                <div className="text-stone-300 text-sm font-medium mb-6 tracking-widest uppercase text-center">Timeout Finished</div>
+                              </>
+                            )}
+                            <button onClick={() => { setActiveTimeoutRemaining(0); setIsTimeoutFinishedOverlay(false); if (enableManualTime) setIsTimerRunning(true); }} className={`px-8 py-3 mt-2 ${activeTimeoutRemaining > 0 ? 'bg-stone-800 hover:bg-stone-700 text-stone-200 border-stone-600 text-xs' : 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500 text-sm'} rounded-full font-bold uppercase tracking-widest transition-all border shadow-lg active:scale-95`}>
+                              Time In
+                            </button>
                           </div>
                         )}
                 
