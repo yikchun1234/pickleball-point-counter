@@ -1470,7 +1470,13 @@
             const prev = stateHistory[stateHistory.length - 1];
             setTeam1Score(prev.team1Score); setTeam2Score(prev.team2Score); setServingTeam(prev.servingTeam); setServerNumber(prev.serverNumber); setWinner(prev.winner); setWinReason(prev.winReason || 'score');
             if (prev.t1Timeouts !== undefined) setT1Timeouts(prev.t1Timeouts); if (prev.t2Timeouts !== undefined) setT2Timeouts(prev.t2Timeouts); if (prev.courtRotation !== undefined) setCourtRotation(prev.courtRotation);
-            setHistory(prev.history); setHasSwitchedEnds(prev.hasSwitchedEnds || false); setStateHistory(s => s.slice(0, -1)); setActiveTimeoutRemaining(0); setIsTimelineLocked(true); setPreviewData(null);
+            setHistory(prev.history); 
+            setHasSwitchedEnds(prev.hasSwitchedEnds || false);
+            setStateHistory(s => s.slice(0, -1));
+            setActiveTimeoutRemaining(0);
+            setIsTimeoutFinishedOverlay(false);
+            setIsTimelineLocked(true);
+            setPreviewData(null);
           };
 
           const handleResetPointsOnly = () => {
@@ -1504,8 +1510,14 @@
                 setStateHistory([]);
                 setHasSwitchedEnds(false);
                 setElapsedTime(0);
-              setCourtRotation(0);
-              setT1Timeouts(enableTimeouts); setT2Timeouts(enableTimeouts); setShowResetModal(false); setActiveTimeoutRemaining(0); setIsTimelineLocked(true); setPreviewData(null);
+                setCourtRotation(0);
+                setT1Timeouts(enableTimeouts);
+                setT2Timeouts(enableTimeouts);
+                setShowResetModal(false);
+                setActiveTimeoutRemaining(0);
+                setIsTimeoutFinishedOverlay(false);
+                setIsTimelineLocked(true);
+                setPreviewData(null);
               setTimeout(() => { const isServeToScore = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14); announceText(null, `0, 0${gameMode === 'double' && isServeToScore ? `, ${gameMode === 'double' ? 2 : 1}` : ''}`); }, 200);
           };
 
@@ -1778,7 +1790,7 @@
               {appState !== 'splash' && (
                 <div className="fixed top-0 w-full flex justify-between items-start z-50 pointer-events-none" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
                   <div className="pointer-events-auto">
-                    {appState === 'game' && <div onClick={() => { if (enableManualTime) setIsTimerRunning(!isTimerRunning); }} className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${bgCard} ${borderSub} border shadow-sm text-xs font-bold transition-colors ${enableManualTime ? 'cursor-pointer hover:scale-105 active:scale-95' : ''} ${enableManualTime && !isTimerRunning ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700 animate-pulse' : textSub}`}> {enableManualTime && !isTimerRunning ? <Play size={14} className="fill-current"/> : <Timer size={14}/>} {formatTime(elapsedTime)}</div>}
+                    {appState === 'game' && <div onClick={() => { if (enableManualTime && activeTimeoutRemaining === 0 && !isTimeoutFinishedOverlay) setIsTimerRunning(!isTimerRunning); }} className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${bgCard} ${borderSub} border shadow-sm text-xs font-bold transition-colors ${enableManualTime && activeTimeoutRemaining === 0 && !isTimeoutFinishedOverlay ? 'cursor-pointer hover:scale-105 active:scale-95' : ''} ${enableManualTime && !isTimerRunning ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700 animate-pulse' : textSub}`}> {enableManualTime && !isTimerRunning ? <Play size={14} className="fill-current"/> : <Timer size={14}/>} {formatTime(elapsedTime)}</div>}
                   </div>
                   <div className={`flex items-center gap-2 pointer-events-auto`}>
                     <button onClick={handleSoundClick} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform relative z-10`}>{soundEnabled ? <Volume2 size={18} className={accentGreen} /> : <VolumeX size={18} className={textSub} />}</button>
