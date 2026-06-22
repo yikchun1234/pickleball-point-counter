@@ -1516,9 +1516,14 @@
              if (winner) return; saveStateForUndo(); if (team === 1) setT1Timeouts(t => t - 1); else setT2Timeouts(t => t - 1);
              const evType = team === 1 ? 'T1_TIMEOUT' : 'T2_TIMEOUT';
              const snapshot = { team1Score, team2Score, servingTeam, serverNumber, elapsedTime, t1Left: currentT1Left, t1Right: currentT1Right, t2Left: currentT2Left, t2Right: currentT2Right, serverPos: courtServerPos, receiverPos: courtReceiverPos, isSnapshot: true, courtRotation: courtRotation };
-             setHistory(prev => [...prev, { id: Date.now(), type: evType, team, point: null, snapshot }]); setShowTimeoutConfirm(null); triggerHaptic('point');
-             announceText(team === servingTeam ? getT('serverTimeout') : getT('receiverTimeout')); setActiveTimeoutRemaining(60);
+             setHistory(prev => [...prev, { id: Date.now(), type: evType, team, point: null, snapshot }]); 
+             setShowTimeoutConfirm(null);
+             triggerHaptic('point');
+             announceText(team === servingTeam ? getT('serverTimeout') : getT('receiverTimeout'));
+             setActiveTimeoutRemaining(60);
+             if (enableManualTime) setIsTimerRunning(false);
           };
+
 
           const checkWin = (t1, t2, newServTeam, newServNum, newHistory, isServeToScore) => {
             let hasWinner = false; let winTeam = null;
@@ -2069,10 +2074,19 @@
                    <div className="mt-auto relative z-10">
                       <div className="grid grid-cols-2 gap-4 h-40 md:h-48 relative">
                         {activeTimeoutRemaining > 0 && (
-                          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-stone-900/60 dark:bg-black/60 backdrop-blur-sm rounded-xl border border-stone-700 shadow-2xl">
-                             <Timer size={32} className="text-amber-400 mb-2 animate-pulse" />
-                             <div className="text-4xl font-black text-white tracking-widest mb-1 drop-shadow-md">00:{activeTimeoutRemaining.toString().padStart(2, '0')}</div>
-                             <button onClick={() => setActiveTimeoutRemaining(0)} className="px-5 py-2 mt-2 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-full text-xs font-bold uppercase tracking-widest transition-colors border border-stone-600 shadow-sm active:scale-95">Resume</button>
+                          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-sm animate-in fade-in duration-200">
+                            <div className="text-white text-6xl font-black mb-6 drop-shadow-lg tabular-nums tracking-tighter">
+                              {formatTime(activeTimeoutRemaining)}
+                            </div>
+                            <button onClick={() => { setActiveTimeoutRemaining(0); if (enableManualTime) setIsTimerRunning(false); }} className="px-5 py-2 mt-2 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-full text-xs font-bold uppercase tracking-widest transition-colors border border-stone-600 shadow-sm active:scale-95">Time In</button>
+                          </div>
+                        )}
+                
+                        {appState === 'game' && enableManualTime && !isTimerRunning && elapsedTime === 0 && team1Score === 0 && team2Score === 0 && activeTimeoutRemaining === 0 && !winner && (
+                          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm animate-in fade-in duration-200">
+                            <div className="text-emerald-500 mb-4 drop-shadow-lg animate-pulse"><Play size={48} className="fill-current opacity-90" /></div>
+                            <div className="text-stone-300 text-sm font-medium mb-6 tracking-widest uppercase text-center">Call Score & Start Match</div>
+                            <button onClick={() => setIsTimerRunning(true)} className="px-5 py-2 mt-2 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-full text-xs font-bold uppercase tracking-widest transition-colors border border-stone-600 shadow-sm active:scale-95">Time In</button>
                           </div>
                         )}
                         <button onClick={() => handleRallyWin(1)} disabled={winner !== null || (previewData && previewSnapshot !== null)} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${d_serveTeam === 1 && !winner ? bgAccentGreen : `muji-card ${bgCard}`} ${winner || previewSnapshot ? 'opacity-50' : ''}`}>
