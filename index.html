@@ -1663,18 +1663,9 @@
           const handleTimeout = (type) => {if (winner) return;
             saveStateForUndo();
             let duration = 60; let title = ''; let evType = 'TIMEOUT'; let team = null;
-            
-            if (type === 1 || type === 2) {
-              team = type;
-              if (type === 1) setT1Timeouts(t => t - 1); else setT2Timeouts(t => t - 1);
-              evType = type === 1 ? 'T1_TIMEOUT' : 'T2_TIMEOUT';
-              title = type === 1 ? `${t1Name} TIMEOUT` : `${t2Name} TIMEOUT`;
-              announceText(team === servingTeam ? getT('serverTimeout') : getT('receiverTimeout'));
-            } else if (type === 'medical') {
-              duration = 900; evType = 'MEDICAL_TIMEOUT'; title = '🚑 MEDICAL TIMEOUT'; announceText("Medical Timeout");
-            } else if (type === 'equipment') {
-              duration = 120; evType = 'EQUIPMENT_TIMEOUT'; title = '👟 EQUIPMENT TIMEOUT'; announceText("Equipment Timeout");
-            }
+            if (type === 1 || type === 2) {team = type; if (type === 1) setT1Timeouts(t => t - 1); else setT2Timeouts(t => t - 1); evType = type === 1 ? 'T1_TIMEOUT' : 'T2_TIMEOUT'; title = type === 1 ? `${t1Name} ${getT('timeoutsBtn').toUpperCase()}` : `${t2Name} ${getT('timeoutsBtn').toUpperCase()}`; announceText(team === servingTeam ? getT('serverTimeout') : getT('receiverTimeout')); }
+            else if (type === 'medical') {duration = 900; evType = 'MEDICAL_TIMEOUT'; title = `🚑 ${getT('medical').toUpperCase()} ${getT('timeoutsBtn').toUpperCase()}`; announceText(`${getT('medical')} ${getT('timeoutsBtn')}`); }
+            else if (type === 'equipment') {duration = 120; evType = 'EQUIPMENT_TIMEOUT'; title = `👟 ${getT('equipment').toUpperCase()} ${getT('timeoutsBtn').toUpperCase()}`; announceText(`${getT('equipment')} ${getT('timeoutsBtn')}`); }
         
             const snapshot = { team1Score, team2Score, servingTeam, serverNumber, elapsedTime, t1Left: currentT1Left, t1Right: currentT1Right, t2Left: currentT2Left, t2Right: currentT2Right, serverPos: courtServerPos, receiverPos: courtReceiverPos, isSnapshot: true, courtRotation: courtRotation };
             setHistory(prev => [...prev, { id: Date.now(), type: evType, team, point: null, snapshot }]);
