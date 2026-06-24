@@ -2226,21 +2226,21 @@
                    <div className="mt-auto relative z-10">
                       <div className="grid grid-cols-2 gap-4 h-40 md:h-48 relative">
                         {(activeTimeoutRemaining > 0 || isTimeoutFinishedOverlay) && (
-                          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-sm animate-in fade-in duration-200">
-                            {activeTimeoutTitle && <div className="text-amber-400 text-sm font-bold tracking-widest uppercase mb-4 drop-shadow-md text-center">{activeTimeoutTitle}</div>}
+                          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-sm animate-in fade-in duration-200 p-2">
+                            {activeTimeoutTitle && <div className="text-amber-400 text-xs font-bold tracking-wider uppercase mb-1.5 drop-shadow-md text-center px-2 leading-tight">{activeTimeoutTitle}</div>}
                             {activeTimeoutRemaining > 0 ? (
-                              <div className="text-white text-6xl font-black mb-6 drop-shadow-lg tabular-nums tracking-tighter">
+                              <div className="text-white text-5xl font-bold mb-3 drop-shadow-lg tabular-nums tracking-tight">
                                 {formatTime(activeTimeoutRemaining)}
                               </div>
                             ) : (
                               <>
-                                <div className="text-emerald-500 mb-4 drop-shadow-lg animate-pulse"><Play size={48} className="fill-current opacity-90" /></div>
-                                <div className="text-stone-300 text-sm font-medium mb-6 tracking-widest uppercase text-center">{getT('timeoutFinished')}</div>
-                                  </>
-                                )}
-                                <button onClick={() => { setActiveTimeoutRemaining(0); setIsTimeoutFinishedOverlay(false); setActiveTimeoutTitle(''); if (enableManualTime) setIsTimerRunning(true); }} className={`px-8 py-3 mt-2 ${activeTimeoutRemaining > 0 ? 'bg-stone-800 hover:bg-stone-700 text-stone-200 border-stone-600 text-xs' : 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500 text-sm'} rounded-full font-bold uppercase tracking-widest transition-all border shadow-lg active:scale-95`}>
-                                  {getT('timeIn')}
-                                </button>
+                                <div className="text-emerald-500 mb-2 drop-shadow-lg animate-pulse"><Play size={40} className="fill-current opacity-90" /></div>
+                                <div className="text-stone-300 text-xs font-medium mb-4 tracking-wider uppercase text-center">{getT('timeoutFinished')}</div>
+                              </>
+                            )}
+                            <button onClick={() => { setActiveTimeoutRemaining(0); setIsTimeoutFinishedOverlay(false); setActiveTimeoutTitle(''); if (enableManualTime) setIsTimerRunning(true); }} className={`px-6 py-2 mt-1 ${activeTimeoutRemaining > 0 ? 'bg-stone-800 hover:bg-stone-700 text-stone-200 border-stone-600 text-[10px]' : 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500 text-xs'} rounded-full font-bold uppercase tracking-widest transition-all border shadow-lg active:scale-95`}>
+                              {getT('timeIn')}
+                            </button>
                           </div>
                         )}
                 
