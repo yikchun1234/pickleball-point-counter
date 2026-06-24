@@ -2771,11 +2771,26 @@
                           const p_t1Right = m.t1PRight || '';
                           const p_t2Left = m.t2PLeft || m.t2Name || t2Name;
                           const p_t2Right = m.t2PRight || '';
-                          const histRotation = 180; 
-
-                          return (
+                          const histRotation = 180;
+                            
+                          // Extract the exact event data and team names for the banner
+                          const currentEvent = previewData.history[previewData.index];
+                          const replayT1Name = m.t1Name || t1Name;
+                          const replayT2Name = m.t2Name || t2Name;
+                
+                            return (
                               <>
-                                  <div className="flex items-center justify-center gap-6 mb-8 w-full">
+                                {currentEvent && currentEvent.type.includes('TIMEOUT') && (
+                                  <div className="mb-4 px-5 py-1.5 rounded-full bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest shadow-md flex items-center gap-2 animate-pulse">
+                                    <Timer size={14} className="opacity-90" />
+                                    {currentEvent.type === 'T1_TIMEOUT' ? `${replayT1Name} TIMEOUT` :
+                                     currentEvent.type === 'T2_TIMEOUT' ? `${replayT2Name} TIMEOUT` :
+                                     currentEvent.type === 'MEDICAL_TIMEOUT' ? `🚑 ${getT('medical')} TIMEOUT` :
+                                     currentEvent.type === 'EQUIPMENT_TIMEOUT' ? `👟 ${getT('equipment')} TIMEOUT` : 'TIMEOUT'}
+                                  </div>
+                                )}
+                                
+                                 <div className="flex items-center justify-center gap-6 mb-8 w-full">
                                       <div className="text-center flex-1">
                                           <span className={`text-[10px] font-bold ${textSub} block uppercase tracking-widest mb-1`}>{snap.servingTeam === 1 ? getT('serverRole') : getT('receiverRole')}</span>
                                           <span className={`text-5xl font-black ${snap.servingTeam === 1 ? accentGreen : textMain}`}>{snap.team1Score}</span>
