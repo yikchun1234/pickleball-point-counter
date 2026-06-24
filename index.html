@@ -1579,8 +1579,16 @@
             setHasSwitchedEnds(false);
             setElapsedTime(0);
             setCourtRotation(0); setActiveTimeoutRemaining(0);
-            setIsTimelineLocked(true); setPreviewData(null); setAppState('game'); window.scrollTo(0, 0); 
-            setTimeout(() => { const isServeToScore = rules === 'standard' || (rules === 'custom' && serveToWinAt14); announceText(null, `0, 0${mode === 'double' && isServeToScore ? `, ${mode === 'double' ? 2 : 1}` : ''}`); }, 200);
+            setIsTimelineLocked(true); 
+            setPreviewData(null);
+            setAppState('game');
+            window.scrollTo(0, 0);
+            setTimeout(() => {
+              if (!manualTime) {
+                const isServeToScore = rules === 'standard' || (rules === 'custom' && serveToWinAt14);
+                announceText(null, `0, 0${mode === 'double' && isServeToScore ? `, ${mode === 'double' ? 2 : 1}` : ''}`);
+              }
+            }, 200);
           };
 
           const saveStateForUndo = () => { setStateHistory(prev => [...prev, { team1Score, team2Score, servingTeam, serverNumber, winner, winReason, hasSwitchedEnds, history: [...history], t1Timeouts, t2Timeouts, courtRotation }]); };
@@ -1639,8 +1647,13 @@
                 setIsTimeoutFinishedOverlay(false);
                 setIsTimelineLocked(true);
                 setPreviewData(null);
-              setTimeout(() => { const isServeToScore = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14); announceText(null, `0, 0${gameMode === 'double' && isServeToScore ? `, ${gameMode === 'double' ? 2 : 1}` : ''}`); }, 200);
-          };
+                setTimeout(() => {
+                  if (!enableManualTime) {
+                    const isServeToScore = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14);
+                    announceText(null, `0, 0${gameMode === 'double' && isServeToScore ? `, ${gameMode === 'double' ? 2 : 1}` : ''}`);
+                  }
+                }, 200);
+              };
 
           const handleChangeSettings = () => { setShowResetModal(false); setMatchTitleInput(matchTitle); setT1PLeftInput(t1PLeft); setT1PRightInput(t1PRight); setT2PLeftInput(t2PLeft); setT2PRightInput(t2PRight); setCustomPlayTo(playTo); setCustomWinBy(winByMargin); setServeToWinAt14(serveToWinAt14); 
                                               setEnableSwitchEnds(enableSwitchEnds); setEnableManualTimeSetup(enableManualTime); setEnableTimeoutsSetup(enableTimeouts); 
@@ -1924,7 +1937,7 @@
               {appState !== 'splash' && (
                 <div className="fixed top-0 w-full flex justify-between items-start z-50 pointer-events-none" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
                   <div className="pointer-events-auto">
-                    {appState === 'game' && <div onClick={() => { if (enableManualTime && activeTimeoutRemaining === 0 && !isTimeoutFinishedOverlay) { const willRun = !isTimerRunning; setIsTimerRunning(willRun); if (willRun) announceText(getT('timeIn')); } }} className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${bgCard} ${borderSub} border shadow-sm text-xs font-bold transition-colors ${enableManualTime && activeTimeoutRemaining === 0 && !isTimeoutFinishedOverlay ? 'cursor-pointer hover:scale-105 active:scale-95' : ''} ${enableManualTime && !isTimerRunning ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700 animate-pulse' : textSub}`}> {enableManualTime && !isTimerRunning ? <Play size={14} className="fill-current"/> : <Timer size={14}/>} {formatTime(elapsedTime)}</div>}
+                    {appState === 'game' && <div onClick={() => { if (enableManualTime && activeTimeoutRemaining === 0 && !isTimeoutFinishedOverlay) { const willRun = !isTimerRunning; setIsTimerRunning(willRun); if (willRun) { if (elapsedTime === 0 && team1Score === 0 && team2Score === 0) { const isServeToScore = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14); const scoreAnnounce = `0, 0${gameMode === 'double' && isServeToScore ? `, ${serverNumber}` : ''}`; announceText(getT('timeIn'), scoreAnnounce); } else { announceText(getT('timeIn')); } } } }} className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${bgCard} ${borderSub} border shadow-sm text-xs font-bold transition-colors ${enableManualTime && activeTimeoutRemaining === 0 && !isTimeoutFinishedOverlay ? 'cursor-pointer hover:scale-105 active:scale-95' : ''} ${enableManualTime && !isTimerRunning ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700 animate-pulse' : textSub}`}> {enableManualTime && !isTimerRunning ? <Play size={14} className="fill-current"/> : <Timer size={14}/>} {formatTime(elapsedTime)}</div>}
                   </div>
                   <div className={`flex items-center gap-2 pointer-events-auto`}>
                     <button onClick={handleSoundClick} className={`p-2 rounded-full ${bgCard} ${borderSub} border shadow-sm hover:scale-105 active:scale-95 transition-transform relative z-10`}>{soundEnabled ? <Volume2 size={18} className={accentGreen} /> : <VolumeX size={18} className={textSub} />}</button>
@@ -2248,7 +2261,7 @@
                           <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm animate-in fade-in duration-200">
                             <div className="text-emerald-500 mb-2 drop-shadow-lg animate-pulse"><Play size={48} className="fill-current opacity-90" /></div>
                             <div className="text-stone-300 text-sm font-medium mb-3 tracking-widest uppercase text-center">{getT('callScoreStart')}</div>
-                            <button onClick={() => { setIsTimerRunning(true); announceText(getT('timeIn')); }} className="px-5 py-2 mt-1 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-full text-xs font-bold uppercase tracking-widest transition-colors border border-stone-600 shadow-sm active:scale-95">{getT('timeIn')}</button>
+                            <button onClick={() => { setIsTimerRunning(true); const isServeToScore = ruleSet === 'standard' || (ruleSet === 'custom' && serveToWinAt14); const scoreAnnounce = `0, 0${gameMode === 'double' && isServeToScore ? `, ${serverNumber}` : ''}`; announceText(getT('timeIn'), scoreAnnounce); }} className="px-5 py-2 mt-1 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-full text-xs font-bold uppercase tracking-widest transition-colors border border-stone-600 shadow-sm active:scale-95">{getT('timeIn')}</button>
                           </div>
                         )}
                         <button onClick={() => handleRallyWin(1)} disabled={winner !== null || (previewData && previewSnapshot !== null)} className={`relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 active:scale-[0.96] ${d_serveTeam === 1 && !winner ? bgAccentGreen : `muji-card ${bgCard}`} ${winner || previewSnapshot ? 'opacity-50' : ''}`}>
