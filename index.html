@@ -1103,7 +1103,7 @@
           const [showWinnerOverlay, setShowWinnerOverlay] = useState(false);
           const [serveToWinAt14, setServeToWinAt14] = useState(false);
           const [fixedPosition, setFixedPosition] = useState(false);
-          const fixedPosActive = ruleSet === 'custom' && gameMode === 'double' && fixedPosition;
+          const fixedPosActive = (ruleSet === 'custom' || ruleSet === '14-point') && gameMode === 'double' && fixedPosition;
           const [lastBallServerToWin, setLastBallServerToWin] = useState(false);
           const [enableSwitchEnds, setEnableSwitchEnds] = useState(false);
           const [hasSwitchedEnds, setHasSwitchedEnds] = useState(false);
@@ -2368,7 +2368,7 @@
                             <button className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${lastBallServerToWin ? 'bg-emerald-500' : 'bg-stone-300 dark:bg-stone-600'}`}><div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-300 ${lastBallServerToWin ? 'translate-x-6' : 'translate-x-0'}`} /></button>
                           </div>
                         )}
-                        {(pendingGame.rules === 'custom' && pendingGame.mode === 'double') && (
+                        {((pendingGame.rules === 'custom' || pendingGame.rules === '14-point') && pendingGame.mode === 'double') && (
                           <div className={`p-4 rounded-xl border ${borderSub} ${bgMain} flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform`} onClick={() => setFixedPosition(!fixedPosition)}>
                             <div className="pr-4"><h3 className={`font-bold text-sm ${textMain}`}>{getT('fixedPosTitle')}</h3><p className={`text-xs mt-1 ${textSub}`}>{getT('fixedPosDesc')}</p></div>
                             <button className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${fixedPosition ? 'bg-emerald-500' : 'bg-stone-300 dark:bg-stone-600'}`}><div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-300 ${fixedPosition ? 'translate-x-6' : 'translate-x-0'}`} /></button>
