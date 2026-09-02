@@ -32,15 +32,20 @@
 ### ✨ Features
 
 * **🧘 Zen UI & Court Positioning:** A clean, distraction-free interface. Includes a dynamic, rotating mini-court that visualizes exactly who is serving, receiving, and which side (Odd/Even) players should stand on.
-* **📜 Flexible Rule Sets:** * **Standard:** 0-0-2 (Doubles) or 0-0 (Singles), play to 11, win by 2.
-  * **14-Point Rally:** Play to 15, with an optional "Must Serve to Win" toggle at 14-14 sudden death.
-  * **Custom:** Define your own 'Play To', 'Win By', and 'Serve to Score' rules.
+* **📜 Flexible Rule Sets:**
+  * **Standard:** 0-0-2 (Doubles) or 0-0 (Singles), play to 11, win by 2.
+  * **15-Point Rally:** Every rally scores — play to 15, win by 1. Optional **Last Ball Serve to Win** (at 14-14) and **Match Point Freeze** (either side reaches 14) toggles.
+  * **Custom:** Define your own 'Play To' and 'Win By', plus toggles for Serve to Score, Match Point Freeze, Last Ball Serve to Win, and Fixed Positions (doubles).
+* **🧊 Match Point Freeze:** Once *either* side reaches match point (e.g. 20-x in a game to 21), the match freezes into strict serve-to-score: only the serving side can score, while the receiving side winning a rally only gains serve. Recreates the 2025 USA Pickleball rally-scoring rule. Available in Custom and 15-Point modes, singles & doubles.
+* **🎯 Last Ball Serve to Win:** From a match-point tie (e.g. 14-14 or 10-10), only the serving side can score; the receiving side winning the rally only gains serve (immediate side-out, single serve). Available in Custom and 15-Point modes, singles & doubles.
+* **🧍 Fixed Positions (Doubles):** Partners never swap sides for the entire match — the service box is still decided by score parity, and whoever stands in that box serves.
+* **🔒 Smart Setting Locks:** Overlapping rules can't contradict each other — Serve to Score automatically covers Match Point Freeze & Last Ball, and Match Point Freeze covers Last Ball. Covered toggles light up but lock, with a clear note explaining why.
 * **🗣️ Smart Voice Announcer:** Built-in Text-to-Speech acts as your referee, announcing scores and side-outs using high-quality native voices across 12 languages.
 * **👻 Ghost Replay & Timeline:** A visual dot-matrix timeline of every match. Click any point in the history to view a "Ghost Replay" of exactly where players were standing at that exact moment.
 * **☁️ Cloud Sync (PIN Transfer):** Securely migrate your match history and saved player roster to another device in seconds using a 5-digit temporary PIN (Powered by Cloudflare Workers).
-* **📸 Shareable Scorecards:** Instantly generate and export a sleek, Instagram-ready (4:5) graphic of your final match results.
+* **📸 Shareable Scorecards:** Instantly generate and export a sleek, Instagram-ready (4:5) graphic of your final match results — and share the app itself via a locally generated QR code that loads instantly, no external service needed.
 * **🎮 Hidden Arcade Room:** Tap the title "Pickleball" 5 times to unlock a secret retro arcade featuring 8 mini-games (Tic-Tac-Toe, Quick Dink, Memory Match, and more!).
-* **🌍 12 Languages Supported:** English, 简体中文, 繁體中文, Bahasa Melayu, Español, Français, Tiếng Việt, ไทย, 日本語, 한국어, Deutsch, and Português.
+* **🌍 12 Languages Supported:** English, 简体中文, 繁體中文, Bahasa, Español, Français, Tiếng Việt, ไทย, 日本語, 한국어, Deutsch, and Português.
 
 ---
 
@@ -70,7 +75,7 @@ You can install this app to use offline directly from your mobile browser!
 1. **Setup Match:** Choose Singles/Doubles, select your rules, and add players from your saved roster.
 2. **Score:** Tap a team's card to award a point. The app automatically calculates side-outs, second servers, and court swaps.
 3. **Mistakes?** Use the **Undo** button to safely reverse the last action.
-4. **Timeouts & Swaps:** Track timeouts and prompt players to switch ends at the half-point mark.
+4. **Timeouts & Swaps:** Track timeouts (0-3 per team, plus medical & equipment timeouts) with a full-screen countdown, and prompt players to switch ends when either side reaches the half-point mark.
 5. **Review:** Access the **Stats** menu to see your overall win rates, average match durations, and format breakdowns.
 
 ---
