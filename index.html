@@ -1413,7 +1413,10 @@
               else if (ruleSet === 'custom' && matchPointFreeze && (team1Score >= playTo - 1 || team2Score >= playTo - 1)) { isServeToScoreCurrent = true; isStrictSuddenDeathCurrent = true; }
               else if (ruleSet === '14-point' && matchPointFreeze && (team1Score >= 14 || team2Score >= 14)) { isServeToScoreCurrent = true; isStrictSuddenDeathCurrent = true; }
               else if (ruleSet === '14-point' && serveToWinAt14 && team1Score === 14 && team2Score === 14) { isServeToScoreCurrent = true; isStrictSuddenDeathCurrent = true; }
-              if (isServeToScoreCurrent) {
+              if (isServeToScoreCurrent && isStrictSuddenDeathCurrent && fixedPosActive) {
+                  // 固定站位 + sudden death（Last Ball / 赛点冻结 / 14-14）：发球区始终按比分奇偶，整局永不换边（整场 0-0-2 发球得分制不受影响）
+                  courtServerPos = (servingTeam === 1 ? team1Score : team2Score) % 2 === 0 ? 'Right' : 'Left';
+              } else if (isServeToScoreCurrent) {
                   let isFirstTurnOfMatch = true;
                   for (let i = 0; i < history.length; i++) { if (history[i].type === 'SIDEOUT' || (!isServeToScoreCurrent && (history[i].type === 'T1_POINT' || history[i].type === 'T2_POINT'))) { isFirstTurnOfMatch = false; break; } }
                   if (isStrictSuddenDeathCurrent) isFirstTurnOfMatch = false;
@@ -1790,7 +1793,10 @@
                 else if (ruleSet === '14-point' && serveToWinAt14 && newT1 === 14 && newT2 === 14) {
                     isServeToScoreCurrent = true; isStrictSuddenDeathCurrent = true;
                 }
-                if (isServeToScoreCurrent) {
+                if (isServeToScoreCurrent && isStrictSuddenDeathCurrent && fixedPosActive) {
+                    // 固定站位 + sudden death：发球区按比分奇偶（与实时路径同规则，快照/幽灵回放一致）
+                    newCourtServerPos = (newServTeam === 1 ? newT1 : newT2) % 2 === 0 ? 'Right' : 'Left';
+                } else if (isServeToScoreCurrent) {
                     let isFirstTurnOfMatch = true;
                     for (let i = 0; i < newHistForCalc.length; i++) {
                         if (newHistForCalc[i].type === 'SIDEOUT' || (!isServeToScoreCurrent && (newHistForCalc[i].type === 'T1_POINT' || newHistForCalc[i].type === 'T2_POINT'))) {
