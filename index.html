@@ -2268,7 +2268,7 @@
                 </div>
             </div>
 
-                    {isSuddenDeath && !winner && (<div className="flex justify-center w-full mb-6 relative z-10 animate-screen-enter"><span className={`px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-900/50 dark:text-rose-300 dark:border-rose-800 shadow-sm text-center max-w-[90%]`}>🔥 {getT('suddenDeath')} - {serveToWinAt14 || (ruleSet === 'custom' && (lastBallServerToWin || matchPointFreeze)) || (ruleSet === '14-point' && matchPointFreeze) ? getT('suddenDeathServeDesc') : getT('nextPointWins')} 🔥</span></div>)}
+                    {isSuddenDeath && !winner && (<div className="flex justify-center w-full mb-6 relative z-10 animate-screen-enter"><span className={`px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-900/50 dark:text-rose-300 dark:border-rose-800 shadow-sm text-center max-w-[90%]`}>🔥 {serveToWinAt14 || (ruleSet === 'custom' && (lastBallServerToWin || matchPointFreeze)) || (ruleSet === '14-point' && matchPointFreeze) ? getT('suddenDeathServeDesc') : getT('suddenDeath')} 🔥</span></div>)}
 
                    <div className="mt-auto relative z-10">
                       <div className="grid grid-cols-2 gap-4 h-40 md:h-48 relative">
